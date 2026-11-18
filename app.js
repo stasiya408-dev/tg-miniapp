@@ -498,7 +498,8 @@ SCREENS.home = () => {
       <button class="y" onclick="qaPick('L')" style="font-size:11px"><span style="filter:brightness(.25)">⚡</span> Швидкий доступ</button>
       ${qaList('L').map(k => `<button onclick="qaGo('${k}')">${QA[k][0]}</button>`).join('')}
     </div>
-    <div id="homeDoll" style="position:absolute;left:0;right:0;top:0;text-align:center"></div>
+    <div style="position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse 85% 75% at 50% 50%,rgba(0,0,0,0) 55%,rgba(8,0,16,.55) 100%)"></div>
+    <div id="homeDoll" style="position:absolute;left:0;right:0;top:0;text-align:center;z-index:2"></div>
     <div class="side" style="position:absolute;right:8px;top:12px;z-index:3">
       <button onclick="go('settings')">⚙</button>
       <button onclick="go('rewards')">🎁 Нагороди${dot(N.login())}</button>
