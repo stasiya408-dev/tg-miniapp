@@ -1329,11 +1329,11 @@ SCREENS.club = p => {
 
 // --- СЛОТИ
 // Математика: результат спіну визначається таблицею ваг (RTP ≈ 97%), барабани малюються під результат.
-const SYM = ['7️⃣', '💲', '🔫', '💵', '🎲', '👑', '💎', '🥃', '🂡', '🔒', '🥇', '🚬'];
-const SLOT_GOAL = 50, SCAT = '🧰'; // скриня-скатер: 3+ на барабанах = бонусна гра (вага символу підібрана під ~1 раз на 50 спінів)
+const SYM = ['7️⃣', '💲', '🔫', '💵', '🎲', '👑', '💎', '🍀', '🂡', '🔒', '🥇', '🚬'];
+const SLOT_GOAL = 50, SCAT = '🪙'; // скриня-скатер: 3+ на барабанах = бонусна гра (вага символу підібрана під ~1 раз на 50 спінів)
 const SLOT_BASE = [[1, 220000], [2, 104000], [3, 50000], [5, 24000], [10, 8000], [20, 2500], [50, 600], [100, 100], [200, 25], [500, 5]];
 const SLOT_BONUS = [[2, 560000], [3, 230000], [5, 120000], [10, 55000], [25, 22000], [50, 8000], [100, 3500], [250, 1000], [500, 400], [1000, 100]];
-const WINMAP = { 1: ['🥃', 3], 2: ['🚬', 3], 3: ['🎲', 3], 5: ['🔫', 3], 10: ['💵', 4], 20: ['💲', 4], 50: ['👑', 5], 100: ['💎', 5], 200: ['🥇', 5], 500: ['7️⃣', 5] };
+const WINMAP = { 1: ['🍀', 3], 2: ['🚬', 3], 3: ['🎲', 3], 5: ['🔫', 3], 10: ['💵', 4], 20: ['💲', 4], 50: ['👑', 5], 100: ['💎', 5], 200: ['🥇', 5], 500: ['7️⃣', 5] };
 function rollTable(t) { let x = Math.random() * 1e6; for (const [m, w] of t) { x -= w; if (x < 0) return m; } return 0; }
 const tableEV = t => t.reduce((s, [m, w]) => s + m * w / 1e6, 0);
 const SLOT_RTP = tableEV(SLOT_BASE) + tableEV(SLOT_BONUS) / SLOT_GOAL;
@@ -1394,9 +1394,9 @@ SCREENS.slots = () => {
 };
 function slotFaq() {
   modal(`<h3>FAQ: Слоти</h3><b>Таблиця виплат</b> (множник на ставку)
-  <table style="width:100%;border-collapse:collapse;font-size:12px;margin:4px 0"><tr style="background:#ffe9a8"><td style="white-space:nowrap">${`<span class="scatT">${SCAT}</span>`.repeat(3)}</td><td colspan="2"><b>×3 будь-де на екрані = БОНУСНА ГРА</b><div class="small">×1 або ×2 = нічого</div></td></tr>${SLOT_BASE.map(([m, w]) => `<tr style="border-bottom:1px solid #ddd"><td>${WINMAP[m][0].repeat(WINMAP[m][1])}</td><td><b>x${m}</b></td><td class="small">шанс 1 до ${fmt(Math.round(1e6 / w))}</td></tr>`).join('')}</table>
+  <table style="width:100%;border-collapse:collapse;font-size:12px;margin:4px 0"><tr style="background:#ffe9a8"><td style="white-space:nowrap">${`<span class="scatT">${SCAT}</span>`.repeat(3)}</td><td colspan="2"><b>Бонусна гра</b><div class="small">3 будь-де на екрані</div></td></tr>${SLOT_BASE.map(([m, w]) => `<tr style="border-bottom:1px solid #ddd"><td>${WINMAP[m][0].repeat(WINMAP[m][1])}</td><td><b>x${m}</b></td><td class="small">шанс 1 до ${fmt(Math.round(1e6 / w))}</td></tr>`).join('')}</table>
   <p class="small">7 ліній виплат: 3 горизонтальні, 2 діагоналі (V і Λ) та 2 зигзаги. Виграє збіг символів зліва направо по лінії. Загальна ставка ділиться на 7.</p>
-  <b>Бонусна гра</b><p class="small">${SCAT} · <b>Скриня</b> — особливий символ. Коли на барабанах випадає <b>3 і більше ${SCAT} де завгодно</b> (не обов’язково в лінії), починається бонусна гра. Приз від x2 до x1000 від ставки.</p><p class="small">Повернення гравцю (RTP): <b>97%</b>.</p>`);
+  <p class="small">Повернення гравцю (RTP): <b>97%</b>.</p>`);
 }
 function slotStats() {
   const h = S.slots.hist || []; if (!h.length) return '';
