@@ -17,14 +17,14 @@ const today = () => new Date().toISOString().slice(0, 10);
 // Речі, які реально одягаються на героя (вирізані зі спрайт-листа)
 const WEAR = {
   cap:      { name: 'Кепка чорна',        slot: 'head',   tab: 'acc',  img: 'cap',      rar: 1, price: 8000,  stat: { luck: 1, crit: 1 } },
-  glasses:  { name: 'Окуляри-авіатори',   slot: 'eyes',   tab: 'acc',  img: 'glasses',  rar: 2, price: 12000, stat: { acc: 3, crit: 2 } },
+  glasses:  { name: 'Окуляри-авіатори',   slot: 'eyes',   tab: 'acc',  img: 'glasses',  rar: 2, price: 12000, stat: { crit: 2 } },
   chain:    { name: 'Ланцюжок з жетоном', slot: 'neck',   tab: 'acc',  img: 'chain',    rar: 3, price: 25000, stat: { luck: 3, dmg: 3 } },
-  watch:    { name: 'Годинник тактичний', slot: 'wristR', tab: 'acc',  img: 'watch',    rar: 2, price: 15000, stat: { acc: 2, crit: 1 } },
-  bracelet: { name: 'Браслет',            slot: 'wristL', tab: 'acc',  img: 'bracelet', rar: 1, price: 6000,  stat: { hp: 2, dmg: 1 } },
-  hoodie:   { name: 'Худі пісочне',       slot: 'top',    tab: 'wear', img: 'hoodie',   rar: 2, price: 18000, stat: { hp: 5, dmg: 2 } },
-  vest:     { name: 'Жилет пуховий',      slot: 'outer',  tab: 'wear', img: 'vest',     rar: 3, price: 30000, stat: { hp: 8, str: 2, dmg: 4 } },
-  pants:    { name: 'Штани карго',        slot: 'legs',   tab: 'wear', img: 'pants',    rar: 2, price: 16000, stat: { str: 2, dmg: 2 } },
-  sneakers: { name: 'Кросівки',           slot: 'feet',   tab: 'wear', img: 'sneakers_m_layer', layer: { m: ['sneakers_m_L', 'sneakers_m_R'] }, def: { s: 0.9, dy: 2 }, rar: 2, price: 14000, stat: { acc: 1, str: 1, crit: 1 } },
+  watch:    { name: 'Годинник тактичний', slot: 'wristR', tab: 'acc',  img: 'watch',    rar: 2, price: 15000, stat: { crit: 1 } },
+  bracelet: { name: 'Браслет',            slot: 'wristL', tab: 'acc',  img: 'bracelet', rar: 1, price: 6000,  stat: { dmg: 1 } },
+  hoodie:   { name: 'Худі пісочне',       slot: 'top',    tab: 'wear', img: 'hoodie',   rar: 2, price: 18000, stat: { dmg: 2 } },
+  vest:     { name: 'Жилет пуховий',      slot: 'outer',  tab: 'wear', img: 'vest',     rar: 3, price: 30000, stat: { dmg: 8 } },
+  pants:    { name: 'Штани карго',        slot: 'legs',   tab: 'wear', img: 'pants',    rar: 2, price: 16000, stat: { dmg: 6 } },
+  sneakers: { name: 'Кросівки',           slot: 'feet',   tab: 'wear', img: 'sneakers_m_layer', layer: { m: ['sneakers_m_L', 'sneakers_m_R'] }, def: { s: 0.9, dy: 2 }, rar: 2, price: 14000, stat: { dmg: 2, crit: 1 } },
 };
 const SLOT_NAME = { head: 'Голова', eyes: 'Очі', neck: 'Шия', top: 'Тулуб (верх)', outer: 'Верхній одяг', legs: 'Ноги', feet: 'Взуття', wristR: 'Зап\'ястя П', wristL: 'Зап\'ястя Л' };
 // позиції речей на фігурі (в пікселях картинки героя висотою 900)
@@ -36,8 +36,8 @@ const ANCH = {
 };
 const ZORD = ['legs', 'feet', 'top', 'outer', 'neck', 'wristL', 'wristR', 'eyes', 'head'];
 const SETS = [
-  { id: 'street', name: 'Набір «Вулиця»', items: ['hoodie', 'pants', 'sneakers', 'cap'], bonus: '+5% сили, +3% влучності, +5% здоров\'я', stat: { str: 5, acc: 3, hp: 5, dmg: 4 } },
-  { id: 'boss', name: 'Набір «Бос»', items: ['vest', 'pants', 'glasses', 'chain', 'watch'], bonus: '+8% удачі, +5% сили', stat: { luck: 8, str: 5, dmg: 8, crit: 3 } },
+  { id: 'street', name: 'Набір «Вулиця»', items: ['hoodie', 'pants', 'sneakers', 'cap'], bonus: '+14% шкоди по босах', stat: { dmg: 14 } },
+  { id: 'boss', name: 'Набір «Бос»', items: ['vest', 'pants', 'glasses', 'chain', 'watch'], bonus: '+8% удачі, +18% шкоди по босах, +3% криту', stat: { luck: 8, dmg: 18, crit: 3 } },
 ];
 
 // Каталог речей для ринку / секонд-хенду (cat = категорія ринку)
@@ -51,13 +51,13 @@ const ITEMS = [
   { id: 'i_boots', name: 'Берці посилені', cat: 'Взуття', rar: 3, base: 10800, stat: 'Захист +48' },
   { id: 'i_sneak', name: 'Кросівки', cat: 'Взуття', rar: 2, base: 5200, stat: 'Спритність +5', wear: 'sneakers' },
   { id: 'i_ring', name: 'Кільце сили', cat: 'Кільця', rar: 4, base: 28000, stat: 'Атака +10%' },
-  { id: 'i_hoodie', name: 'Худі', cat: 'Одяг', rar: 1, base: 4100, stat: 'Здоров\'я +5', wear: 'hoodie' },
-  { id: 'i_tee', name: 'Футболка «Маямі»', cat: 'Одяг', rar: 3, base: 3500, stat: 'Сила +2%' },
-  { id: 'i_glasses', name: 'Окуляри-авіатори', cat: 'Аксесуари', rar: 3, base: 7400, stat: 'Влучність +3', wear: 'glasses' },
+  { id: 'i_hoodie', name: 'Худі', cat: 'Одяг', rar: 1, base: 4100, stat: 'Шкода +2%', wear: 'hoodie' },
+  { id: 'i_tee', name: 'Футболка «Маямі»', cat: 'Одяг', rar: 3, base: 3500, stat: 'Шкода +4%' },
+  { id: 'i_glasses', name: 'Окуляри-авіатори', cat: 'Аксесуари', rar: 3, base: 7400, stat: 'Крит +2%', wear: 'glasses' },
   { id: 'i_chain', name: 'Ланцюжок з жетоном', cat: 'Аксесуари', rar: 3, base: 9900, stat: 'Удача +3', wear: 'chain' },
-  { id: 'i_bracelet', name: 'Браслет', cat: 'Аксесуари', rar: 1, base: 2100, stat: 'Здоров\'я +2', wear: 'bracelet' },
+  { id: 'i_bracelet', name: 'Браслет', cat: 'Аксесуари', rar: 1, base: 2100, stat: 'Шкода +1%', wear: 'bracelet' },
   { id: 'i_belt', name: 'Ремінь шкіряний', cat: 'Аксесуари', rar: 0, base: 900, stat: '—' },
-  { id: 'i_watch', name: 'Годинник тактичний', cat: 'Годинники', rar: 2, base: 6600, stat: 'Влучність +2', wear: 'watch' },
+  { id: 'i_watch', name: 'Годинник тактичний', cat: 'Годинники', rar: 2, base: 6600, stat: 'Крит +1%', wear: 'watch' },
   { id: 'i_gloves', name: 'Рукавиці тактичні', cat: 'Рукавиці', rar: 1, base: 2400, stat: 'Захист +8' },
   { id: 'i_bag', name: 'Рюкзак міський', cat: 'Рюкзаки', rar: 1, base: 3300, stat: 'Слоти +4' },
   { id: 'i_radio', name: 'Рація', cat: 'Спорядження', rar: 2, base: 4700, stat: '—' },
@@ -441,14 +441,14 @@ function energyTick() {
   if (mins > 0) { if (S.energy < 60) S.energy = Math.min(60, S.energy + mins); S.energyTs += mins * iv; }
 }
 function stats() {
-  const s = { str: 10, acc: 10, luck: 5, hp: 100, dmg: 0, crit: 5 };
+  const s = { luck: 5, dmg: 0, crit: 5 };
   Object.values(S.equipped).forEach(k => { if (k && WEAR[k]) for (const st in WEAR[k].stat) s[st] = Math.round((s[st] + WEAR[k].stat[st] * GM_ST[wgOf(k)]) * 10) / 10; });
   activeSets().forEach(st => { for (const k in st.stat) s[k] += st.stat[k]; });
   return s;
 }
 function activeSets() { const eq = Object.values(S.equipped); return SETS.filter(st => st.items.every(i => eq.includes(i))); }
 // Шкода по босах: сила героя, зброя, бонус речей (dmg%), крит (подвійний удар), клан
-function bossBase() { const s = stats(); return 30000 * (1 + s.str / 50) * weaponMult() * (1 + s.dmg / 100) * (1 + (clanEff('bossDmg') + clanBase()) / 100); }
+function bossBase() { const s = stats(); return 30000 * 1.2 * weaponMult() * (1 + s.dmg / 100) * (1 + (clanEff('bossDmg') + clanBase()) / 100); }
 const avgHit = () => Math.round(bossBase() * (1 + stats().crit / 100));
 function weaponMult() { return (WEAPONS.find(w => w.id === S.weapon) || WEAPONS[0]).dmg; }
 function rarBadge(r) { return `<span class="small">[${RAR[r]}]</span>`; }
@@ -984,7 +984,7 @@ SCREENS.profile = () => {
   const s = stats();
   return `<h2>👤 Профіль</h2><div class="bar"><div>${doll(220)}</div><div class="f" style="flex:1">
   <div class="box" style="${cosFrame() ? 'border:3px solid ' + cosFrame() : ''}"><b>${S.name}</b> ${cosTitle() ? '<span class="small">«' + cosTitle() + '»</span>' : ''} (${S.gender === 'm' ? 'чоловік' : 'жінка'})<br>Рівень ${S.lvl}<br><span onclick="go('tasks',{tab:'ach'})" style="cursor:pointer">🏅 <b>${achRank(achPts())[1]}</b> · ${(achPct() * 100).toFixed(1)}% досягнень · ${fmt(achPts())} очок</span><div class="prog"><i style="width:${S.xp / xpNeed(S.lvl) * 100}%"></i></div><span class="small">${S.xp} / ${xpNeed(S.lvl)} XP</span></div>
-  <div class="box"><b>⚔️ Бойова сила</b><br>Середній удар по босу: <b>${fmt(avgHit())}</b><br>Шкода по босах: +${s.dmg}% <span class="small">(речі, набори)</span><br>Крит: ${s.crit}% <span class="small">(подвійний удар)</span><br>Колекція: ${S.owned.length}/${Object.keys(WEAR).length} речей у гардеробі<hr>Сила: ${s.str}<br>Влучність: ${s.acc} <span class="small">(шанс рейду)</span><br>Удача: ${s.luck} <span class="small">(кращі знахідки)</span><br>Здоров'я: ${s.hp} <span class="small">(шанс рейду)</span><br>Зброя: ${(WEAPONS.find(w => w.id === S.weapon) || {}).name} (x${weaponMult()})<br>Авто: ${S.car.name}</div>
+  <div class="box" style="text-align:center"><b>⚔️ Бойова сила</b><div style="font-size:34px;font-weight:800;line-height:1.1">${fmt(avgHit())}</div><div class="small">середній удар по босу</div><hr style="margin:6px 0"><div style="text-align:left">Шкода по босах: +${s.dmg}%<br>Крит: ${s.crit}% <span class="small">(подвійний удар)</span><br>Удача: ${s.luck} <span class="small">(кращі знахідки)</span><br>Колекція: ${S.owned.length}/${Object.keys(WEAR).length} речей у гардеробі<br>Зброя: ${(WEAPONS.find(w => w.id === S.weapon) || {}).name} (x${weaponMult()})<br>Авто: ${S.car.name}</div>
   ${profBox()}
   <div class="box small">Патрони: ${S.ammo} · Гранати: ${S.grenades}</div></div></div>
   <div class="bar"><input id="rn" value="${S.name}" style="flex:1"><button onclick="S.name=$('rn').value||S.name;render()">Змінити ім'я</button></div>`;
@@ -1066,7 +1066,7 @@ SCREENS.wardrobe = p => {
     h += `<div class="grid g4">${items.map(([k, w]) => `<div class="cell r${w.rar}" onclick="setP('sel','${k}')" style="${sel === k ? 'outline:3px solid #000' : ''}">${wearIcon(k)}${w.name}${S.owned.includes(k) ? '<br>' + gB(wgOf(k)) : '<br>🔒'}${Object.values(S.equipped).includes(k) ? '<br>✓' : ''}</div>`).join('') || '<div class="small">Немає</div>'}</div>`;
     if (sel && WEAR[sel]) {
       const w = WEAR[sel], own = S.owned.includes(sel), on = S.equipped[w.slot] === sel;
-      h += `<div class="box"><b>${w.name}</b> ${own ? gB(wgOf(sel)) : ''} ${rarBadge(w.rar)}<div class="small">Слот: ${SLOT_NAME[w.slot]} · ${Object.entries(w.stat).map(([k, v]) => ({ str: 'Сила', acc: 'Влучність', luck: 'Удача', hp: 'Здоров\'я', dmg: 'Шкода по босах %', crit: 'Крит %' }[k]) + ' +' + (Math.round(v * GM_ST[own ? wgOf(sel) : 1] * 10) / 10)).join(', ')}</div>
+      h += `<div class="box"><b>${w.name}</b> ${own ? gB(wgOf(sel)) : ''} ${rarBadge(w.rar)}<div class="small">Слот: ${SLOT_NAME[w.slot]} · ${Object.entries(w.stat).map(([k, v]) => ({ luck: 'Удача', dmg: 'Шкода по босах %', crit: 'Крит %' }[k]) + ' +' + (Math.round(v * GM_ST[own ? wgOf(sel) : 1] * 10) / 10)).join(', ')}</div>
       ${own ? `<button onclick="go('bv',{src:'w:${sel}'})">🧵 До баби Валі</button> <button onclick="fromWardrobe('${sel}')">У інвентар (для продажу)</button>` : ''}
       ${own ? (on ? `<button class="g" onclick="unequip('${w.slot}')">✓ Екіпіровано (зняти)</button>` : `<button class="y" onclick="equip('${sel}')">Екіпірувати</button>`) : `<button class="y" onclick="buyWear('${sel}','money')">Купити ${fmt(w.price)} 💵</button> <span class="small">або знайди в секонд-хенді</span>`}</div>`;
     }
@@ -1252,7 +1252,7 @@ SCREENS.district = p => {
   else h += raidShop();
   return h;
 };
-const raidChance = () => { const q = stats(); return Math.min(0.95, 0.7 + q.acc * 0.01 + (q.hp - 100) * 0.001); }; // влучність і здоров'я підвищують шанс успіху атаки
+const raidChance = () => { const q = stats(); return Math.min(0.95, 0.8 + (q.luck - 5) * 0.005); }; // удача підвищує шанс успіху атаки
 const luckB = () => Math.max(0, stats().luck - 5) * 0.003; // удача підвищує шанс кращих знахідок
 const RAID_EN = [2, 3, 5, 8, 10, 12, 13, 14, 15, 16, 18, 20]; // вартість енергії за етап, 12-й це бос
 function attackStage(id) {
