@@ -486,11 +486,11 @@ SCREENS.home = () => {
   const unread = S.mail.filter(m => m.box === 'in' && (!m.read || m.gift)).length, cu = chTotal();
   after.push(() => {
     const box = $('homeBox'); if (!box) return;
-    const Hh = Math.max(300, $('app').clientHeight - 14), oc = cur().p.chat; box.style.height = (oc ? Math.round(Hh * 0.45) : Hh) + 'px'; if (oc) box.style.overflow = 'hidden';
-    const hh = oc ? Math.round(Hh * 0.45) - 24 : Math.round((Hh - 70) * 0.9); $('homeDoll').innerHTML = `<div style="position:relative;display:inline-block"><div style="position:absolute;left:6%;right:6%;bottom:-6px;height:${Math.round(hh * 0.035)}px;background:radial-gradient(ellipse,rgba(10,0,20,.85),rgba(0,0,0,0) 70%);filter:blur(2px)"></div><div style="position:relative;filter:drop-shadow(0 0 6px rgba(255,120,60,.35))">${doll(hh)}</div></div>`; $('homeDoll').style.top = (oc ? 8 : Math.round(Hh - 56 - hh * 0.97)) + 'px';
+    const Hh = Math.max(300, $('app').clientHeight - 14), oc = cur().p.chat; box.style.height = (oc ? Math.round(Hh * 0.45) : Hh + 12) + 'px'; if (oc) box.style.overflow = 'hidden';
+    const hh = oc ? Math.round(Hh * 0.45) - 24 : Math.round((Hh - 70) * 0.9); $('homeDoll').innerHTML = `<div style="position:relative;display:inline-block"><div style="position:absolute;left:6%;right:6%;bottom:-6px;height:${Math.round(hh * 0.035)}px;background:radial-gradient(ellipse,rgba(10,0,20,.85),rgba(0,0,0,0) 70%);filter:blur(2px)"></div><div style="position:relative;filter:drop-shadow(0 0 6px rgba(255,120,60,.35))">${doll(hh)}</div></div>`; $('homeDoll').style.top = (oc ? 8 : Math.round(Hh - 44 - hh * 0.97)) + 'px';
   });
-  return `<div id="homeBox" style="position:relative;background:url(img/home_bg.jpg) center bottom/cover no-repeat;border-radius:10px;overflow:hidden">
-    <div class="side" style="position:absolute;left:0;top:0;z-index:3">
+  return `<div id="homeBox" style="position:relative;background:url(img/home_bg.jpg) center bottom/cover no-repeat;border-radius:0;overflow:hidden;margin:-6px -6px 0">
+    <div class="side" style="position:absolute;left:8px;top:12px;z-index:3">
       <button onclick="go('mail')">✉️ Пошта${unread ? `<span class="badge">${unread}</span>` : ''}</button>
       <button onclick="go('tasks')">☑ Завдання${dot(N.tasks())}</button>
       <button onclick="go('events')">🏆 Події</button>
@@ -499,13 +499,13 @@ SCREENS.home = () => {
       ${qaList('L').map(k => `<button onclick="qaGo('${k}')">${QA[k][0]}</button>`).join('')}
     </div>
     <div id="homeDoll" style="position:absolute;left:0;right:0;top:0;text-align:center"></div>
-    <div class="side" style="position:absolute;right:0;top:0;z-index:3">
+    <div class="side" style="position:absolute;right:8px;top:12px;z-index:3">
       <button onclick="go('settings')">⚙</button>
       <button onclick="go('rewards')">🎁 Нагороди${dot(N.login())}</button>
       <button class="y" onclick="qaPick('R')" style="font-size:11px"><span style="filter:brightness(.25)">⚡</span> Швидкий доступ</button>
       ${qaList('R').map(k => `<button onclick="qaGo('${k}')">${QA[k][0]}</button>`).join('')}
     </div>
-    ${cur().p.chat ? '' : `<button class="play" style="position:absolute;left:6px;right:6px;bottom:6px;padding:14px;font-size:22px;z-index:3" onclick="go('play')">ГРАТИ ▶${dot(N.bonus())}</button>`}
+    ${cur().p.chat ? '' : `<button class="play" style="position:absolute;left:12px;right:12px;bottom:12px;padding:14px;font-size:22px;z-index:3" onclick="go('play')">ГРАТИ ▶${dot(N.bonus())}</button>`}
   </div>${cur().p.chat ? chatPanel(cur().p, true) : ''}`;
 };
 
