@@ -435,7 +435,7 @@ function give(r, why) {
 }
 const xpNeed = l => l * 500;
 const lvM = () => 1 + 0.12 * (S.lvl - 1); // спільний множник нагород за рівнем героя (рейди, гонки, робота, райони)
-function lvlCheck() { while (S.xp >= xpNeed(S.lvl)) { S.xp -= xpNeed(S.lvl); S.lvl++; toast('Новий рівень ' + S.lvl + '!'); } }
+function lvlCheck() { while (S.xp >= xpNeed(S.lvl)) { S.xp -= xpNeed(S.lvl); S.lvl++; toast('Новий рівень ' + S.lvl + '!'); Object.values(UNL).forEach(u => { if (!u[1] && u[0] === S.lvl) toast('🔓 Відкрито: ' + u[2]); }); } }
 function addItem(id, g) { const u = { uid: ++S.uidN, id }; if (g != null) u.g = g; S.inv.push(u); bump('itemsFound'); if (g >= 2) bump('itemsRare'); if (g >= 3) bump('itemsEpic'); if (g >= 4) bump('itemsLegend'); return u; }
 const EN_MIN = 6, EN_CAP = 90; // 1 ⚡ за 6 хв: 240 ⚡ на добу, повний запас 90 ⚡ за 9 годин
 function energyTick() {
@@ -502,6 +502,44 @@ function showUnlocks() {
   const rows = Object.entries(UNL).sort((a, b) => (a[1][1] ? 99 : a[1][0]) - (b[1][1] ? 99 : b[1][0])).map(([k, u]) => `<div class="bar sp small" style="padding:3px 0"><span>${lockOf(k) ? '🔒' : '✅'} ${u[2]}</span><b>${u[1] ? 'після 2-го боса' : 'рівень ' + u[0]}</b></div>`).join('');
   modal(`<h3>Що коли відкривається</h3><div class="small">З самого початку: Профіль, Інвентар, Гардероб, Наліт (боси), Завдання, Пошта, Магазин.</div><div style="margin:6px 0">${rows}</div><button class="y" style="width:100%" onclick="closeModal()">Закрити</button>`);
 }
+// ---------- ШЛЯХ ВІД ПАЦАНА ДО БОСА (етапи-титули) ----------
+const dOwnN = () => { try { return DISTS.filter(D => dMine(D.id) && dS(D.id).r > 0).length; } catch (e) { return 0; } };
+const bt = id => !!(S.beat && S.beat[id]);
+const stN = k => (S.st && S.st[k]) || 0;
+const G_LV = n => ['Рівень ' + n, () => Math.min(S.lvl, n), n];
+const G_BOSS = (id, n) => ['Переможи боса ' + n, () => bt(id) ? 1 : 0, 1];
+const PATH = [
+  { t: 'Пацан з вітром у голові', ic: '🧢', col: '#b8c0cc', d: 'Ні грошей, ні поваги. Тільки вітер у голові. Шукай перший заробіток і перший бій.', opens: 'Наліт (боси), Гардероб, Завдання, Магазин', goals: [] },
+  { t: 'Ділок', ic: '💼', col: '#5fd3ff', d: 'Підробіток на складі, перші угоди в секонд-хенді, перша тачка.', opens: 'Секонд-хенд і Робота (рів.3), Клуб розваг (рів.5), машина й гонки (після Молота)', goals: [G_LV(5), G_BOSS('molot', 'Молот'), ['Відпрацюй 5 змін', () => Math.min(stN('shifts'), 5), 5]] },
+  { t: 'Бригадир', ic: '👊', col: '#6ee36e', d: 'Своя бригада, ринок і перші зв\'язки в місті.', opens: 'Ринок і Аукціон (рів.8), Баба Валя і Групування (рів.10)', goals: [G_LV(10), G_BOSS('vipera', 'Ла Віпера'), ['Вступи в групування', () => S.group && S.group.member ? 1 : 0, 1]] },
+  { t: 'Авторитет', ic: '🕶', col: '#ffcc44', d: 'Тебе знають на районі. Час забирати територію.', opens: 'Райони (рів.12), Картковий турнір (рів.15)', goals: [G_LV(15), G_BOSS('karlo', 'Дон Карло'), ['Пройди 10 рейдів', () => Math.min(stN('raids'), 10), 10]] },
+  { t: 'Бос району', ic: '🏙', col: '#ff7a45', d: 'Ти тримаєш район і маєш щоденний дохід з нього.', opens: 'Перекуп авто (рів.20)', goals: [G_LV(20), G_BOSS('senator', 'Сенатор'), ['Тримай 1 район', () => Math.min(dOwnN(), 1), 1]] },
+  { t: 'Хрещений батько', ic: '👑', col: '#ff4fd8', d: 'Місто твоє: райони, клан, повага. Справжній жирний бос.', opens: 'Повага всього міста', goals: [G_LV(30), ['Тримай 3 райони', () => Math.min(dOwnN(), 3), 3], ['Клан 10 рівня', () => Math.min(S.group && S.group.member ? S.group.lvl : 0, 10), 10]] },
+];
+const goalOk = g => g[1]() >= g[2];
+function pathCalc() { let s = 0; while (s + 1 < PATH.length && PATH[s + 1].goals.every(goalOk)) s++; return s; }
+const pathSt = () => S.stg || 0;
+function pathCheck() {
+  if (!S.created) return; if (S.stg === undefined) { S.stg = pathCalc(); return; }
+  const n = pathCalc(); if (n <= S.stg) return; S.stg = n; const P = PATH[n];
+  setTimeout(() => modal(`<div style="text-align:center"><div style="font-size:56px">${P.ic}</div><div class="small">Новий етап ${n + 1} з ${PATH.length}</div><h2 style="color:${P.col};margin:4px 0">${P.t}</h2><p>${P.d}</p></div><div class="box small">🔓 На цьому етапі: ${P.opens}</div><button class="y" style="width:100%" onclick="closeModal();showPath()">Мій шлях</button>`), 500);
+}
+function nextUnl() {
+  const l = Object.entries(UNL).filter(([k]) => lockOf(k)).map(([k, u]) => [u[1] && !hasCar() ? 0 : u[0], u]).sort((a, b) => a[0] - b[0]);
+  if (!l.length) return ''; const [lv, u] = l[0]; return u[2] + (u[1] && !hasCar() ? ' (після боса Молот)' : ' (рів.' + lv + ')');
+}
+function pathStrip() {
+  const s = pathSt(), P = PATH[s], N = PATH[s + 1];
+  const g = N ? N.goals.map(x => `${goalOk(x) ? '✅' : '▫️'}${x[0].replace('Переможи боса ', '⚔ ').replace('Рівень ', 'рів.')}${x[2] > 1 && !x[0].startsWith('Рівень') ? ' ' + x[1]() + '/' + x[2] : ''}`).join(' · ') : 'Ти на вершині міста';
+  const nu = nextUnl();
+  return `<div onclick="showPath()" style="cursor:pointer;background:rgba(10,4,24,.78);border:2px solid ${P.col};border-radius:12px;padding:4px 8px;color:#fff;font-size:11px;line-height:1.35">
+  <div style="display:flex;justify-content:space-between;gap:6px"><b style="color:${P.col}">${P.ic} ${P.t}</b>${N ? `<span>далі: <b style="color:${N.col}">${N.ic} ${N.t}</b> ▸</span>` : '<b>👑 MAX</b>'}</div>
+  <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">🎯 ${g}</div>${nu ? `<div style="opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">🔓 Наступне: ${nu}</div>` : ''}</div>`;
+}
+function showPath() {
+  const s = pathSt();
+  modal(`<h3>🛣 Шлях від пацана до боса</h3><div class="small">Етап ${s + 1} з ${PATH.length}. Виконай цілі, щоб отримати новий титул.</div>` + PATH.map((P, i) => `<div class="box" style="border-left:5px solid ${P.col};${i > s + 1 ? 'opacity:.55' : ''}"><b style="color:${P.col}">${i <= s ? '✅' : i === s + 1 ? '🎯' : '🔒'} ${P.ic} ${i + 1}. ${P.t}</b><div class="small">${P.d}</div><div class="small">🔓 ${P.opens}</div>${i === s + 1 ? P.goals.map(g => `<div class="small">${goalOk(g) ? '✅' : '▫️'} ${g[0]}${g[2] > 1 ? ' (' + g[1]() + '/' + g[2] + ')' : ''}</div>`).join('') : ''}</div>`).join('') + `<button style="width:100%" onclick="closeModal();showUnlocks()">📋 Що коли відкривається</button>`);
+}
 function chatGo() { const l = lockOf('chat'); if (l) return toast('🔒 ' + l); cur().p.chat = true; render(); }
 function showTut() {
   if (S.tut || !S.created) return; S.tut = 1; save();
@@ -510,7 +548,7 @@ function showTut() {
 let after = [];
 function render() {
   if (typeof spinning !== 'undefined' && spinning && cur().name === 'slots') return;
-  energyTick(); save();
+  energyTick(); pathCheck(); save();
   const c = cur(); after = [];
   const scr = SCREENS[c.name];
   const lk = lockOf(c.name);
@@ -680,7 +718,7 @@ SCREENS.home = () => {
     if (!S.tut) setTimeout(showTut, 500);
     const box = $('homeBox'); if (!box) return;
     const Hh = Math.max(300, $('app').clientHeight - 14), oc = cur().p.chat; box.style.height = (Hh + 12) + 'px';
-    const hh = Math.round((Hh - 70) * 0.9); $('homeDoll').innerHTML = `<div style="position:relative;display:inline-block"><div style="position:absolute;left:6%;right:6%;bottom:-6px;height:${Math.round(hh * 0.035)}px;background:radial-gradient(ellipse,rgba(10,0,20,.85),rgba(0,0,0,0) 70%);filter:blur(2px)"></div><div style="position:relative;filter:drop-shadow(0 0 6px rgba(255,120,60,.35))">${doll(hh)}</div></div>`; $('homeDoll').style.top = (oc ? 8 : Math.round(Hh - 44 - hh * 0.97)) + 'px';
+    const hh = Math.round((Hh - 130) * 0.9), Pc = PATH[pathSt()].col; $('homeDoll').innerHTML = `<div style="position:relative;display:inline-block"><div style="position:absolute;left:6%;right:6%;bottom:-6px;height:${Math.round(hh * 0.035)}px;background:radial-gradient(ellipse,rgba(10,0,20,.85),rgba(0,0,0,0) 70%);filter:blur(2px)"></div><div style="position:relative;filter:drop-shadow(0 0 ${6 + pathSt() * 3}px ${Pc}${pathSt() ? 'aa' : '55'})">${doll(hh)}</div></div>`; $('homeDoll').style.top = (oc ? 8 : Math.round(Hh - 104 - hh * 0.97)) + 'px';
   });
   return `<div id="homeBox" style="position:relative;background:url(img/home_bg.jpg) center bottom/cover no-repeat;border-radius:0;overflow:hidden;margin:-6px -6px 0">
     <div class="side" style="position:absolute;left:8px;top:12px;z-index:3">
@@ -699,6 +737,7 @@ SCREENS.home = () => {
       <button class="y" onclick="qaPick('R')" style="font-size:11px"><span style="filter:brightness(.25)">⚡</span> Швидкий доступ</button>
       ${qaList('R').map(k => `<button onclick="qaGo('${k}')">${lockOf(QA[k][1]) ? '🔒 ' : ''}${QA[k][0]}</button>`).join('')}
     </div>
+    <div style="position:absolute;left:10px;right:10px;bottom:70px;z-index:3">${pathStrip()}</div>
     ${false ? '' : `<button class="play" style="position:absolute;left:12px;right:12px;bottom:12px;padding:14px;font-size:22px;z-index:3" onclick="go('play')">ГРАТИ ▶${dot(N.bonus())}</button>`}
   ${cur().p.chat ? `<div style="position:absolute;left:0;right:0;bottom:0;height:62%;z-index:6;display:flex;flex-direction:column;background:#f4efe6;border-top:3px solid #d8b25a;padding:6px;color:#111;font-size:14px">${chatPanel(cur().p, true)}</div>` : ''}</div>`;
 };
@@ -985,7 +1024,7 @@ function buyWear(k, curr) {
 SCREENS.profile = () => {
   const s = stats();
   return `<h2>👤 Профіль</h2><div class="bar"><div>${doll(220)}</div><div class="f" style="flex:1">
-  <div class="box" style="${cosFrame() ? 'border:3px solid ' + cosFrame() : ''}"><b style="${nickSt(subTier())}">${S.name}</b> ${cosTitle() ? '<span class="small">«' + cosTitle() + '»</span>' : ''} (${S.gender === 'm' ? 'чоловік' : 'жінка'})<br>Рівень ${S.lvl}<br><span onclick="go('tasks',{tab:'ach'})" style="cursor:pointer">🏅 <b>${achRank(achPts())[1]}</b> · ${(achPct() * 100).toFixed(1)}% досягнень · ${fmt(achPts())} очок</span><div class="prog"><i style="width:${S.xp / xpNeed(S.lvl) * 100}%"></i></div><span class="small">${S.xp} / ${xpNeed(S.lvl)} XP</span></div>
+  <div class="box" style="${cosFrame() ? 'border:3px solid ' + cosFrame() : ''}"><b style="${nickSt(subTier())}">${S.name}</b> ${cosTitle() ? '<span class="small">«' + cosTitle() + '»</span>' : ''} (${S.gender === 'm' ? 'чоловік' : 'жінка'})<br><span onclick="showPath()" style="cursor:pointer;color:${PATH[pathSt()].col};font-weight:800">${PATH[pathSt()].ic} ${PATH[pathSt()].t} ▸</span><br>Рівень ${S.lvl}<br><span onclick="go('tasks',{tab:'ach'})" style="cursor:pointer">🏅 <b>${achRank(achPts())[1]}</b> · ${(achPct() * 100).toFixed(1)}% досягнень · ${fmt(achPts())} очок</span><div class="prog"><i style="width:${S.xp / xpNeed(S.lvl) * 100}%"></i></div><span class="small">${S.xp} / ${xpNeed(S.lvl)} XP</span></div>
   <div class="box" style="text-align:center"><b>⚔️ Бойова сила</b><div style="font-size:34px;font-weight:800;line-height:1.1">${fmt(avgHit())}</div><div class="small">середній удар по босу</div><hr style="margin:6px 0"><div style="text-align:left">Шкода по босах: +${s.dmg}%<br>Крит: ${s.crit}% <span class="small">(подвійний удар)</span><br>Удача: ${s.luck} <span class="small">(кращі знахідки)</span><br>Колекція: ${S.owned.length}/${Object.keys(WEAR).length} речей у гардеробі<br>Зброя: ${(WEAPONS.find(w => w.id === S.weapon) || {}).name} (x${weaponMult()})<br>Авто: ${S.car.name}</div>
   ${profBox()}
   <div class="box small">Патрони: ${S.ammo} · Гранати: ${S.grenades} · 🪡 Наперстки: ${S.thim || 0} · 🌟 Золоті: ${S.thimG || 0}</div></div></div>
@@ -2492,7 +2531,7 @@ SCREENS.settings = p => {
 const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 8192) s += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
 const unb64u = t => { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; const s = atob(t), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
 async function zip(str, mode) { const st = mode === 'c' ? new Blob([str]).stream().pipeThrough(new CompressionStream('deflate-raw')) : new Blob([str]).stream().pipeThrough(new DecompressionStream('deflate-raw')); return new Uint8Array(await new Response(st).arrayBuffer()); }
-const BUILD = 'v115';
+const BUILD = 'v116';
 const BOT = 'PotuzhneMisto_bot', PAGE = 'https://stasiya408-dev.github.io/tg-miniapp/';
 async function saveExport() {
   const o = Object.assign({}, S, { mail: [] }), t = b64u(await zip(JSON.stringify(o), 'c'));
