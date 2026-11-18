@@ -487,7 +487,7 @@ SCREENS.home = () => {
   after.push(() => {
     const box = $('homeBox'); if (!box) return;
     const Hh = Math.max(300, $('app').clientHeight - 14), oc = cur().p.chat; box.style.height = (oc ? Math.round(Hh * 0.45) : Hh) + 'px'; if (oc) box.style.overflow = 'hidden';
-    const hh = oc ? Math.round(Hh * 0.45) - 24 : Math.round((Hh - 78) * 0.74); $('homeDoll').innerHTML = `<div style="position:relative;display:inline-block"><div style="position:absolute;left:6%;right:6%;bottom:-6px;height:${Math.round(hh * 0.035)}px;background:radial-gradient(ellipse,rgba(10,0,20,.85),rgba(0,0,0,0) 70%);filter:blur(2px)"></div><div style="position:relative;filter:drop-shadow(0 0 6px rgba(255,120,60,.35))">${doll(hh)}</div></div>`; $('homeDoll').style.top = (oc ? 8 : Math.round(Hh - 56 - hh * 0.97)) + 'px';
+    const hh = oc ? Math.round(Hh * 0.45) - 24 : Math.round((Hh - 70) * 0.9); $('homeDoll').innerHTML = `<div style="position:relative;display:inline-block"><div style="position:absolute;left:6%;right:6%;bottom:-6px;height:${Math.round(hh * 0.035)}px;background:radial-gradient(ellipse,rgba(10,0,20,.85),rgba(0,0,0,0) 70%);filter:blur(2px)"></div><div style="position:relative;filter:drop-shadow(0 0 6px rgba(255,120,60,.35))">${doll(hh)}</div></div>`; $('homeDoll').style.top = (oc ? 8 : Math.round(Hh - 56 - hh * 0.97)) + 'px';
   });
   return `<div id="homeBox" style="position:relative;background:url(img/home_bg.jpg) center bottom/cover no-repeat;border-radius:10px;overflow:hidden">
     <div class="side" style="position:absolute;left:0;top:0;z-index:3">
