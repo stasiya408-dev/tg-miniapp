@@ -1394,7 +1394,7 @@ SCREENS.slots = () => {
 };
 function slotFaq() {
   modal(`<h3>FAQ: Слоти</h3><b>Таблиця виплат</b> (множник на ставку)
-  <table style="width:100%;border-collapse:collapse;font-size:12px;margin:4px 0"><tr style="background:#ffe9a8"><td>${SCAT}${SCAT}${SCAT}</td><td colspan="2"><b>Бонус</b> <span class="small">(3+ де завгодно)</span></td></tr>${SLOT_BASE.map(([m, w]) => `<tr style="border-bottom:1px solid #ddd"><td>${WINMAP[m][0].repeat(WINMAP[m][1])}</td><td><b>x${m}</b></td><td class="small">шанс 1 до ${fmt(Math.round(1e6 / w))}</td></tr>`).join('')}</table>
+  <table style="width:100%;border-collapse:collapse;font-size:12px;margin:4px 0"><tr style="background:#ffe9a8"><td style="white-space:nowrap">${`<span class="scatT">${SCAT}</span>`.repeat(3)}</td><td colspan="2"><b>×3 будь-де на екрані = БОНУСНА ГРА</b><div class="small">×1 або ×2 = нічого</div></td></tr>${SLOT_BASE.map(([m, w]) => `<tr style="border-bottom:1px solid #ddd"><td>${WINMAP[m][0].repeat(WINMAP[m][1])}</td><td><b>x${m}</b></td><td class="small">шанс 1 до ${fmt(Math.round(1e6 / w))}</td></tr>`).join('')}</table>
   <p class="small">7 ліній виплат: 3 горизонтальні, 2 діагоналі (V і Λ) та 2 зигзаги. Виграє збіг символів зліва направо по лінії. Загальна ставка ділиться на 7.</p>
   <b>Бонусна гра</b><p class="small">${SCAT} · <b>Скриня</b> — особливий символ. Коли на барабанах випадає <b>3 і більше ${SCAT} де завгодно</b> (не обов’язково в лінії), починається бонусна гра. Приз від x2 до x1000 від ставки.</p><p class="small">Повернення гравцю (RTP): <b>97%</b>.</p>`);
 }
