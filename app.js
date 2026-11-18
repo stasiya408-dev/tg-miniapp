@@ -1337,19 +1337,21 @@ const WINMAP = { 1: ['🥃', 3], 2: ['🚬', 3], 3: ['🎲', 3], 5: ['🔫', 3],
 function rollTable(t) { let x = Math.random() * 1e6; for (const [m, w] of t) { x -= w; if (x < 0) return m; } return 0; }
 const tableEV = t => t.reduce((s, [m, w]) => s + m * w / 1e6, 0);
 const SLOT_RTP = tableEV(SLOT_BASE) + tableEV(SLOT_BONUS) / SLOT_GOAL;
+const LINES = [[1, 1, 1, 1, 1], [0, 0, 0, 0, 0], [2, 2, 2, 2, 2], [0, 1, 2, 1, 0], [2, 1, 0, 1, 2], [0, 0, 1, 2, 2], [2, 2, 1, 0, 0]]; // 7 ліній виплат (рядок у кожному з 5 барабанів)
+const lineCells = (L, k) => Array.from({ length: k }, (_, i) => LINES[L][i] * 5 + i);
 function rowRun(row) { let n = 1; while (n < 5 && row[n] === row[0]) n++; return n; }
 function buildReels(mult, scat) {
   for (let tries = 0; tries < 200; tries++) {
     const g = Array.from({ length: 15 }, () => pick(SYM));
     let line = -1;
     if (mult > 0) {
-      const [sym, k] = WINMAP[mult]; line = rnd(0, 2);
-      for (let i = 0; i < 5; i++) g[line * 5 + i] = i < k ? sym : pick(SYM.filter(x => x !== sym));
+      const [sym, k] = WINMAP[mult]; line = rnd(0, 6);
+      for (let i = 0; i < 5; i++) g[LINES[line][i] * 5 + i] = i < k ? sym : pick(SYM.filter(x => x !== sym));
     }
     let ok = true;
-    for (let r = 0; r < 3; r++) { if (r !== line && rowRun(g.slice(r * 5, r * 5 + 5)) >= 3) ok = false; }
+    for (let L = 0; L < 7; L++) { if (L !== line && rowRun(LINES[L].map((r, i) => g[r * 5 + i])) >= 3) ok = false; }
     if (ok) {
-      const used = new Set(); if (line >= 0) for (let i = 0; i < WINMAP[mult][1]; i++) used.add(line * 5 + i);
+      const used = new Set(); if (line >= 0) lineCells(line, WINMAP[mult][1]).forEach(c => used.add(c));
       const cols = [0, 1, 2, 3, 4].sort(() => Math.random() - 0.5).slice(0, scat || 0), sc = [];
       cols.forEach(c => { const rows = [0, 1, 2].filter(r => !used.has(r * 5 + c)); if (rows.length) { const i = pick(rows) * 5 + c; g[i] = SCAT; sc.push(i); } });
       return { g, line, k: mult > 0 ? WINMAP[mult][1] : 0, sc };
@@ -1382,8 +1384,8 @@ function openSlotChest(i) {
 SCREENS.slots = () => {
   if (slotBonus) return slotBonusUI();
   if (!reels) reels = buildReels(0).g;
-  return `<div class="bar sp"><h2 style="margin:4px 0">🎰 СЛОТИ</h2><button class="y" onclick="slotFaq()">❓ FAQ</button></div>${ctabs('slots')}<div class="reel">${reels.map((s, i) => `<div class="${winCells.includes(i) ? 'win' : ''}">${s}</div>`).join('')}</div>
-  <div class="${lastWin ? 'winban ' + (lastWin.mult >= 20 ? 'me' : '') : 'small'}" style="${lastWin ? '' : 'text-align:center;padding:10px'}">${lastWin ? (lastWin.mult >= 20 ? '🔥 ВЕЛИКИЙ ВИГРАШ ' : 'ВИГРАШ ') + 'x' + lastWin.mult + ': +' + fmt(lastWin.pay) + ' 🎟' : 'Крутни барабани'}</div>
+  return `<div class="bar sp"><h2 style="margin:4px 0">🎰 СЛОТИ</h2><button class="y" onclick="slotFaq()">❓ FAQ</button></div>${ctabs('slots')}<div class="reel">${reels.map((s, i) => `<div class="${winCells.includes(i) ? 'win' : ''}">${s}</div>`).join('')}</div><div class="small" style="text-align:center;margin:2px 0">7 ліній · ставка на лінію ${(S.slots.bet / 7).toFixed(1)} 🎟 (загальна ${S.slots.bet})</div>
+  <div class="${lastWin ? 'winban ' + (lastWin.mult >= 20 ? 'me' : '') : 'small'}" style="${lastWin ? '' : 'text-align:center;padding:10px'}">${lastWin ? (lastWin.mult >= 20 ? '🔥 ВЕЛИКИЙ ВИГРАШ ' : 'ВИГРАШ ') + 'x' + lastWin.mult + ' (лінія ' + lastWin.line + '): +' + fmt(lastWin.pay) + ' 🎟' : 'Крутни барабани'}</div>
   <div class="bar" style="justify-content:center;margin:8px 0"><button onclick="S.slots.bet=Math.max(10,S.slots.bet-10);render()">−</button><b>${S.slots.bet} 🎟</b><button onclick="S.slots.bet=Math.min(200,S.slots.bet+10);render()">+</button>
   <button class="y" style="padding:10px 24px;font-size:18px" onclick="spin()">ГРАТИ</button>
   <label><input type="checkbox" id="auto" ${autoOn ? 'checked' : ''} onchange="autoSpin(this.checked)"> АВТО</label></div>
@@ -1394,7 +1396,7 @@ SCREENS.slots = () => {
 function slotFaq() {
   modal(`<h3>FAQ: Слоти</h3><b>Таблиця виплат</b> (множник на ставку)
   <table style="width:100%;border-collapse:collapse;font-size:12px;margin:4px 0">${SLOT_BASE.map(([m, w]) => `<tr style="border-bottom:1px solid #ddd"><td>${WINMAP[m][0].repeat(WINMAP[m][1])}</td><td><b>x${m}</b></td><td class="small">шанс 1 до ${fmt(Math.round(1e6 / w))}</td></tr>`).join('')}</table>
-  <p class="small">Виграє збіг символів зліва направо в одному рядку.</p>
+  <p class="small">7 ліній виплат: 3 горизонтальні, 2 діагоналі (V і Λ) та 2 зигзаги. Виграє збіг символів зліва направо по лінії. Загальна ставка ділиться на 7.</p>
   <b>Бонусна гра</b><p class="small">Символ ${SCAT} (скриня) на барабанах: коли випадає 3 і більше ${SCAT} у будь-яких місцях, починається бонусна гра (в середньому раз на ~${SLOT_GOAL} спінів). Приз від x2 до x1000 від ставки.</p>`);
 }
 function slotStats() {
@@ -1441,10 +1443,10 @@ function spin() {
   const mult = rollTable(SLOT_BASE), bonusHit = Math.random() < 1 / SLOT_GOAL, nsc = bonusHit ? (() => { const x = Math.random(); return x < 0.85 ? 3 : x < 0.97 ? 4 : 5; })() : (Math.random() < 0.12 ? rnd(1, 2) : 0), R = buildReels(mult, nsc);
   lastWin = null; winCells = [];
   animReels(R.g, () => {
-    reels = R.g; winCells = mult ? Array.from({ length: R.k }, (_, i) => R.line * 5 + i) : [];
+    reels = R.g; winCells = mult ? lineCells(R.line, R.k) : [];
     S.daily.casino++; bump('spins'); bump('slotBet', bet); if (mult >= 10) bump('slotX10'); if (mult >= 50) bump('slotX50'); clubPt();
     pushHist({ bet, win: bet * mult, mult });
-    if (!mult) bump('slotLost', bet); if (mult) { bump('slotWins'); bump('slotBig', mult, 'max'); bump('slotWon', bet * mult); lastWin = { mult, pay: bet * mult }; give({ chips: bet * mult }, 'Виграш x' + mult); }
+    if (!mult) bump('slotLost', bet); if (mult) { bump('slotWins'); bump('slotBig', mult, 'max'); bump('slotWon', bet * mult); lastWin = { mult, pay: bet * mult, line: R.line + 1 }; give({ chips: bet * mult }, 'Виграш x' + mult); }
     if (bonusHit) {
       const m = rollTable(SLOT_BONUS) || 2; bump('slotBonus'); autoSpin(false); bonusPend = true;
       winCells = winCells.concat(R.sc); toast('🎁 Бонусна гра! ' + R.sc.length + '× ' + SCAT);
