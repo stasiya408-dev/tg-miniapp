@@ -1352,8 +1352,7 @@ function buildReels(mult, scat) {
     for (let L = 0; L < 7; L++) { if (L !== line && rowRun(LINES[L].map((r, i) => g[r * 5 + i])) >= 3) ok = false; }
     if (ok) {
       const used = new Set(); if (line >= 0) lineCells(line, WINMAP[mult][1]).forEach(c => used.add(c));
-      const cols = [0, 1, 2, 3, 4].sort(() => Math.random() - 0.5).slice(0, scat || 0), sc = [];
-      cols.forEach(c => { const rows = [0, 1, 2].filter(r => !used.has(r * 5 + c)); if (rows.length) { const i = pick(rows) * 5 + c; g[i] = SCAT; sc.push(i); } });
+      const free = Array.from({ length: 15 }, (_, i) => i).filter(i => !used.has(i)).sort(() => Math.random() - 0.5), sc = free.slice(0, scat || 0); sc.forEach(i => g[i] = SCAT);
       return { g, line, k: mult > 0 ? WINMAP[mult][1] : 0, sc };
     }
   }
@@ -1384,7 +1383,7 @@ function openSlotChest(i) {
 SCREENS.slots = () => {
   if (slotBonus) return slotBonusUI();
   if (!reels) reels = buildReels(0).g;
-  return `<div class="bar sp"><h2 style="margin:4px 0">🎰 СЛОТИ</h2><button class="y" onclick="slotFaq()">❓ FAQ</button></div>${ctabs('slots')}<div class="reel">${reels.map((s, i) => `<div class="${winCells.includes(i) ? 'win' : ''}">${s}</div>`).join('')}</div><div class="small" style="text-align:center;margin:2px 0">7 ліній · ставка на лінію ${(S.slots.bet / 7).toFixed(1)} 🎟 (загальна ${S.slots.bet})</div>
+  return `<div class="bar sp"><h2 style="margin:4px 0">🎰 СЛОТИ</h2><button class="y" onclick="slotFaq()">❓ FAQ</button></div>${ctabs('slots')}<div class="reel">${reels.map((s, i) => `<div class="${winCells.includes(i) ? 'win' : ''}${s === SCAT ? ' scat' : ''}">${s}</div>`).join('')}</div><div class="small" style="text-align:center;margin:2px 0">7 ліній · ставка на лінію ${(S.slots.bet / 7).toFixed(1)} 🎟 (загальна ${S.slots.bet}) · RTP 97% · ${SCAT} ×3 = бонус</div>
   <div class="${lastWin ? 'winban ' + (lastWin.mult >= 20 ? 'me' : '') : 'small'}" style="${lastWin ? '' : 'text-align:center;padding:10px'}">${lastWin ? (lastWin.mult >= 20 ? '🔥 ВЕЛИКИЙ ВИГРАШ ' : 'ВИГРАШ ') + 'x' + lastWin.mult + ' (лінія ' + lastWin.line + '): +' + fmt(lastWin.pay) + ' 🎟' : 'Крутни барабани'}</div>
   <div class="bar" style="justify-content:center;margin:8px 0"><button onclick="S.slots.bet=Math.max(10,S.slots.bet-10);render()">−</button><b>${S.slots.bet} 🎟</b><button onclick="S.slots.bet=Math.min(200,S.slots.bet+10);render()">+</button>
   <button class="y" style="padding:10px 24px;font-size:18px" onclick="spin()">ГРАТИ</button>
@@ -1395,9 +1394,9 @@ SCREENS.slots = () => {
 };
 function slotFaq() {
   modal(`<h3>FAQ: Слоти</h3><b>Таблиця виплат</b> (множник на ставку)
-  <table style="width:100%;border-collapse:collapse;font-size:12px;margin:4px 0">${SLOT_BASE.map(([m, w]) => `<tr style="border-bottom:1px solid #ddd"><td>${WINMAP[m][0].repeat(WINMAP[m][1])}</td><td><b>x${m}</b></td><td class="small">шанс 1 до ${fmt(Math.round(1e6 / w))}</td></tr>`).join('')}</table>
+  <table style="width:100%;border-collapse:collapse;font-size:12px;margin:4px 0"><tr style="background:#ffe9a8"><td>${SCAT}${SCAT}${SCAT}</td><td colspan="2"><b>БОНУСНА ГРА</b> <span class="small">(3+ де завгодно)</span></td></tr>${SLOT_BASE.map(([m, w]) => `<tr style="border-bottom:1px solid #ddd"><td>${WINMAP[m][0].repeat(WINMAP[m][1])}</td><td><b>x${m}</b></td><td class="small">шанс 1 до ${fmt(Math.round(1e6 / w))}</td></tr>`).join('')}</table>
   <p class="small">7 ліній виплат: 3 горизонтальні, 2 діагоналі (V і Λ) та 2 зигзаги. Виграє збіг символів зліва направо по лінії. Загальна ставка ділиться на 7.</p>
-  <b>Бонусна гра</b><p class="small">Символ ${SCAT} (скриня) на барабанах: коли випадає 3 і більше ${SCAT} у будь-яких місцях, починається бонусна гра (в середньому раз на ~${SLOT_GOAL} спінів). Приз від x2 до x1000 від ставки.</p>`);
+  <b>Бонусна гра</b><p class="small">${SCAT} · <b>Скриня</b> — особливий символ. Коли на барабанах випадає <b>3 і більше ${SCAT} де завгодно</b> (не обов’язково в лінії), починається бонусна гра. Приз від x2 до x1000 від ставки.</p><p class="small">Повернення гравцю (RTP): <b>97%</b>.</p>`);
 }
 function slotStats() {
   const h = S.slots.hist || []; if (!h.length) return '';
@@ -1424,7 +1423,7 @@ function animReels(final, done) {
     const el = Date.now() - t0; let all = true;
     for (let c = 0; c < 5; c++) {
       if (el >= stopAt[c]) {
-        if (!stopped[c]) { stopped[c] = 1; for (let r = 0; r < 3; r++) { const d = cells[r * 5 + c]; d.textContent = final[r * 5 + c]; d.classList.remove('spin'); d.classList.add('stop'); } }
+        if (!stopped[c]) { stopped[c] = 1; for (let r = 0; r < 3; r++) { const d = cells[r * 5 + c]; d.textContent = final[r * 5 + c]; d.classList.toggle('scat', final[r * 5 + c] === SCAT); d.classList.remove('spin'); d.classList.add('stop'); } }
       } else { all = false; for (let r = 0; r < 3; r++) { const d = cells[r * 5 + c]; d.textContent = pick(SYM); d.classList.add('spin'); } }
     }
     if (all) { spinning = false; setTimeout(done, 250); return; }
