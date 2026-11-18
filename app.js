@@ -1396,7 +1396,7 @@ function slotFaq() {
   modal(`<h3>FAQ: Слоти</h3><b>Таблиця виплат</b> (множник на ставку)
   <table style="width:100%;border-collapse:collapse;font-size:12px;margin:4px 0"><tr style="background:#ffe9a8"><td style="white-space:nowrap">${`<span class="scatT">${SCAT}</span>`.repeat(3)}</td><td colspan="2"><b>Бонусна гра</b><div class="small">3 будь-де на екрані</div></td></tr>${SLOT_BASE.map(([m, w]) => `<tr style="border-bottom:1px solid #ddd"><td>${WINMAP[m][0].repeat(WINMAP[m][1])}</td><td><b>x${m}</b></td><td class="small">шанс 1 до ${fmt(Math.round(1e6 / w))}</td></tr>`).join('')}</table>
   <p class="small">7 ліній виплат: 3 горизонтальні, 2 діагоналі (V і Λ) та 2 зигзаги. Виграє збіг символів зліва направо по лінії. Загальна ставка ділиться на 7.</p>
-  <p class="small">Повернення гравцю (RTP): <b>97%</b>.</p>`);
+  <p class="small">Повернення гравцю (RTP): <b>97%</b>.</p><div class="small" style="color:#888">Збірка ${BUILD}</div>`);
 }
 function slotStats() {
   const h = S.slots.hist || []; if (!h.length) return '';
@@ -2457,11 +2457,12 @@ SCREENS.settings = p => {
   <div class="box">Мова: Українська</div>
   <div class="box"><b>Перенос збереження</b><div class="small">Одне посилання: скопіюй тут, відкрий у Telegram, і прогрес з’явиться там.</div><div class="grid g2"><button class="y" onclick="saveExport()">🔗 Посилання</button><button onclick="saveImport()">📥 Вставити</button></div></div>
   <button style="background:#f99;width:100%" onclick="if(confirmReset()){}">Скинути прогрес (почати з нуля)</button>
-  <div class="note">Прототип зберігає прогрес у браузері (localStorage).</div>`;
+  <div class="note">Прототип зберігає прогрес у браузері (localStorage).<br><b>Збірка ${BUILD}</b></div>`;
 };
 const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 8192) s += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
 const unb64u = t => { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; const s = atob(t), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
 async function zip(str, mode) { const st = mode === 'c' ? new Blob([str]).stream().pipeThrough(new CompressionStream('deflate-raw')) : new Blob([str]).stream().pipeThrough(new DecompressionStream('deflate-raw')); return new Uint8Array(await new Response(st).arrayBuffer()); }
+const BUILD = 'v107';
 const BOT = 'PotuzhneMisto_bot', PAGE = 'https://stasiya408-dev.github.io/tg-miniapp/';
 async function saveExport() {
   const o = Object.assign({}, S, { mail: [] }), t = b64u(await zip(JSON.stringify(o), 'c'));
