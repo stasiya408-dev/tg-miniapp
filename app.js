@@ -346,7 +346,7 @@ function hudSet(i, k) { const o = 1 - i; if (HUD[o] === k) HUD[o] = HUD[i]; HUD[
 function topbar(name) {
   return `<div class="top">
     ${name !== 'home' ? '<button onclick="back()">◀</button>' : ''}
-    <span class="cur" onclick="go('profile')">👤 ${S.name} · Рів. ${S.lvl}</span>
+    <span class="cur" onclick="go('profile')">👤 <span class="nm">${S.name}</span> · ${name === 'home' ? 'Рів. ' : ''}${S.lvl}</span>
     <span class="cur" onclick="go('district',{tab:'shop'})">⚡ ${S.energy}${S.energy <= 60 ? '/60' : ''} +</span>
     <span class="cur" onclick="go('tasks',{tab:'ach'})">🏅 ${achPts()}</span>
     ${hudChip(0)}${hudChip(1)}
