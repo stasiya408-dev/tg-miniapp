@@ -2231,9 +2231,25 @@ SCREENS.settings = p => {
     <button onclick="S.xp+=S.lvl*1000;lvlCheck();render()">+1 рівень</button></div></div>`;
   return h + `<div class="box">Звук: <button onclick="toast('Заглушка')">Увімк</button> Музика: <button onclick="toast('Заглушка')">Увімк</button></div>
   <div class="box">Мова: Українська</div>
+  <div class="box"><b>Перенос збереження</b><div class="small">Скопіюй з одного місця і встав в іншому (наприклад, з Claude у Telegram): прогрес, одяг і підгонка.</div><div class="grid g2"><button class="y" onclick="saveExport()">📤 Скопіювати</button><button onclick="saveImport()">📥 Вставити</button></div></div>
   <button style="background:#f99;width:100%" onclick="if(confirmReset()){}">Скинути прогрес (почати з нуля)</button>
   <div class="note">Прототип зберігає прогрес у браузері (localStorage).</div>`;
 };
+function saveExport() {
+  const o = { v: 1, state: S, fit: FIT, fits: FITS }, t = btoa(unescape(encodeURIComponent(JSON.stringify(o))));
+  try { navigator.clipboard.writeText(t).catch(() => { }); } catch (e) { }
+  modal(`<h3>Збереження</h3><div class="small">Скопійовано. Якщо ні, виділи й скопіюй текст вручну.</div><textarea style="width:100%;height:140px" readonly onclick="this.select()">${t}</textarea><button style="width:100%;margin-top:6px" onclick="closeModal()">Готово</button>`);
+}
+function saveImport() {
+  modal(`<h3>Вставити збереження</h3><div class="small">Встав текст, скопійований кнопкою «Скопіювати». Поточний прогрес буде замінено.</div><textarea id="saveIn" style="width:100%;height:120px"></textarea><button class="y" style="width:100%;margin-top:6px" onclick="saveApply()">Завантажити</button>`);
+}
+function saveApply() {
+  try {
+    const o = JSON.parse(decodeURIComponent(escape(atob($('saveIn').value.trim()))));
+    localStorage.setItem('pm_state', JSON.stringify(o.state)); localStorage.setItem('pm_fit', JSON.stringify(o.fit || {})); localStorage.setItem('pm_fit_saved', JSON.stringify(o.fits || o.fit || {}));
+    location.reload();
+  } catch (e) { toast('Не вдалося: текст неповний або пошкоджений'); }
+}
 function confirmReset() { modal(`<p>Скинути весь прогрес?</p><button style="background:#f99" onclick="localStorage.removeItem('pm_state');load();closeModal();stack=[{name:'create',p:{}}];render()">Так, скинути</button>`); }
 
 // ---------- СТАРТ ----------
