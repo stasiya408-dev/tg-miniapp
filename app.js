@@ -222,7 +222,7 @@ function achTab(p) {
 
 const DEF = () => ({
   created: false, name: 'Гравець', gender: 'm', lvl: 12, xp: 400,
-  money: 125000, crystals: 2430, gold: 320, chips: 450, energy: 60, energyTs: Date.now(), ammo: 100, grenades: 2, pokerTickets: 0,
+  money: 125000, crystals: 2430, gold: 320, chips: 450, energy: 60, energyTs: Date.now(), ammo: 100, grenades: 2,
   owned: ['hoodie', 'cap', 'glasses'], equipped: { eyes: 'glasses' },
   inv: [{ uid: 1, id: 'i_belt' }, { uid: 2, id: 'i_scrap' }], uidN: 10,
   weapons: ['w_bat'], weapon: 'w_bat',
@@ -239,6 +239,7 @@ const DEF = () => ({
 let S;
 function load() {
   try { S = Object.assign(DEF(), JSON.parse(localStorage.getItem('pm_state') || '{}')); } catch (e) { S = DEF(); }
+  if (S.pokerTickets) { S.chips = (S.chips || 0) + S.pokerTickets * 50; } delete S.pokerTickets; // квитки покеру злито з фішками клубу
   if (!S.mail) S.mail = defMail();
   if (!S.st) S.st = {};
   if (!S.ach.seen) achScan(true);
@@ -272,7 +273,7 @@ function give(r, why) {
   const parts = [];
   for (const k in r) {
     let v = r[k]; if (S.vip && (k === 'money')) v *= 2;
-    S[k] = (S[k] || 0) + v; if (k === 'money') bump('earned', v); else if (k === 'crystals') bump('crysEarned', v); parts.push(fmt(v) + ' ' + ({ money: '💵', crystals: '💎', gold: '🟡', chips: '🎟', sprem: 'преміум пропуск', ammo: 'патронів', grenades: 'гранат', pokerTickets: 'квитків покеру', xp: 'XP' }[k] || k));
+    S[k] = (S[k] || 0) + v; if (k === 'money') bump('earned', v); else if (k === 'crystals') bump('crysEarned', v); parts.push(fmt(v) + ' ' + ({ money: '💵', crystals: '💎', gold: '🟡', chips: '🎟', sprem: 'преміум пропуск', ammo: 'патронів', grenades: 'гранат', xp: 'XP' }[k] || k));
   }
   if (r.xp) lvlCheck();
   toast((why ? why + ': ' : '') + '+' + parts.join(', +'));
@@ -348,7 +349,6 @@ function topbar(name) {
     ${name !== 'home' ? '<button onclick="back()">◀</button>' : ''}
     <span class="cur" onclick="go('profile')">👤 <span class="nm">${S.name}</span> · ${name === 'home' ? 'Рів. ' : ''}${S.lvl}</span>
     <span class="cur" onclick="go('district',{tab:'shop'})">⚡ ${S.energy}${S.energy <= 60 ? '/60' : ''} +</span>
-    <span class="cur" onclick="go('tasks',{tab:'ach'})">🏅 ${achPts()}</span>
     ${hudChip(0)}${hudChip(1)}
     ${name !== 'home' ? `<button style="position:relative" onclick="home()">⌂${dot(N.any())}</button>` : ''}
   </div>`;
@@ -799,7 +799,7 @@ SCREENS.profile = () => {
   <div class="box" style="${cosFrame() ? 'border:3px solid ' + cosFrame() : ''}"><b>${S.name}</b> ${cosTitle() ? '<span class="small">«' + cosTitle() + '»</span>' : ''} (${S.gender === 'm' ? 'чоловік' : 'жінка'})<br>Рівень ${S.lvl}<br><span onclick="go('tasks',{tab:'ach'})" style="cursor:pointer">🏅 <b>Досягнення: ${achPts()}</b> · ${achRank(achPts())[1]}</span><div class="prog"><i style="width:${S.xp / (S.lvl * 1000) * 100}%"></i></div><span class="small">${S.xp} / ${S.lvl * 1000} XP</span></div>
   <div class="box"><b>⚔️ Бойова сила</b><br>Середній удар по босу: <b>${fmt(avgHit())}</b><br>Шкода по босах: +${s.dmg}% <span class="small">(речі, набори)</span><br>Крит: ${s.crit}% <span class="small">(подвійний удар)</span><br>Колекція: ${S.owned.length}/${Object.keys(WEAR).length} речей у гардеробі<hr>Сила: ${s.str}<br>Влучність: ${s.acc} <span class="small">(шанс рейду)</span><br>Удача: ${s.luck} <span class="small">(кращі знахідки)</span><br>Здоров'я: ${s.hp} <span class="small">(шанс рейду)</span><br>Зброя: ${(WEAPONS.find(w => w.id === S.weapon) || {}).name} (x${weaponMult()})<br>Авто: ${S.car.name}</div>
   ${profBox()}
-  <div class="box small">Патрони: ${S.ammo} · Гранати: ${S.grenades} · Квитки покеру: ${S.pokerTickets}</div></div></div>
+  <div class="box small">Патрони: ${S.ammo} · Гранати: ${S.grenades}</div></div></div>
   <div class="bar"><input id="rn" value="${S.name}" style="flex:1"><button onclick="S.name=$('rn').value||S.name;render()">Змінити ім'я</button></div>`;
 };
 
@@ -1242,7 +1242,7 @@ let autoT = null;
 function autoSpin(on) { clearInterval(autoT); autoT = null; if (on) autoT = setInterval(() => { if (cur().name !== 'slots') return autoSpin(false); spin(); const a = $('auto'); if (a) a.checked = true; }, 900); }
 
 // --- БОНУСНА ГРА (скрині)
-const BONUS_POOL = [['🎟 x100', { chips: 100 }], ['🔫 патрони x30', { ammo: 30 }], ['🎟 x250', { chips: 250 }], ['💣 граната x1', { grenades: 1 }], ['🂡 квиток покеру', { pokerTickets: 1 }], ['🎟 x500', { chips: 500 }]];
+const BONUS_POOL = [['🎟 x100', { chips: 100 }], ['🔫 патрони x30', { ammo: 30 }], ['🎟 x250', { chips: 250 }], ['💣 граната x1', { grenades: 1 }], ['🎟 x50', { chips: 50 }], ['🎟 x500', { chips: 500 }]];
 
 // --- ПОКЕР (спрощений техаський холдем, 1 гравець + 4 боти)
 const SUITS = ['♠', '♥', '♦', '♣'], RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
