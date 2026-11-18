@@ -163,34 +163,34 @@ A('🧵 Баба Валя', 'bvN', 'Прошивок зроблено', 'n');
 A('🧵 Баба Валя', 'bvUp', 'Вдалих прошивок (ранг вгору)', 's');
 A('🧵 Баба Валя', 'bvDown', 'Невдалих прошивок (ранг вниз)', 's');
 A('🧵 Баба Валя', 'bvSpent', 'Витрачено на прошивки, 💎', 'x');
-// 🎰 Слоти
-A('🎰 Слоти', 'spins', 'Спінів у слотах', [20, 100, 500, 2500, 10000, 50000, 200000]);
-A('🎰 Слоти', 'slotWins', 'Виграшів у слотах', [10, 50, 250, 1000, 4000, 20000]);
-A('🎰 Слоти', 'slotBig', 'Найбільший виграш у слотах, x', [5, 20, 50, 100, 200, 500, 1000], 50);
-A('🎰 Слоти', 'slotX10', 'Виграшів x10 і більше', 's');
-A('🎰 Слоти', 'slotX50', 'Виграшів x50 і більше', 't');
-A('🎰 Слоти', 'slotBonus', 'Бонусних ігор у слотах', [1, 3, 10, 30, 100, 300]);
-A('🎰 Слоти', 'bonusWon', 'Виграно в бонусних іграх, 🎟', 'b');
-A('🎰 Слоти', 'slotBet', 'Поставлено в слотах, 🎟', 'b');
-A('🎰 Слоти', 'slotLost', 'Програно в слотах, 🎟', [200, 1000, 5000, 20000, 100000, 500000]);
-A('🎰 Слоти', 'slotWon', 'Виграно в слотах, 🎟', [200, 1000, 5000, 20000, 100000, 500000]);
-// 🃏 Покер
-A('🃏 Покер', 'pokerPlayed', 'Роздач у покер', [5, 25, 100, 400, 1500, 5000]);
-A('🃏 Покер', 'pokerWins', 'Перемог у покер', [3, 15, 60, 200, 800, 3000]);
-A('🃏 Покер', 'pokerWon', 'Виграно в покер, 🎟', [10000, 100000, 1000000, 10000000, 100000000, 1000000000]);
-A('🃏 Покер', 'pokerSpent', 'Фішок витрачено в покері', 'b');
-A('🃏 Покер', 'pkPair', 'Зібрано: Пара', 'n');
-A('🃏 Покер', 'pkTwo', 'Зібрано: Дві пари', 'n');
-A('🃏 Покер', 'pkTrips', 'Зібрано: Трійка', 'n');
-A('🃏 Покер', 'pkStr', 'Зібрано: Стріт', 's');
-A('🃏 Покер', 'pkFlush', 'Зібрано: Флеш', 's');
-A('🃏 Покер', 'pkFull', 'Зібрано: Фул-хаус', 's');
-A('🃏 Покер', 'pkQuads', 'Зібрано: Каре', 't');
-A('🃏 Покер', 'pkSF', 'Зібрано: Стріт-флеш', 't');
+// 🎡 Барабани удачі
+A('🎡 Барабани удачі', 'spins', 'Обертів барабанів', [20, 100, 500, 2500, 10000, 50000, 200000]);
+A('🎡 Барабани удачі', 'slotWins', 'Нагород на барабанах', [10, 50, 250, 1000, 4000, 20000]);
+A('🎡 Барабани удачі', 'slotBig', 'Найбільша нагорода на барабанах, x', [5, 20, 50, 100, 200, 500, 1000], 50);
+A('🎡 Барабани удачі', 'slotX10', 'Нагород x10 і більше', 's');
+A('🎡 Барабани удачі', 'slotX50', 'Нагород x50 і більше', 't');
+A('🎡 Барабани удачі', 'slotBonus', 'Бонусних ігор на барабанах', [1, 3, 10, 30, 100, 300]);
+A('🎡 Барабани удачі', 'bonusWon', 'Отримано в бонусних іграх, 🎟', 'b');
+A('🎡 Барабани удачі', 'slotBet', 'Заряджено в барабани, 🎟', 'b');
+A('🎡 Барабани удачі', 'slotLost', 'Витрачено без нагороди на барабанах, 🎟', [200, 1000, 5000, 20000, 100000, 500000]);
+A('🎡 Барабани удачі', 'slotWon', 'Отримано на барабанах, 🎟', [200, 1000, 5000, 20000, 100000, 500000]);
+// 🃏 Картковий турнір
+A('🃏 Картковий турнір', 'pokerPlayed', 'Роздач у турнірі', [5, 25, 100, 400, 1500, 5000]);
+A('🃏 Картковий турнір', 'pokerWins', 'Перемог у турнірі', [3, 15, 60, 200, 800, 3000]);
+A('🃏 Картковий турнір', 'pokerWon', 'Отримано в турнірі, 🎟', [10000, 100000, 1000000, 10000000, 100000000, 1000000000]);
+A('🃏 Картковий турнір', 'pokerSpent', 'Жетонів витрачено в турнірі', 'b');
+A('🃏 Картковий турнір', 'pkPair', 'Зібрано: Пара', 'n');
+A('🃏 Картковий турнір', 'pkTwo', 'Зібрано: Дві пари', 'n');
+A('🃏 Картковий турнір', 'pkTrips', 'Зібрано: Трійка', 'n');
+A('🃏 Картковий турнір', 'pkStr', 'Зібрано: Стріт', 's');
+A('🃏 Картковий турнір', 'pkFlush', 'Зібрано: Флеш', 's');
+A('🃏 Картковий турнір', 'pkFull', 'Зібрано: Фул-хаус', 's');
+A('🃏 Картковий турнір', 'pkQuads', 'Зібрано: Каре', 't');
+A('🃏 Картковий турнір', 'pkSF', 'Зібрано: Стріт-флеш', 't');
 // 🎟 Клуб
-A('🎟 Клуб', 'chipsEarned', 'Отримано фішок, 🎟', 'b');
-A('🎟 Клуб', 'chipsSpent', 'Витрачено фішок, 🎟', 'b');
-A('🎟 Клуб', 'chipsClaimN', 'Днів із щоденними фішками', 'd');
+A('🎟 Клуб', 'chipsEarned', 'Отримано жетонів, 🎟', 'b');
+A('🎟 Клуб', 'chipsSpent', 'Витрачено жетонів, 🎟', 'b');
+A('🎟 Клуб', 'chipsClaimN', 'Днів із щоденними жетонами', 'd');
 A('🎟 Клуб', 'clubDays', 'Днів із повним клубним днем (45 очок)', 'd');
 A('🎟 Клуб', 'clubShopN', 'Покупок у крамниці клубу', 'n');
 A('🎟 Клуб', 'cosN', 'Куплено косметики клубу', [1, 2, 3, 5, 7, 9]);
@@ -243,7 +243,7 @@ A('⭐ Прогрес', 'outfits', 'Змін одягу', 'n');
 // 🏆 Сезон
 A('🏆 Сезон', 'spClaims', 'Нагород сезонного пропуску', [1, 5, 10, 25, 50, 100, 250, 500]);
 A('🏆 Сезон', 'spMax', 'Найвищий рівень сезонного пропуску', [1, 5, 10, 15, 20, 25, 30]);
-const ACH_CAT_NOCR = ['🎰', '🃏', '🎟'];
+const ACH_CAT_NOCR = ['🎡', '🃏', '🎟'];
 const ACH_MAXPTS = () => ACH.reduce((s, a) => s + a[3].reduce((t, g, i) => t + ACH_PTS[i], 0), 0);
 const ACH_TIERS = () => ACH.reduce((s, a) => s + a[3].length, 0);
 const ACH_RANKS = [[0, 'Новачок'], [0.02, 'Вуличний'], [0.07, 'Бандит'], [0.18, 'Авторитет'], [0.35, 'Бос'], [0.6, 'Легенда'], [0.9, 'Король міста'], [1, '👑 FULL']];
@@ -346,7 +346,7 @@ const DEF = () => ({
 let S;
 function load() {
   try { const raw = JSON.parse(localStorage.getItem('pm_state') || '{}'); S = Object.assign(DEF(), raw); if (raw.created && !raw.ver) S.legacy = true; S.ver = 2; } catch (e) { S = DEF(); }
-  if (S.pokerTickets) { S.chips = (S.chips || 0) + S.pokerTickets * 50; } delete S.pokerTickets; // квитки покеру злито з фішками клубу
+  if (S.pokerTickets) { S.chips = (S.chips || 0) + S.pokerTickets * 50; } delete S.pokerTickets; // квитки покеру злито з жетонами клубу
   if (!S.mail) S.mail = defMail();
   if (!S.st) S.st = {};
   if (!S.ach.seen) achScan(true);
@@ -422,7 +422,7 @@ function pay(cur, n) {
   if (S[cur] < n) { toast('Не вистачає: ' + curName(cur)); return false; }
   S[cur] -= n; if (cur === 'money') bump('spent', n); else if (cur === 'crystals') bump('crysSpent', n); else if (cur === 'gold') bump('goldSpent', n); else if (cur === 'chips') bump('chipsSpent', n); else if (cur === 'energy') bump('energySpent', n); return true;
 }
-function curName(c) { return { money: 'гроші 💵', crystals: 'кристали 💎', gold: 'золоті прикраси 🟡', energy: 'енергія ⚡', chips: 'фішки 🎟' }[c] || c; }
+function curName(c) { return { money: 'гроші 💵', crystals: 'кристали 💎', gold: 'золоті прикраси 🟡', energy: 'енергія ⚡', chips: 'жетони 🎟' }[c] || c; }
 function give(r, why) {
   const parts = [];
   for (const k in r) {
@@ -482,8 +482,8 @@ const hasCar = () => !!(S.legacy || (S.beat && S.beat.molot));
 // ключ: [рівень, чи потрібна машина, назва]
 const UNL = {
   chat: [3, 0, '💬 Чат'], secondhand: [3, 0, '🧥 Секонд-хенд'], jobs: [3, 0, '💼 Робота'], events: [5, 0, '🏆 Події'],
-  slots: [5, 0, '🎰 Слоти'], club: [5, 0, '🎰 Ігровий клуб'], season: [7, 0, '🏆 Сезон'], market: [8, 0, '📈 Ринок і Аукціон'],
-  group: [10, 0, '👥 Групування'], bv: [10, 0, '🧵 Баба Валя'], district: [12, 0, '🏙 Райони'], poker: [15, 0, '🃏 Покер'],
+  slots: [5, 0, '🎡 Барабани удачі'], club: [5, 0, '🎡 Клуб розваг'], season: [7, 0, '🏆 Сезон'], market: [8, 0, '📈 Ринок і Аукціон'],
+  group: [10, 0, '👥 Групування'], bv: [10, 0, '🧵 Баба Валя'], district: [12, 0, '🏙 Райони'], poker: [15, 0, '🃏 Картковий турнір'],
   flip: [20, 0, '🚗 Перекуп авто'], garage: [0, 1, '🔧 Транспорт'], races: [0, 1, '🏁 Гонки']
 };
 function lockOf(n) {
@@ -520,7 +520,7 @@ function render() {
 }
 const NAVS = ['profile', 'inventory', 'wardrobe', 'garage'];
 // --- ВАЛЮТИ ЗВЕРХУ: 2 слоти (завжди 💵 і 💎 при вході), по натисканню можна показати іншу валюту
-const HUD_C = { money: ['💵', 'Гроші'], crystals: ['💎', 'Кристали'], gold: ['🟡', 'Золоті прикраси'], chips: ['🎟', 'Фішки клубу'] };
+const HUD_C = { money: ['💵', 'Гроші'], crystals: ['💎', 'Кристали'], gold: ['🟡', 'Золоті прикраси'], chips: ['🎟', 'Жетони клубу'] };
 let HUD = ['money', 'crystals'];
 const hudChip = i => `<span class="cur" onclick="hudPick(${i})">${HUD_C[HUD[i]][0]} ${fmt(S[HUD[i]] || 0)} ▾</span>`;
 function hudPick(i) {
@@ -648,7 +648,7 @@ function createHero(g) {
 
 // --- ШВИДКИЙ ДОСТУП: гравець сам обирає кнопки в правому стовпчику головного екрана
 const QA = {
-  shop: ['🛒 Магазин', 'shop'], auction: ['🏪 Аукціон', 'market', { tab: 'buy' }], market: ['📈 Ринок', 'market'], club: ['🎰 Ігровий клуб', 'club'],
+  shop: ['🛒 Магазин', 'shop'], auction: ['🏪 Аукціон', 'market', { tab: 'buy' }], market: ['📈 Ринок', 'market'], club: ['🎡 Клуб розваг', 'club'],
   group: ['👥 Групування', 'group'], races: ['🏁 Гонки', 'races'], grace: ['🏁 Груп. заїзд', 'races', { rt: 'group' }], jobs: ['💼 Робота', 'jobs'], sh: ['🧥 Секонд-хенд', 'secondhand'],
   bv: ['🧵 Баба Валя', 'bv'], season: ['🏆 Сезон', 'season'], boss: ['💀 Наліт', 'raidBoss'], dist: ['🏙 Райони', 'district'], inv: ['🎒 Інвентар', 'inventory'], ward: ['👕 Гардероб', 'wardrobe'], garage: ['🔧 Гараж', 'garage'],
   prof: ['👤 Профіль', 'profile']
@@ -702,7 +702,7 @@ SCREENS.home = () => {
 };
 
 
-const QA_D = { boss: 'Боси, рейди, рейтинг шкоди', dist: 'Атака на райони, 12 етапів', club: 'Слоти, покер, клубний день', slots: 'Барабани удачі за фішки', poker: 'Столи 10 / 50 / 500 / 1000 фішок', races: 'Траси, старт, нагороди', grace: 'Командні заїзди 5×5', jobs: 'Секонд-хенд, перекуп авто', sh: 'Завезення, полиці, зміни', market: 'Купити / продати, графіки цін', auction: 'Лоти гравців і біржа', shop: 'Кристали, золото, підписки', bv: 'Прошивка речей: ранг D…A++', season: 'Нагороди за активність, 30 рівнів', group: 'Твоя група, внески, гілки', inv: 'Твої речі', ward: 'Одяг і набори', garage: 'Авто, тюнінг, ремонт', weap: 'Зброя для боса', prof: 'Герой, досягнення' };
+const QA_D = { boss: 'Боси, рейди, рейтинг шкоди', dist: 'Атака на райони, 12 етапів', club: 'Барабани удачі, картковий турнір, клубний день', slots: 'Барабани удачі за жетони', poker: 'Столи 10 / 50 / 500 / 1000 жетонів', races: 'Траси, старт, нагороди', grace: 'Командні заїзди 5×5', jobs: 'Секонд-хенд, перекуп авто', sh: 'Завезення, полиці, зміни', market: 'Купити / продати, графіки цін', auction: 'Лоти гравців і біржа', shop: 'Кристали, золото, підписки', bv: 'Прошивка речей: ранг D…A++', season: 'Нагороди за активність, 30 рівнів', group: 'Твоя група, внески, гілки', inv: 'Твої речі', ward: 'Одяг і набори', garage: 'Авто, тюнінг, ремонт', weap: 'Зброя для боса', prof: 'Герой, досягнення' };
 const PLAY_EXTRA = [['✉ Пошта', 'mail', 'Листи й подарунки'], ['☑ Завдання', 'tasks', 'Щоденні, тижневі, досягнення'], ['🏆 Події', 'events', 'Події та турніри'], ['🎁 Нагороди', 'rewards', 'Щоденний вхід, подарунки'], ['⚙ Налаштування', 'settings', 'Звук, мова, розробник']];
 SCREENS.play = () => {
   const row = (label, scr, d, onclick, dotH) => { const lk = lockOf(scr); return `<div class="row" style="position:relative" onclick="${onclick}">${dotH || ''}<div class="f"><b>${lk ? '🔒 ' : ''}${label}</b><div class="small">${lk || d}</div></div><button class="${lk ? 'dis' : 'y'}">${lk ? '🔒' : '▶'}</button></div>`; };
@@ -761,7 +761,7 @@ function achList() {
     { k: 'bossKills', t: 'Переможи 3 босів', v: a.bossKills, goal: 3, r: { gold: 30 }, go: 'raidBoss' },
     { k: 'bags', t: 'Відкрий 20 завезень', v: a.bags, goal: 20, r: { crystals: 300 }, go: 'secondhand' },
     { k: 'raceWins', t: 'Виграй 10 гонок', v: a.raceWins, goal: 10, r: { gold: 25 }, go: 'races' },
-    { k: 'pokerWins', t: 'Виграй 5 роздач у покер', v: a.pokerWins, goal: 5, r: { crystals: 200 }, go: 'poker' },
+    { k: 'pokerWins', t: 'Виграй 5 роздач у турнірі', v: a.pokerWins, goal: 5, r: { crystals: 200 }, go: 'poker' },
   ];
 }
 SCREENS.tasks = p => {
@@ -778,7 +778,7 @@ SCREENS.tasks = p => {
     return `<div class="row" style="position:relative">${ok && !cl ? DOT : ''}<div class="f"><b>${x.t}</b><div class="prog"><i style="width:${Math.min(1, x.v / x.goal) * 100}%"></i></div><span class="small">${Math.min(x.v, x.goal)} / ${x.goal} · нагорода: ${Object.entries(x.r).map(([k, v]) => fmt(v) + ' ' + curName(k)).join(', ')}</span></div>
     ${cl ? '<button class="g" disabled>✓ Виконано</button>' : ok ? `<button class="y" onclick="claimTask('${t}','${x.k}')">Забрати</button>` : `<button onclick="go('${x.go}')">Перейти ›</button>`}</div>`;
   }).join('')}
-  ${t === 'day' ? `<div class="box" style="position:relative">${doneN >= 6 && !S.daily.chest ? DOT : ''}<b>Нагорода за всі щоденні завдання</b><div>30 000 💵 · 20 💎 · +10 до бонус-прогресу слотів</div>
+  ${t === 'day' ? `<div class="box" style="position:relative">${doneN >= 6 && !S.daily.chest ? DOT : ''}<b>Нагорода за всі щоденні завдання</b><div>30 000 💵 · 20 💎 · +10 до бонус-прогресу барабанів</div>
     <button class="${doneN >= 6 && !S.daily.chest ? 'y' : 'dis'}" onclick="claimDailyChest()">${S.daily.chest ? 'Отримано' : 'Отримати'}</button></div>` : ''}`;
 };
 function claimTask(t, k) {
@@ -795,7 +795,7 @@ function claimDailyChest() {
 // --- ПОДІЇ
 SCREENS.events = () => `<h2>🏆 Події</h2>
   ${[['Вуличні перегони', 'Гонки на Прибережній трасі. Подвійні нагороди.', 'races', '2 дн 4 год'], ['Рейд на Даунтаун', 'Захопи район за 12 етапів.', 'district', '5 дн'],
-    ['Турнір покеру', 'Шлях гравця: дійди до 10 рівня.', 'poker', '1 дн 12 год'], ['Бос тижня: Дон Карло', 'Подвійна шкода по босу.', 'raidBoss', '3 дн']]
+    ['Картковий турнір', 'Шлях гравця: дійди до 10 рівня.', 'poker', '1 дн 12 год'], ['Бос тижня: Дон Карло', 'Подвійна шкода по босу.', 'raidBoss', '3 дн']]
     .map(([t, d, g, tm]) => `<div class="row"><div class="f"><b>${t}</b><div class="small">${d}</div><div class="small">⏱ ${tm}</div></div><button class="y" onclick="go('${g}')">Взяти участь</button></div>`).join('')}`;
 
 // --- ГРУПУВАННЯ
@@ -1269,11 +1269,11 @@ function attackStage(id) {
 }
 
 
-// --- ІГРОВИЙ КЛУБ
+// --- КЛУБ РОЗВАГ
 function ctabs(a) {
-  const t = [['club', '🏛 Клуб'], ['slots', '🎰 Слоти'], ['poker', '🃏 Покер']];
+  const t = [['club', '🏛 Клуб'], ['slots', '🎡 Барабани удачі'], ['poker', '🃏 Картковий турнір']];
   return `<div class="tabs">${t.map(([k, n]) => `<button style="position:relative" class="${a === k ? 'y' : ''}" onclick="stack[stack.length-1]={name:'${k}',p:{}};render()">${n}</button>`).join('')}</div>
-  <div class="box bar sp small" style="margin:4px 0"><span>🎟 Фішки: <b>${fmt(S.chips || 0)}</b></span><span onclick="go('club',{tab:'day'})" style="cursor:pointer">⭐ ${S.daily.cp || 0}/${CP_MAX} → нагороди ›</span><span>${S.daily.chipsClaim ? 'Щоденні фішки отримано' : '<a onclick="go(\'club\',{tab:\'bon\'})" style="color:#c70;font-weight:bold">Забери щоденні ›</a>'}</span></div>`;
+  <div class="box bar sp small" style="margin:4px 0"><span>🎟 Жетони: <b>${fmt(S.chips || 0)}</b></span><span onclick="go('club',{tab:'day'})" style="cursor:pointer">⭐ ${S.daily.cp || 0}/${CP_MAX} → нагороди ›</span><span>${S.daily.chipsClaim ? 'Щоденні жетони отримано' : '<a onclick="go(\'club\',{tab:\'bon\'})" style="color:#c70;font-weight:bold">Забери щоденні ›</a>'}</span></div><div class="small" style="text-align:center;color:#777;margin:-2px 0 4px">🔞 18+ · Клуб розваг — це гра. Жетони не виводяться, реальних виграшів немає.</div>`;
 }
 // --- КЛУБНИЙ ДЕНЬ (тест): очки за кількість ігор, не за виграш; цінності клубу: лише косметика
 const CP_MAX = 45;
@@ -1281,7 +1281,7 @@ const CP_TRACK = [[10, { money: 10000 }, '10 000 💵'], [25, { energy: 10 }, '1
 function clubPt() { const n = S.daily.cp || 0; if (n < CP_MAX) { S.daily.cp = n + 1; if (S.daily.cp === CP_MAX) { bump('clubDays'); toast('⭐ Клубний день: 45 очок, максимум на сьогодні'); } } }
 function cpClaim(i) { const [need, r] = CP_TRACK[i]; if ((S.daily.cp || 0) < need) return; const c = S.daily.cpc || (S.daily.cpc = {}); if (c[i]) return; c[i] = true; give(r, 'Клубний день'); render(); }
 const CLUB_COS = [
-  ['t1', '🏷 Титул «Новачок клубу»', 500], ['t2', '🏷 Титул «Азартний»', 1500], ['t3', '🏷 Титул «Везунчик»', 3000], ['t4', '🏷 Титул «Шулер»', 6000], ['t5', '🏷 Титул «Бос столу»', 12000], ['t6', '🏷 Титул «Король барабанів»', 20000],
+  ['t1', '🏷 Титул «Новачок клубу»', 500], ['t2', '🏷 Титул «Душа вечірки»', 1500], ['t3', '🏷 Титул «Везунчик»', 3000], ['t4', '🏷 Титул «Шулер»', 6000], ['t5', '🏷 Титул «Бос столу»', 12000], ['t6', '🏷 Титул «Король барабанів»', 20000],
   ['f1', '🖼 Рамка профілю: золото', 800, '#d9a400'], ['f2', '🖼 Рамка профілю: неон', 2500, '#d0f'], ['f3', '🖼 Рамка профілю: вогонь', 8000, '#e33']
 ];
 const clubOwn = () => S.cos || (S.cos = { own: [], title: '', frame: '' });
@@ -1301,16 +1301,16 @@ const CLUB_SHOP = [
 ];
 function clubBuy(k) { const c = CLUB_SHOP.find(x => x[0] === k), d = S.daily.cs || (S.daily.cs = {}); if (d[k]) return toast('Сьогодні вже куплено'); if (!pay('chips', c[2])) return; d[k] = true; bump('clubShopN'); c[3](); toast('Куплено: ' + c[1]); render(); }
 const CHIPS_SPINS = 20, CHIPS_POKER = 25, CHIPS_DAILY = CHIPS_SPINS * 10 + CHIPS_POKER * 10; // 450
-function claimChips() { if (S.daily.chipsClaim) return; S.daily.chipsClaim = true; bump('chipsClaimN'); give({ chips: CHIPS_DAILY }, 'Щоденні фішки'); render(); }
+function claimChips() { if (S.daily.chipsClaim) return; S.daily.chipsClaim = true; bump('chipsClaimN'); give({ chips: CHIPS_DAILY }, 'Щоденні жетони'); render(); }
 SCREENS.club = p => {
   const t = p.tab || 'bon';
-  let h = `<h2>🎰 ІГРОВИЙ КЛУБ</h2>${ctabs('club')}
-  <div class="grid g2"><button class="y" style="padding:22px 4px" onclick="go('slots')">🎰 БАРАБАНИ УДАЧІ ›</button><button class="y" style="padding:22px 4px" onclick="go('poker')">🃏 КАРТКОВА ГРА ›</button></div>
-  ${tabs([['bon', 'Фішки'], ['day', '⭐ День'], ['sh', '🛒 Крамниця'], ['cos', '🎁 Косметика'], ['rank', 'Рейтинг']], t)}`;
-  if (t === 'bon') h += `<div class="box"><b>Щоденні фішки</b><div class="small">Вистачає на ${CHIPS_SPINS} спінів у слотах і ${CHIPS_POKER} партій у покері. Фішки не купуються й не обмінюються на інші валюти.</div><button class="${S.daily.chipsClaim ? 'dis' : 'y'}" style="width:100%;margin-top:4px" onclick="claimChips()">${S.daily.chipsClaim ? 'Отримано сьогодні' : 'Забрати ' + CHIPS_DAILY + ' 🎟'}</button>${subTier() ? `<div class="small" style="margin-top:4px">Підписка додає ще +${TIERS[subTier()].chips} 🎟 до щоденної виплати.</div>` : ''}</div><div class="box small">Фішки можна виграти й програти, ними не можна купити нічого за реальні гроші. Приз клубу: фішки, патрони, гранати.</div>`;
+  let h = `<h2>🎡 КЛУБ РОЗВАГ</h2>${ctabs('club')}
+  <div class="grid g2"><button class="y" style="padding:22px 4px" onclick="go('slots')">🎡 БАРАБАНИ УДАЧІ ›</button><button class="y" style="padding:22px 4px" onclick="go('poker')">🃏 КАРТКОВИЙ ТУРНІР ›</button></div>
+  ${tabs([['bon', 'Жетони'], ['day', '⭐ День'], ['sh', '🛒 Крамниця'], ['cos', '🎁 Косметика'], ['rank', 'Рейтинг']], t)}`;
+  if (t === 'bon') h += `<div class="box"><b>Щоденні жетони</b><div class="small">Вистачає на ${CHIPS_SPINS} обертів барабанів і ${CHIPS_POKER} партій у турнірі. Жетони не купуються й не обмінюються на інші валюти.</div><button class="${S.daily.chipsClaim ? 'dis' : 'y'}" style="width:100%;margin-top:4px" onclick="claimChips()">${S.daily.chipsClaim ? 'Отримано сьогодні' : 'Забрати ' + CHIPS_DAILY + ' 🎟'}</button>${subTier() ? `<div class="small" style="margin-top:4px">Підписка додає ще +${TIERS[subTier()].chips} 🎟 до щоденної виплати.</div>` : ''}</div><div class="box small">Жетони можна отримати й витратити лише в Клубі розваг. Реальних виграшів немає. Приз клубу: жетони, патрони, гранати.</div>`;
   if (t === 'day') {
     const n = S.daily.cp || 0, c = S.daily.cpc || {};
-    h += `<div class="box"><b>⭐ Клубний день</b><div class="small">Очки дають за кожен спін або партію, незалежно від результату. Максимум ${CP_MAX} на добу, скидаються щодня.</div><div class="prog"><i style="width:${n / CP_MAX * 100}%"></i></div><div class="small">${n} / ${CP_MAX} очок</div></div>` +
+    h += `<div class="box"><b>⭐ Клубний день</b><div class="small">Очки дають за кожен оберт або партію, незалежно від результату. Максимум ${CP_MAX} на добу, скидаються щодня.</div><div class="prog"><i style="width:${n / CP_MAX * 100}%"></i></div><div class="small">${n} / ${CP_MAX} очок</div></div>` +
       CP_TRACK.map(([need, r, txt], i) => `<div class="row"><div class="f"><b>${need} очок</b><div class="small">${txt}</div></div><button class="${c[i] ? 'dis' : n >= need ? 'y' : 'dis'}" onclick="cpClaim(${i})">${c[i] ? 'Отримано' : n >= need ? 'Забрати' : '🔒'}</button></div>`).join('');
   }
   if (t === 'sh') {
@@ -1323,14 +1323,14 @@ SCREENS.club = p => {
     h += `<div class="box"><b>🎁 Магазин клубу</b><div class="small">Косметика лише за 🎟. Не продається й не обмінюється. У тебе <b>${fmt(S.chips || 0)}</b> 🎟.</div></div>` +
       CLUB_COS.map(([k, n, p]) => { const has = o.own.includes(k), on = o.title === k || o.frame === k; return `<div class="row"><div class="f">${n}</div>${has ? `<button class="${on ? 'g' : 'y'}" onclick="cosUse('${k}')">${on ? '✓ Одягнено' : 'Одягти'}</button>` : `<button class="y" onclick="cosBuy('${k}')">${fmt(p)} 🎟</button>`}</div>`; }).join('');
   }
-  if (t === 'rank') h += rankTable(['Тоні', 'Ла Ріка', 'Козак', S.name, 'Бандерас'], 'фішок');
+  if (t === 'rank') h += rankTable(['Тоні', 'Ла Ріка', 'Козак', S.name, 'Бандерас'], 'жетонів');
   return h;
 };
 
 // --- СЛОТИ
 // Математика: результат спіну визначається таблицею ваг (RTP ≈ 97%), барабани малюються під результат.
 const SYM = ['7️⃣', '💲', '🔫', '💵', '🎲', '👑', '💎', '🍀', '🂡', '🔒', '🥇', '🚬'];
-const SLOT_GOAL = 50, SCAT = '🪙'; // скриня-скатер: 3+ на барабанах = бонусна гра (вага символу підібрана під ~1 раз на 50 спінів)
+const SLOT_GOAL = 50, SCAT = '🪙'; // скриня-скатер: 3+ на барабанах = бонусна гра (вага символу підібрана під ~1 раз на 50 обертів)
 const SLOT_BASE = [[1, 220000], [2, 104000], [3, 50000], [5, 24000], [10, 8000], [20, 2500], [50, 600], [100, 100], [200, 25], [500, 5]];
 const SLOT_BONUS = [[2, 560000], [3, 230000], [5, 120000], [10, 55000], [25, 22000], [50, 8000], [100, 3500], [250, 1000], [500, 400], [1000, 100]];
 const WINMAP = { 1: ['🍀', 3], 2: ['🚬', 3], 3: ['🎲', 3], 5: ['🔫', 3], 10: ['💵', 4], 20: ['💲', 4], 50: ['👑', 5], 100: ['💎', 5], 200: ['🥇', 5], 500: ['7️⃣', 5] };
@@ -1362,15 +1362,15 @@ let reels = null, winCells = [], lastWin = null, slotBonus = null;
 function endIntro() { if (slotBonus && slotBonus.intro) { slotBonus.intro = false; if (cur().name === 'slots') render(); } }
 function slotBonusUI() {
   const b = slotBonus;
-  if (b.intro) return `<div onclick="endIntro()" style="text-align:center;padding:90px 10px"><div style="font-size:70px">🎁</div><div class="winban" style="font-size:26px;padding:20px">БОНУСНА ГРА!</div><div class="small">Приз: від x2 до x1000 від вашої ставки!</div><div class="small">(натисни, щоб пропустити)</div></div>`;
+  if (b.intro) return `<div onclick="endIntro()" style="text-align:center;padding:90px 10px"><div style="font-size:70px">🎁</div><div class="winban" style="font-size:26px;padding:20px">БОНУСНА ГРА!</div><div class="small">Приз: від x2 до x1000 від вашого заряду!</div><div class="small">(натисни, щоб пропустити)</div></div>`;
   const cells = Array.from({ length: 9 }, (_, i) => {
     if (b.picked === i) return `<div class="cell winner" style="height:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:18px"><b>x${b.mult}</b><span class="small">${fmt(b.pay)} 🎟</span></div>`;
     if (b.picked != null) return `<div class="cell" style="height:70px;display:flex;align-items:center;justify-content:center;opacity:.5">x${b.others[i]}</div>`;
     return `<button style="height:70px;font-size:26px" onclick="openSlotChest(${i})">🧰</button>`;
   }).join('');
-  return `<h2>🎁 БОНУСНА ГРА!</h2><div class="winban ${b.mult >= 100 ? 'me' : ''}">${b.picked == null ? 'ОБЕРИ СКРИНЮ ТА ЗАБЕРИ ПРИЗ!' : (b.mult >= 100 ? '🔥 ДЖЕКПОТ x' + b.mult + '! 🔥' : 'ПРИЗ x' + b.mult + '!')}<div class="small">Приз = множник × ставка (${fmt(b.avg)} 🎟)</div></div>
+  return `<h2>🎁 БОНУСНА ГРА!</h2><div class="winban ${b.mult >= 100 ? 'me' : ''}">${b.picked == null ? 'ОБЕРИ СКРИНЮ ТА ЗАБЕРИ ПРИЗ!' : (b.mult >= 100 ? '🔥 ДЖЕКПОТ x' + b.mult + '! 🔥' : 'ПРИЗ x' + b.mult + '!')}<div class="small">Приз = множник × заряд (${fmt(b.avg)} 🎟)</div></div>
   <div class="grid g3" style="margin:8px 0">${cells}</div>
-  <div class="box small">${b.picked == null ? 'Можливі множники: x2 … x1000' : '✔ Бонус забрано. Повертаємось до слотів…'}</div>`;
+  <div class="box small">${b.picked == null ? 'Можливі множники: x2 … x1000' : '✔ Бонус забрано. Повертаємось до барабанів…'}</div>`;
 }
 function openSlotChest(i) {
   const b = slotBonus; if (!b || b.picked != null) return;
@@ -1383,20 +1383,20 @@ function openSlotChest(i) {
 SCREENS.slots = () => {
   if (slotBonus) return slotBonusUI();
   if (!reels) reels = buildReels(0).g;
-  return `<div class="bar sp"><h2 style="margin:4px 0">🎰 СЛОТИ</h2><button class="y" onclick="slotFaq()">❓ FAQ</button></div>${ctabs('slots')}<div class="reel">${reels.map((s, i) => `<div class="${winCells.includes(i) ? 'win' : ''}${s === SCAT ? ' scat' : ''}">${s}</div>`).join('')}</div><div class="small" style="text-align:center;margin:2px 0">7 ліній · ставка на лінію ${(S.slots.bet / 7).toFixed(1)} 🎟 (загальна ${S.slots.bet}) · RTP 97% · ${SCAT} ×3 = бонус</div>
-  <div class="${lastWin ? 'winban ' + (lastWin.mult >= 20 ? 'me' : '') : 'small'}" style="${lastWin ? '' : 'text-align:center;padding:10px'}">${lastWin ? (lastWin.mult >= 20 ? '🔥 ВЕЛИКИЙ ВИГРАШ ' : 'ВИГРАШ ') + 'x' + lastWin.mult + ' (лінія ' + lastWin.line + '): +' + fmt(lastWin.pay) + ' 🎟' : 'Крутни барабани'}</div>
+  return `<div class="bar sp"><h2 style="margin:4px 0">🎡 БАРАБАНИ УДАЧІ</h2><button class="y" onclick="slotFaq()">❓ FAQ</button></div>${ctabs('slots')}<div class="reel">${reels.map((s, i) => `<div class="${winCells.includes(i) ? 'win' : ''}${s === SCAT ? ' scat' : ''}">${s}</div>`).join('')}</div><div class="small" style="text-align:center;margin:2px 0">7 ліній · заряд на лінію ${(S.slots.bet / 7).toFixed(1)} 🎟 (загальний ${S.slots.bet}) · Віддача 97% · ${SCAT} ×3 = бонус</div>
+  <div class="${lastWin ? 'winban ' + (lastWin.mult >= 20 ? 'me' : '') : 'small'}" style="${lastWin ? '' : 'text-align:center;padding:10px'}">${lastWin ? (lastWin.mult >= 20 ? '🔥 ВЕЛИКА НАГОРОДА ' : 'НАГОРОДА ') + 'x' + lastWin.mult + ' (лінія ' + lastWin.line + '): +' + fmt(lastWin.pay) + ' 🎟' : 'Крутни барабани'}</div>
   <div class="bar" style="justify-content:center;margin:8px 0"><button onclick="S.slots.bet=Math.max(10,S.slots.bet-10);render()">−</button><b>${S.slots.bet} 🎟</b><button onclick="S.slots.bet=Math.min(200,S.slots.bet+10);render()">+</button>
   <button class="y" style="padding:10px 24px;font-size:18px" onclick="spin()">ГРАТИ</button>
   <label><input type="checkbox" id="auto" ${autoOn ? 'checked' : ''} onchange="autoSpin(this.checked)"> АВТО</label></div>
-  <div class="box small">🎁 Бонусна гра випадає випадково під час обертів: приз від x2 до x1000 від ставки.</div>
-  <div class="box small">🔞 18+. Фішки не купуються й не обмінюються на інші валюти. Денний ліміт ставок ${fmt(SLOT_DAY_CAP)} 🎟 (сьогодні ${fmt(S.daily.sb || 0)}).</div>
-  <div class="box"><div class="bar sp"><b>Історія спінів</b><span class="small">${slotStats()}</span></div>${slotHistory()}</div>`;
+  <div class="box small">🎁 Бонусна гра випадає випадково під час обертів: приз від x2 до x1000 від заряду.</div>
+  <div class="box small">🔞 18+. Клуб розваг — це гра. Жетони не продаються окремо, не обмінюються й не виводяться. Реальних виграшів немає. Денний ліміт заряду ${fmt(SLOT_DAY_CAP)} 🎟 (сьогодні ${fmt(S.daily.sb || 0)}).</div>
+  <div class="box"><div class="bar sp"><b>Історія обертів</b><span class="small">${slotStats()}</span></div>${slotHistory()}</div>`;
 };
 function slotFaq() {
-  modal(`<h3>FAQ: Слоти</h3><b>Таблиця виплат</b> (множник на ставку)
+  modal(`<h3>FAQ: Барабани удачі</h3><b>Таблиця виплат</b> (множник на заряд)
   <table style="width:100%;border-collapse:collapse;font-size:12px;margin:4px 0"><tr style="background:#ffe9a8"><td style="white-space:nowrap">${`<span class="scatT">${SCAT}</span>`.repeat(3)}</td><td colspan="2"><b>Бонусна гра</b><div class="small">3 будь-де на екрані</div></td></tr>${SLOT_BASE.map(([m, w]) => `<tr style="border-bottom:1px solid #ddd"><td>${WINMAP[m][0].repeat(WINMAP[m][1])}</td><td><b>x${m}</b></td><td class="small">шанс 1 до ${fmt(Math.round(1e6 / w))}</td></tr>`).join('')}</table>
-  <p class="small">7 ліній виплат: 3 горизонтальні, 2 діагоналі (V і Λ) та 2 зигзаги. Виграє збіг символів зліва направо по лінії. Загальна ставка ділиться на 7.</p>
-  <p class="small">Повернення гравцю (RTP): <b>97%</b>.</p><div class="small" style="color:#888">Збірка ${BUILD}</div>`);
+  <p class="small">7 ліній виплат: 3 горизонтальні, 2 діагоналі (V і Λ) та 2 зигзаги. Нагороду дає збіг символів зліва направо по лінії. Загальний заряд ділиться на 7.</p>
+  <p class="small">Віддача барабанів: <b>97%</b>.</p><div class="small" style="color:#888">Збірка ${BUILD}</div>`);
 }
 function slotStats() {
   const h = S.slots.hist || []; if (!h.length) return '';
@@ -1407,7 +1407,7 @@ function slotHistory() {
   const h = S.slots.hist || []; if (!h.length) return '<div class="small">Поки порожньо. Крутни барабани.</div>';
   return h.map(x => { const net = x.win - x.bet, w = x.win > 0;
     return `<div class="bar sp" style="font-size:12px;padding:3px 4px;margin:2px 0;border-radius:3px;background:${x.bonus ? '#ffe9a8' : w ? '#d8f5d8' : '#f6dede'}">
-      <span>${x.bonus ? '🎁 БОНУС' : w ? '✔ x' + x.mult : '✖ нічого'}</span><span class="small">ставка ${fmt(x.bet)}</span><b style="color:${net >= 0 ? '#090' : '#c00'}">${net >= 0 ? '+' : ''}${fmt(net)} 🎟</b></div>`; }).join('');
+      <span>${x.bonus ? '🎁 БОНУС' : w ? '✔ x' + x.mult : '✖ нічого'}</span><span class="small">заряд ${fmt(x.bet)}</span><b style="color:${net >= 0 ? '#090' : '#c00'}">${net >= 0 ? '+' : ''}${fmt(net)} 🎟</b></div>`; }).join('');
 }
 function pushHist(e) { if (!S.slots.hist) S.slots.hist = []; S.slots.hist.unshift(e); S.slots.hist.length = Math.min(S.slots.hist.length, 20); }
 const SLOT_DAY_CAP = 2000;
@@ -1436,8 +1436,8 @@ function spin() {
   if (slotBonus || spinning || bonusPend) return;
   const bet = S.slots.bet;
   if (!S.daily.sb) S.daily.sb = 0;
-  if (S.daily.sb + bet > SLOT_DAY_CAP) { autoSpin(false); return toast('Денний ліміт ставок у слотах ' + fmt(SLOT_DAY_CAP) + ' 🎟 вичерпано'); }
-  if (!pay('chips', bet)) { autoSpin(false); return toast('Фішки закінчились. Нові: щоденні фішки в клубі'); }
+  if (S.daily.sb + bet > SLOT_DAY_CAP) { autoSpin(false); return toast('Денний ліміт заряду барабанів ' + fmt(SLOT_DAY_CAP) + ' 🎟 вичерпано'); }
+  if (!pay('chips', bet)) { autoSpin(false); return toast('Жетони закінчились. Нові: щоденні жетони в клубі'); }
   S.daily.sb += bet;
   const mult = rollTable(SLOT_BASE), bonusHit = Math.random() < 1 / SLOT_GOAL, nsc = bonusHit ? (() => { const x = Math.random(); return x < 0.85 ? 3 : x < 0.97 ? 4 : 5; })() : (Math.random() < 0.12 ? rnd(1, 2) : 0), R = buildReels(mult, nsc);
   lastWin = null; winCells = [];
@@ -1445,7 +1445,7 @@ function spin() {
     reels = R.g; winCells = mult ? lineCells(R.line, R.k) : [];
     S.daily.casino++; bump('spins'); bump('slotBet', bet); if (mult >= 10) bump('slotX10'); if (mult >= 50) bump('slotX50'); clubPt();
     pushHist({ bet, win: bet * mult, mult });
-    if (!mult) bump('slotLost', bet); if (mult) { bump('slotWins'); bump('slotBig', mult, 'max'); bump('slotWon', bet * mult); lastWin = { mult, pay: bet * mult, line: R.line + 1 }; give({ chips: bet * mult }, 'Виграш x' + mult); }
+    if (!mult) bump('slotLost', bet); if (mult) { bump('slotWins'); bump('slotBig', mult, 'max'); bump('slotWon', bet * mult); lastWin = { mult, pay: bet * mult, line: R.line + 1 }; give({ chips: bet * mult }, 'Нагорода x' + mult); }
     if (bonusHit) {
       const m = rollTable(SLOT_BONUS) || 2; bump('slotBonus'); autoSpin(false); bonusPend = true;
       winCells = winCells.concat(R.sc); toast('🎁 Бонусна гра! ' + R.sc.length + '× ' + SCAT);
@@ -1480,12 +1480,12 @@ function best7(c) { let best = null; for (let a = 0; a < 7; a++) for (let b = a 
 function cardH(c, hide) { if (hide) return '<span class="card back"></span>'; return `<span class="card ${c.s === '♥' || c.s === '♦' ? 'red' : ''}">${RANKS[c.r]}${c.s}</span>`; }
 let PK = null;
 let STAKE = 10; const POKER_DAY = 25;
-const PK_TABLES = [[10, '🟢 Стіл новачків', 'Для щоденних завдань і досягнень'], [50, '🔵 Звичайний стіл', 'Трохи більші ставки'], [500, '🟣 Стіл гравців', 'Для тих, хто любить пограти по-справжньому'], [1000, '🔴 VIP-стіл', 'Найвищі ставки']];
+const PK_TABLES = [[10, '🟢 Стіл новачків', 'Для щоденних завдань і досягнень'], [50, '🔵 Звичайний стіл', 'Трохи більші внески'], [500, '🟣 Стіл гравців', 'Для тих, хто любить пограти по-справжньому'], [1000, '🔴 VIP-стіл', 'Найвищі внески']];
 let PKT = null, PKR = 0;
 function pkSit(i) { const t = PK_TABLES[i]; if (S.chips < t[0]) return toast('Для цього столу треба мінімум ' + fmt(t[0]) + ' 🎟'); PKT = i; STAKE = t[0]; render(); }
 function pokerNew() {
-  if ((S.daily.pk || 0) >= POKER_DAY) return toast('Ліміт покеру на сьогодні: ' + POKER_DAY + ' партій. Завтра нові');
-  if (S.chips < STAKE) return toast('Мінімум ' + STAKE + ' 🎟. Нові фішки: щоденні в клубі');
+  if ((S.daily.pk || 0) >= POKER_DAY) return toast('Ліміт турніру на сьогодні: ' + POKER_DAY + ' партій. Завтра нові');
+  if (S.chips < STAKE) return toast('Мінімум ' + STAKE + ' 🎟. Нові жетони: щоденні в клубі');
   const d = deck();
   PK = { d, me: [d.pop(), d.pop()], bots: ['Тоні', 'Сеньйор', 'Лисий', 'Ла Ріка'].map((n, i) => ({ n, c: [d.pop(), d.pop()], fold: false, stack: STAKE * 10, th: [0.42, 0.38, 0.3, 0.45][i], bl: [0.05, 0.03, 0.12, 0.04][i] })), board: [d.pop(), d.pop(), d.pop(), d.pop(), d.pop()], st: 0, bank: 0, over: false, msg: '', owe: 0, raises: 0 };
   S.daily.pk = (S.daily.pk || 0) + 1; S.chips -= STAKE; bump('pokerSpent', STAKE); bump('chipsSpent', STAKE); PK.bank = STAKE * 5; S.daily.casino++; bump('pokerPlayed'); clubPt(); render();
@@ -1493,7 +1493,7 @@ function pokerNew() {
 SCREENS.poker = () => {
   let h = `<h2>🃏 ПОКЕР</h2>${ctabs('poker')}<div class="box small">Шлях гравця: ${Array.from({ length: 10 }, (_, i) => i < S.pokerPath ? '■' : '□').join('')} ${S.pokerPath}/10 (кожна перемога +1, на 10 — скриня)</div>`;
   if (!PK && PKT == null) return h + `<div class="box small">Обери стіл. Мінімальний вхід дорівнює ставці за стіл. Партій на добу: ${S.daily.pk || 0}/${POKER_DAY}.</div>` + PK_TABLES.map((t, i) => `<div class="row"><div class="f"><b>${t[1]}</b><div class="small">Вхід від ${fmt(t[0])} 🎟 · ${t[2]}</div></div><button class="${S.chips >= t[0] ? 'y' : 'dis'}" onclick="pkSit(${i})">Сісти ›</button></div>`).join('');
-  if (!PK) return h + `<div class="box"><b>${PK_TABLES[PKT][1]}</b><br>Ставка за стіл: ${fmt(STAKE)} 🎟 (з кожного гравця). Боти: 4. Партій сьогодні: ${S.daily.pk || 0}/${POKER_DAY}.</div><button class="y" style="width:100%;padding:12px" onclick="pokerNew()">СІСТИ ЗА СТІЛ</button>`;
+  if (!PK) return h + `<div class="box"><b>${PK_TABLES[PKT][1]}</b><br>Вхід за стіл: ${fmt(STAKE)} 🎟 (з кожного гравця). Боти: 4. Партій сьогодні: ${S.daily.pk || 0}/${POKER_DAY}.</div><button class="y" style="width:100%;padding:12px" onclick="pokerNew()">СІСТИ ЗА СТІЛ</button>`;
   const show = [0, 3, 4, 5][PK.st] ?? 5;
   const WN = PK.over ? PK.win : null;
   const banner = WN ? `<div class="winban ${WN === 'Ви' ? 'me' : ''}">${WN === 'Ви' ? '🏆 ВИ ПЕРЕМОГЛИ! +' + fmt(PK.bank) + ' 🎟' : '🏆 ПЕРЕМОЖЕЦЬ: ' + WN.toUpperCase()}</div>` : '';
@@ -1504,7 +1504,7 @@ SCREENS.poker = () => {
   if (PK.over) return h + `<button class="y" style="width:100%" onclick="pokerNew()">Нова роздача</button> <button style="width:100%;margin-top:4px" onclick="PK=null;PKT=null;render()">Встати з-за столу</button>`;
   const mn = Math.max(5, Math.round(STAKE / 2)), mx = Math.max(mn, Math.min(S.chips - (PK.owe || 0), STAKE * 10)), stp = mn;
   PKR = Math.max(mn, Math.min(mx, PKR || mn)); PKR = Math.round(PKR / stp) * stp || mn;
-  return h + `<div class="box"><div class="bar sp"><b>Підняти ставку</b><b id="rv">+${fmt(PKR)} 🎟</b></div><input type="range" min="${mn}" max="${mx}" step="${stp}" value="${PKR}" style="width:100%" oninput="PKR=+this.value;$('rv').textContent='+'+fmt(PKR)+' 🎟'"><div class="bar sp small"><span>мін. ${fmt(mn)}</span><span>макс. ${fmt(mx)}</span></div></div>
+  return h + `<div class="box"><div class="bar sp"><b>Підняти внесок</b><b id="rv">+${fmt(PKR)} 🎟</b></div><input type="range" min="${mn}" max="${mx}" step="${stp}" value="${PKR}" style="width:100%" oninput="PKR=+this.value;$('rv').textContent='+'+fmt(PKR)+' 🎟'"><div class="bar sp small"><span>мін. ${fmt(mn)}</span><span>макс. ${fmt(mx)}</span></div></div>
   <div class="grid g4" style="margin-top:6px"><button onclick="pkAct('fold')">↶ СКИНУТИ</button><button class="g" onclick="pkAct('call')">${PK.owe ? '✓ КОЛ ' + PK.owe : '✓ ЧЕК'}</button><button class="y" onclick="pkAct('raise',PKR)">ПІДНЯТИ</button><button style="background:#f99" onclick="pkAct('all')">УСЕ В БАНК</button></div>`;
 };
 // --- ШІ ботів: оцінка сили руки, скидають слабкі, сильні ставлять і піднімають, рідкі блефи
@@ -1524,7 +1524,7 @@ function pkStr(hole, board, k) {
   return cl(v);
 }
 const pkK = () => [0, 3, 4, 5][PK.st] ?? 5;
-// face: скільки фішок треба доплатити, щоб лишитись у грі
+// face: скільки жетонів треба доплатити, щоб лишитись у грі
 function botDecide(b, face, canRaise) {
   const sv = pkStr(b.c, PK.board, pkK());
   if (face > 0) {
@@ -1565,7 +1565,7 @@ function pkAct(a, amt) {
   }
   const owe = PK.owe || 0;
   if (a === 'all') {
-    const add = Math.min(S.chips, STAKE * 10); if (add <= 0) return toast('Немає фішок');
+    const add = Math.min(S.chips, STAKE * 10); if (add <= 0) return toast('Немає жетонів');
     S.chips -= add; PK.bank += add;
     const log = [];
     PK.bots.forEach(b => { if (b.fold) return; const sv = pkStr(b.c, PK.board, pkK()); if (sv < 0.12 + 1.2 * add / (PK.bank + add) + (b.th - 0.4) * 0.5) { b.fold = true; log.push(b.n + ': скинув'); } else { const p = Math.min(add, b.stack); PK.bank += p; b.stack -= p; log.push(b.n + ': кол'); } });
@@ -1573,7 +1573,7 @@ function pkAct(a, amt) {
   }
   const ramt = a === 'raise' ? Math.max(Math.max(5, Math.round(STAKE / 2)), amt || STAKE) : 0;
   let pay = owe + ramt;
-  if (pay > S.chips) { if (S.chips <= 0) return toast('Немає фішок'); pay = S.chips; }
+  if (pay > S.chips) { if (S.chips <= 0) return toast('Немає жетонів'); pay = S.chips; }
   S.chips -= pay; PK.bank += pay;
   const face = ramt;
   if (owe > 0 && a === 'call') {
@@ -1600,7 +1600,7 @@ function showdown() {
   const w = all[0]; PK.win = w.n; PK.hands = Object.fromEntries(all.map(x => [x.n, HAND_N[x.h[0]]]));
   PK.msg = all.map(x => `${x.n}: ${HAND_N[x.h[0]]}`).join('<br>') + `<br><b>Переміг: ${w.n}</b>`;
   if (w.me) {
-    give({ chips: Math.floor(PK.bank * 0.92), xp: 100 }, 'Банк (комісія клубу 8%)'); S.ach.pokerWins++; bump('pokerWins'); bump('pokerWon', PK.bank); S.pokerPath++;
+    give({ chips: PK.bank, xp: 100 }, 'Призовий фонд'); S.ach.pokerWins++; bump('pokerWins'); bump('pokerWon', PK.bank); S.pokerPath++;
     if (S.pokerPath >= 10) { S.pokerPath = 0; give({ chips: 20 }, 'Шлях гравця пройдено'); }
   }
 }
@@ -1837,7 +1837,7 @@ SCREENS.secondhand = p => {
       <div class="grid g2" style="margin-top:6px"><button onclick="bagKeep()">Залишити в інвентарі</button><button class="y" onclick="bagSell(${sum})">Продати все<br>${fmt(sum)} 💵</button></div>`;
     }
     h += swHead() + shHead() + `<div class="box" style="text-align:center"><b>Мої завезення</b><div class="small">Відкривай баули, отримуй випадкові речі та вирішуй: залишити собі чи продати на аукціоні!</div></div>
-    <div class="grid g3">${BAGS.map(b => `<div class="cell">👜<br><b>${b.n}</b><br>${b.cnt[0]}-${b.cnt[1]} речей<button class="y" style="width:100%" onclick="openBag('${b.id}')">${fmt(b.cur === 'money' ? Math.round(b.price * (1 - swDisc())) : b.price)} ${b.cur === 'money' ? '💵' : '💎'}</button><button style="width:100%;margin-top:2px" class="${sw().crates >= b.crates && sw().keys >= b.keys ? 'g' : ''}" onclick="openBag('${b.id}','crates')">${b.crates} 📦${b.keys ? ' + ' + b.keys + ' 🔑' : ''}</button></div>`).join('')}</div>
+    <div class="grid g3">${BAGS.map(b => `<div class="cell">👜<br><b>${b.n}</b><br>${b.cnt[0]}-${b.cnt[1]} речей<button class="small" style="width:100%;margin:2px 0;padding:2px" onclick="bagOdds('${b.id}')">📊 Шанси</button><button class="y" style="width:100%" onclick="openBag('${b.id}')">${fmt(b.cur === 'money' ? Math.round(b.price * (1 - swDisc())) : b.price)} ${b.cur === 'money' ? '💵' : '💎'}</button><button style="width:100%;margin-top:2px" class="${sw().crates >= b.crates && sw().keys >= b.keys ? 'g' : ''}" onclick="openBag('${b.id}','crates')">${b.crates} 📦${b.keys ? ' + ' + b.keys + ' 🔑' : ''}</button></div>`).join('')}</div>
     <div class="box"><div class="small">Лишилось завезень сьогодні: <b>${shLeft('bags')}</b></div><div class="bar">${shBuyBtn('bags')}</div></div>
     <div class="box"><b>Знахідки в інвентарі:</b> ${S.inv.length} шт. <button onclick="stack=[{name:'home',p:{}}];go('inventory')">Відкрити інвентар</button></div>`;
   } else if (t === 'search') {
@@ -1860,6 +1860,14 @@ function stallLeft() { const m = Math.max(0, Math.ceil((S.stallTs + 864e5 - Date
 function newStall() { if (!pay('crystals', 20)) return; S.stall = genStall(); S.stallTs = Date.now(); render(); }
 function newStallOld() { if (shLeft('search') > 0) shS().search++; else if (!pay('money', 500)) return; S.stall = null; render(); }
 function rollRar(w) { let x = Math.random() * 100; for (let i = 0; i < 5; i++) { x -= w[i]; if (x < 0) return i; } return 0; }
+function bagOdds(id) {
+  const b = BAGS.find(x => x.id === id), u = Math.min(1, shTier().rar + swRar() + luckB());
+  const eff = b.rw.map((w, i) => w * (i === 4 ? 1 : 1 - u) + (i ? b.rw[i - 1] * u : 0));
+  const pc = v => (Math.round(v * 10) / 10) + '%';
+  modal(`<h3>📊 Шанси: ${b.n}</h3><div class="small">Шанс рідкості для кожної речі в мішку (${b.cnt[0]}-${b.cnt[1]} речей).</div>
+  <table style="width:100%;border-collapse:collapse;font-size:12px;margin:6px 0"><tr style="background:#ffe9a8"><td><b>Рідкість</b></td><td><b>Базовий</b></td><td><b>Твій</b></td></tr>${RAR.map((r, i) => `<tr style="border-bottom:1px solid #ddd"><td>${r}</td><td>${pc(b.rw[i])}</td><td><b>${pc(eff[i])}</b></td></tr>`).join('')}</table>
+  <div class="small">«Твій» враховує підписку, склад і удачу: з шансом ${pc(u * 100)} річ стає на рідкість кращою. Речі однієї рідкості випадають рівноймовірно.</div>`);
+}
 function openBag(id, mode) {
   const b = BAGS.find(x => x.id === id); if (shLeft('bags') < 1) return toast('Завезення на сьогодні закінчились. Завтра нові або докупи за 💎');
   if (mode === 'crates') { const w = sw(); if (w.crates < b.crates || w.keys < b.keys) return toast('Не вистачає ящиків 📦' + (b.keys ? ' або ключів 🔑' : '') + '. Працюй на змінах'); w.crates -= b.crates; w.keys -= b.keys; }
@@ -1883,7 +1891,7 @@ const CHAT_COST = 2;
 const CH_TABS = [['world', '🌍 Світовий'], ['group', '👥 Клан'], ['buy', '🛒 Куплю'], ['sell', '🏷 Продам'], ['dm', '✉ Особисті']];
 const CH_NPC = ['Козак', 'Ла Ріка', 'Бандерас', 'Тоні', 'Віталік', 'Мікі', 'Дон Карло', 'Сніжана'];
 const CH_BOT = {
-  world: ['Хто на рейд Даунтаун?', 'Вчора виграв x50 у слотах!', 'Набираю в клан, пишіть в особисті', 'Гонки сьогодні топ', 'Вітаю нових гравців в місті'],
+  world: ['Хто на рейд Даунтаун?', 'Вчора вибив x50 на барабанах!', 'Набираю в клан, пишіть в особисті', 'Гонки сьогодні топ', 'Вітаю нових гравців в місті'],
   group: ['Всім привіт, вносимо в клан по можливості', 'Хто качає гілку гонщиків?', 'Сьогодні бос тижня, всі на бій', 'Дякую за внески, рівень росте'],
   buy: ['Куплю кепку польову, дорого', 'Куплю рідкісні речі, ціна договірна', 'Куплю спорт-авто, звертайтесь'],
   sell: ['Продам ремінь шкіряний за 1200', 'Продам брухт, дешево', 'Продам набір рідкісних речей, пишіть'],
@@ -2453,7 +2461,7 @@ SCREENS.settings = p => {
     <button onclick="spS().pts+=300;render()">+300 очок сезону</button><button onclick="spS();S.sprem=S.sprem?0:1;render()">⭐ Преміум пропуск вкл/вимк</button>
     <button class="y" onclick="give({ammo:200,grenades:10},'Розробник');render()">+200 🔫 +10 💣</button></div></div>
   <div class="box"><b>Ліміти й день</b><div class="grid g2">
-    <button onclick="S.daily.pk=0;S.daily.sb=0;S.daily.cp=0;S.daily.cpc={};S.daily.cs={};S.daily.chipsClaim=false;toast('Ліміти казино скинуто');render()">Скинути ліміти казино</button>
+    <button onclick="S.daily.pk=0;S.daily.sb=0;S.daily.cp=0;S.daily.cpc={};S.daily.cs={};S.daily.chipsClaim=false;toast('Ліміти клубу скинуто');render()">Скинути ліміти клубу</button>
     <button onclick="S.day='';save();load();render()">Новий день</button>
     <button onclick="DISTS.forEach(D=>dRate(D.id,20000));render()">+ рейтинг районів</button>
     <button onclick="S.xp+=xpNeed(S.lvl);lvlCheck();render()">+1 рівень</button></div></div>`;
@@ -2466,7 +2474,7 @@ SCREENS.settings = p => {
 const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 8192) s += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
 const unb64u = t => { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; const s = atob(t), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
 async function zip(str, mode) { const st = mode === 'c' ? new Blob([str]).stream().pipeThrough(new CompressionStream('deflate-raw')) : new Blob([str]).stream().pipeThrough(new DecompressionStream('deflate-raw')); return new Uint8Array(await new Response(st).arrayBuffer()); }
-const BUILD = 'v110';
+const BUILD = 'v111';
 const BOT = 'PotuzhneMisto_bot', PAGE = 'https://stasiya408-dev.github.io/tg-miniapp/';
 async function saveExport() {
   const o = Object.assign({}, S, { mail: [] }), t = b64u(await zip(JSON.stringify(o), 'c'));
