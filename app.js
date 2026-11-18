@@ -2448,42 +2448,36 @@ SCREENS.settings = p => {
     <button onclick="S.xp+=xpNeed(S.lvl);lvlCheck();render()">+1 рівень</button></div></div>`;
   return h + `<div class="box">Звук: <button onclick="toast('Заглушка')">Увімк</button> Музика: <button onclick="toast('Заглушка')">Увімк</button></div>
   <div class="box">Мова: Українська</div>
-  <div class="box"><b>Перенос збереження</b><div class="small">Скопіюй з одного місця і встав в іншому (наприклад, з Claude у Telegram): прогрес, одяг і підгонка.</div><div class="grid g2"><button class="y" onclick="saveExport()">📤 Скопіювати</button><button onclick="saveImport()">📥 Вставити</button></div></div>
+  <div class="box"><b>Перенос збереження</b><div class="small">Одне посилання: скопіюй тут, відкрий у Telegram, і прогрес з’явиться там.</div><div class="grid g2"><button class="y" onclick="saveExport()">🔗 Посилання</button><button onclick="saveImport()">📥 Вставити</button></div></div>
   <button style="background:#f99;width:100%" onclick="if(confirmReset()){}">Скинути прогрес (почати з нуля)</button>
   <div class="note">Прототип зберігає прогрес у браузері (localStorage).</div>`;
 };
 const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 8192) s += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
 const unb64u = t => { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; const s = atob(t), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
 async function zip(str, mode) { const st = mode === 'c' ? new Blob([str]).stream().pipeThrough(new CompressionStream('deflate-raw')) : new Blob([str]).stream().pipeThrough(new DecompressionStream('deflate-raw')); return new Uint8Array(await new Response(st).arrayBuffer()); }
-const SV_CH = 3000;
+const BOT = 'PotuzhneMisto_bot', PAGE = 'https://stasiya408-dev.github.io/tg-miniapp/';
 async function saveExport() {
-  const o = { v: 1, state: S, fit: FIT, fits: FITS }, t = b64u(await zip(JSON.stringify(o), 'c')), n = Math.ceil(t.length / SV_CH), parts = [];
-  for (let i = 0; i < n; i++) parts.push(`PM${i + 1}/${n}:` + t.slice(i * SV_CH, (i + 1) * SV_CH));
-  window._svParts = parts;
-  modal(`<h3>Збереження</h3><div class="small">${n === 1 ? 'Натисни «Копіювати», потім надішли текст повідомленням (не файлом).' : `Текст великий: ${n} частини. Копіюй кожну окремо й надсилай окремими повідомленнями, у будь-якому порядку.`}</div>
-  ${parts.map((x, i) => `<div style="margin-top:6px"><button class="y" style="width:100%" onclick="svCopy(${i},this)">📋 Копіювати частину ${i + 1}/${n}</button><textarea id="sv${i}" style="width:100%;height:50px" readonly onclick="this.select()">${x}</textarea></div>`).join('')}
-  <button style="width:100%;margin-top:6px" onclick="closeModal()">Готово</button>`);
+  const o = Object.assign({}, S, { mail: [] }), t = b64u(await zip(JSON.stringify(o), 'c'));
+  const link = t.length <= 480 ? `https://t.me/${BOT}?startapp=PM${t}` : `${PAGE}#pm=${t}`;
+  window._lnk = link;
+  modal(`<h3>Посилання з прогресом</h3><div class="small">${t.length <= 480 ? 'Скопійовано. Встав у чат Telegram і відкрий: прогрес з’явиться в Mini App.' : 'Скопійовано. Надішли собі в Telegram (наприклад, «Збережене»), потім у Mini App: Налаштування → «Вставити» → встав це посилання.'}</div>
+  <textarea id="lnkT" style="width:100%;height:70px" readonly onclick="this.select()">${link}</textarea>
+  <button class="y" style="width:100%;margin-top:6px" id="lnkB" onclick="lnkCopy()">📋 Копіювати</button><button style="width:100%;margin-top:6px" onclick="closeModal()">Готово</button>`);
+  setTimeout(lnkCopy, 50);
 }
-function svCopy(i, b) {
-  const t = window._svParts[i], ta = $('sv' + i); let ok = false;
+function lnkCopy() {
+  const ta = $('lnkT'), b = $('lnkB'); let ok = false;
   try { ta.focus(); ta.select(); ok = document.execCommand('copy'); } catch (e) { }
-  if (!ok) { try { navigator.clipboard.writeText(t).then(() => { b.textContent = '✓ Скопійовано'; }, () => { }); return; } catch (e) { } }
-  b.textContent = ok ? '✓ Скопійовано' : 'Виділи текст нижче і скопіюй вручну';
+  if (!ok) { try { navigator.clipboard.writeText(window._lnk); ok = true; } catch (e) { } }
+  if (b && ok) b.textContent = '✓ Скопійовано';
 }
 function saveImport() {
-  modal(`<h3>Вставити збереження</h3><div class="small">Встав увесь скопійований текст (усі частини підряд, можна по черзі). Поточний прогрес буде замінено.</div><textarea id="saveIn" style="width:100%;height:120px"></textarea><div class="small" id="saveInfo"></div><button class="y" style="width:100%;margin-top:6px" onclick="saveApply()">Завантажити</button>`);
-  $('saveIn').oninput = () => { const m = ($('saveIn').value.match(/PM\d+\/\d+:/g) || []), tot = m.length ? +m[0].split('/')[1].replace(':', '') : 0; $('saveInfo').textContent = tot ? `Частин: ${new Set(m).size} з ${tot}` : ''; };
+  modal(`<h3>Вставити посилання</h3><div class="small">Встав посилання з прогресом. Поточний прогрес буде замінено.</div><textarea id="saveIn" style="width:100%;height:80px"></textarea><button class="y" style="width:100%;margin-top:6px" onclick="saveApply()">Застосувати</button><button style="width:100%;margin-top:6px" onclick="closeModal()">Скасувати</button>`);
 }
+function payOf(txt) { const m = String(txt).match(/(?:startapp=PM|pm=)([A-Za-z0-9_-]{20,})/); return m ? m[1] : null; }
+async function applyPay(t) { const o = JSON.parse(new TextDecoder().decode(await zip2(unb64u(t)))); if (!o || !o.created) throw 0; o.savedAt = Date.now(); localStorage.setItem('pm_state', JSON.stringify(o)); localStorage.setItem('pm_imp', t); }
 async function saveApply() {
-  try {
-    const txt = $('saveIn').value, re = /PM(\d+)\/(\d+):([A-Za-z0-9_-]+)/g, got = {}; let m, tot = 0;
-    while ((m = re.exec(txt))) { got[+m[1]] = m[3]; tot = +m[2]; }
-    if (!tot) throw 0;
-    let all = ''; for (let i = 1; i <= tot; i++) { if (!got[i]) { toast('Бракує частини ' + i + ' з ' + tot); return; } all += got[i]; }
-    const o = JSON.parse(new TextDecoder().decode(await zip2(unb64u(all))));
-    localStorage.setItem('pm_state', JSON.stringify(o.state)); localStorage.setItem('pm_fit', JSON.stringify(o.fit || {})); localStorage.setItem('pm_fit_saved', JSON.stringify(o.fits || o.fit || {}));
-    location.reload();
-  } catch (e) { toast('Не вдалося: текст неповний або пошкоджений'); }
+  try { const t = payOf($('saveIn').value); if (!t) throw 0; await applyPay(t); location.reload(); } catch (e) { toast('Не вдалося: посилання неповне або пошкоджене'); }
 }
 async function zip2(u8) { return new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer()); }
 function confirmReset() { modal(`<p>Скинути весь прогрес?</p><button style="background:#f99" onclick="localStorage.removeItem('pm_state');load();closeModal();stack=[{name:'create',p:{}}];render()">Так, скинути</button>`); }
@@ -2492,6 +2486,8 @@ function confirmReset() { modal(`<p>Скинути весь прогрес?</p><
 // @@SEED@@ (підставляється при деплої в Telegram: стан гри з артефакта; null = немає)
 const SEED = null;
 (function applySeed() { try { if (!SEED || localStorage.getItem('pm_seedver') === String(SEED.ver)) return; const o = JSON.parse(SEED.state); o.savedAt = Date.now(); localStorage.setItem('pm_state', JSON.stringify(o)); localStorage.setItem('pm_seedver', String(SEED.ver)); } catch (e) { } })();
+const PAY = (() => { try { const sp = TGW && TGW.initDataUnsafe && TGW.initDataUnsafe.start_param; if (sp && sp.startsWith('PM')) return sp.slice(2); return payOf(location.hash.slice(1)); } catch (e) { return null; } })();
+function boot() {
 load();
 catchUpLots();
 stack = [{ name: S.created ? 'home' : 'create', p: {} }];
@@ -2499,8 +2495,14 @@ if (CS) {
   $('app').innerHTML = '<div style="text-align:center;padding:120px 10px"><div style="font-size:40px">⏳</div><b>Завантаження прогресу…</b></div>';
   cloudRestore().catch(() => false).then(ok => { restoring = false; if (ok) { load(); catchUpLots(); stack = [{ name: S.created ? 'home' : 'create', p: {} }]; } lastJ = stateJ(); render(); if (S.created) schedCloud(); });
 } else { lastJ = stateJ(); render(); }
-if (S.chips == null) S.chips = 450;
+}
+if (PAY && localStorage.getItem('pm_imp') !== PAY) {
+  $('app').innerHTML = '<div style="text-align:center;padding:120px 10px"><div style="font-size:40px">⏳</div><b>Переношу прогрес…</b></div>';
+  applyPay(PAY).then(() => { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { } location.reload(); }).catch(() => { restoring = false; boot(); });
+} else boot();
+if (S && S.chips == null) S.chips = 450;
 setInterval(() => {
+  if (!S || !stack.length) return;
   distDaily(); tickMarket(); tickLots(1); const newMsg = tickChat(); const grDone = grTick(); if (grDone) toast('🏁 Груповий заїзд завершено!'); save();
   const ae = document.activeElement, typing = ae && ['INPUT', 'SELECT'].includes(ae.tagName);
   if (cur().name === 'market' && !typing && $('modal').style.display !== 'flex') render();
