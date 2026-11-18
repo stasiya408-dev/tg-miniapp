@@ -268,7 +268,7 @@ function spRew(l, prem) {
   if (l % 3 === 0) return { grenades: 2, ammo: 50 };
   return { money: 15000 + l * 1500, energy: 10 };
 }
-function spTxt(r) { return Object.entries(r).map(([k, v]) => k === 'item' ? IT[v[0]].name + ' ' + GRD[v[1]] : fmt(v) + ' ' + ({ money: '💵', crystals: '💎', gold: '🟡', chips: '🎟', ammo: '🔫', grenades: '💣', pins: '📍', energy: '⚡' }[k])).join(' · '); }
+function spTxt(r) { return Object.entries(r).map(([k, v]) => k === 'item' ? IT[v[0]].name + ' ' + GRD[v[1]] : fmt(v) + ' ' + ({ money: '💵', crystals: '💎', gold: '🟡', chips: '🎟', ammo: '🔫', grenades: '💣', thim: '🪡', thimG: '🌟', energy: '⚡' }[k])).join(' · '); }
 function spClaim(l, prem) {
   const sp = spS(), box = prem ? sp.pr : sp.fr; if (box[l] || spLvl() < l || (prem && !S.sprem)) return;
   box[l] = 1; bump('spClaims'); bump('spMax', spLvl(), 'max'); const r = { ...spRew(l, prem) }; const it = r.item; delete r.item; if (Object.keys(r).length) give(r, 'Сезонний пропуск'); if (it) { addItem(it[0], it[1]); toast('Річ: ' + IT[it[0]].name + ' ' + GRD[it[1]]); } render();
@@ -428,7 +428,7 @@ function give(r, why) {
   const parts = [];
   for (const k in r) {
     let v = r[k]; if (S.vip && (k === 'money')) v *= 2;
-    S[k] = (S[k] || 0) + v; if (k === 'money') bump('earned', v); else if (k === 'crystals') bump('crysEarned', v); else if (k === 'gold') bump('goldEarned', v); else if (k === 'chips') bump('chipsEarned', v); else if (k === 'xp') bump('xpEarned', v); parts.push(fmt(v) + ' ' + ({ money: '💵', crystals: '💎', gold: '🟡', chips: '🎟', sprem: 'преміум пропуск', ammo: 'патронів', grenades: 'гранат', pins: '📍 шпилька-оберіг', xp: 'XP' }[k] || k));
+    S[k] = (S[k] || 0) + v; if (k === 'money') bump('earned', v); else if (k === 'crystals') bump('crysEarned', v); else if (k === 'gold') bump('goldEarned', v); else if (k === 'chips') bump('chipsEarned', v); else if (k === 'xp') bump('xpEarned', v); parts.push(fmt(v) + ' ' + ({ money: '💵', crystals: '💎', gold: '🟡', chips: '🎟', sprem: 'преміум пропуск', ammo: 'патронів', grenades: 'гранат', thim: '🪡 бабин наперсток', thimG: '🌟 золотий наперсток', xp: 'XP' }[k] || k));
   }
   if (r.xp) lvlCheck();
   toast((why ? why + ': ' : '') + '+' + parts.join(', +'));
@@ -988,7 +988,7 @@ SCREENS.profile = () => {
   <div class="box" style="${cosFrame() ? 'border:3px solid ' + cosFrame() : ''}"><b style="${nickSt(subTier())}">${S.name}</b> ${cosTitle() ? '<span class="small">«' + cosTitle() + '»</span>' : ''} (${S.gender === 'm' ? 'чоловік' : 'жінка'})<br>Рівень ${S.lvl}<br><span onclick="go('tasks',{tab:'ach'})" style="cursor:pointer">🏅 <b>${achRank(achPts())[1]}</b> · ${(achPct() * 100).toFixed(1)}% досягнень · ${fmt(achPts())} очок</span><div class="prog"><i style="width:${S.xp / xpNeed(S.lvl) * 100}%"></i></div><span class="small">${S.xp} / ${xpNeed(S.lvl)} XP</span></div>
   <div class="box" style="text-align:center"><b>⚔️ Бойова сила</b><div style="font-size:34px;font-weight:800;line-height:1.1">${fmt(avgHit())}</div><div class="small">середній удар по босу</div><hr style="margin:6px 0"><div style="text-align:left">Шкода по босах: +${s.dmg}%<br>Крит: ${s.crit}% <span class="small">(подвійний удар)</span><br>Удача: ${s.luck} <span class="small">(кращі знахідки)</span><br>Колекція: ${S.owned.length}/${Object.keys(WEAR).length} речей у гардеробі<br>Зброя: ${(WEAPONS.find(w => w.id === S.weapon) || {}).name} (x${weaponMult()})<br>Авто: ${S.car.name}</div>
   ${profBox()}
-  <div class="box small">Патрони: ${S.ammo} · Гранати: ${S.grenades} · 📍 Шпильки: ${S.pins || 0}</div></div></div>
+  <div class="box small">Патрони: ${S.ammo} · Гранати: ${S.grenades} · 🪡 Наперстки: ${S.thim || 0} · 🌟 Золоті: ${S.thimG || 0}</div></div></div>
   <div class="bar"><input id="rn" value="${S.name}" style="flex:1"><button onclick="S.name=$('rn').value||S.name;render()">Змінити ім'я</button></div>`;
 };
 
@@ -1018,8 +1018,10 @@ function bvItem(src) {
   if (t === 'i') { const i = S.inv.find(x => x.uid === +v); return i ? { it: IT[i.id], g: itG(i), set: g => i.g = g, nm: IT[i.id].name, pity: i.bp || 0, setP: n => i.bp = n } : null; }
   if (!S.owned.includes(v)) return null; const it = ITEMS.find(x => x.wear === v); return { it: it || { base: WEAR[v].price }, g: wgOf(v), set: g => wg()[v] = g, nm: WEAR[v].name, pity: (S.wp || {})[v] || 0, setP: n => { if (!S.wp) S.wp = {}; S.wp[v] = n; } };
 }
-const PIN_DROP = { toro: 2, molot: 3, vipera: 4, karlo: 6, senator: 10 }; // % шансу 📍 за першу перемогу над босом за добу
-const PIN_MIN_G = 3; // шпилька діє з рангу A
+// Бабин наперсток: рятує ранг від падіння. 🪡 thim: ранги C, B (перші 2 боси); 🌟 thimG: ранги A, A+ (сильніші боси). % за першу перемогу над босом за добу
+const TH_DROP = { toro: ['thim', 3], molot: ['thim', 4], vipera: ['thimG', 3], karlo: ['thimG', 5], senator: ['thimG', 8] };
+const thKey = g => g >= 3 ? 'thimG' : g >= 1 ? 'thim' : null; // D не падає
+const thName = k => k === 'thimG' ? '🌟 Золотий бабин наперсток' : '🪡 Бабин наперсток';
 const BV_PITY = 4, BV_PITY_MAX = 5; // +4% до шансу «краще» за кожну невдачу поспіль, до 5 невдач
 const bvOdds = o => { const [u, sm, d] = BV_ODDS[o.g], b = Math.min(o.pity, BV_PITY_MAX) * BV_PITY, add = Math.min(b, sm + d); const fromD = Math.min(add, d); return [u + add, sm - (add - fromD), d - fromD]; };
 const bvCost = (it, g) => Math.max(5, Math.round((it.base || 5000) / 300 * BV_CM[g]));
@@ -1037,7 +1039,7 @@ SCREENS.bv = p => {
   return h + `<div class="box" style="text-align:center"><b>${o.nm}</b> ${gB(o.g)}<br><span class="small">Далі: ${gB(o.g + 1)}</span>
   ${o.pity ? `<div class="small" style="color:#090">🍀 Бонус невдач: +${Math.min(o.pity, BV_PITY_MAX) * BV_PITY}% до «краще»</div>` : ''}
   <div class="grid g3" style="margin-top:6px"><div class="cell" style="color:#090">⬆ Краще<br><b>${up}%</b></div><div class="cell">➡ Так само<br><b>${same}%</b></div><div class="cell" style="color:#c00">⬇ Гірше<br><b>${down}%</b></div></div></div>
-  ${o.g >= PIN_MIN_G ? `<div class="box bar sp" style="margin:6px 0"><span>📍 Шпилька-оберіг: <b>${S.pins || 0}</b><br><span class="small">Якщо вийде «гірше», ранг не впаде, а шпилька порветься.</span></span><button class="${S.pinOn && S.pins > 0 ? 'y' : ''}" onclick="S.pinOn=!S.pinOn;render()" ${S.pins > 0 ? '' : 'disabled'}>${S.pinOn && S.pins > 0 ? 'Увімк' : 'Вимк'}</button></div>` : ''}
+  ${(k => k ? `<div class="box bar sp" style="margin:6px 0"><span>${thName(k)}: <b>${S[k] || 0}</b><br><span class="small">Якщо вийде «гірше», ранг не впаде, а наперсток трісне.</span></span><button class="${S.thOn && S[k] > 0 ? 'y' : ''}" onclick="S.thOn=!S.thOn;render()" ${S[k] > 0 ? '' : 'disabled'}>${S.thOn && S[k] > 0 ? 'Увімк' : 'Вимк'}</button></div>` : '')(thKey(o.g))}
   <button class="y" style="width:100%;padding:12px;font-size:16px" onclick="bvDo('${p.src}')">🧵 Прошити — ${fmt(cost)} 💎</button><div class="small" style="text-align:center;margin-top:4px">Після успіху наступна спроба дорожча: ${fmt(nxt)} 💎 (ранг ${GRD[o.g + 1]}), зате річ коштує ×${(GM_PR[o.g + 1] / GM_PR[o.g]).toFixed(1)} на аукціоні</div><button style="width:100%;margin-top:4px" onclick="setP('src','')">Обрати іншу річ</button>`;
 };
 function bvFaq() {
@@ -1047,15 +1049,16 @@ function bvFaq() {
   <p class="small">• Чим вищий ранг, тим дорожча спроба й тим менший шанс піднятись.</p>
   <p class="small">• Невдала спроба збільшує шанс наступної (до +20%). Успіх скидає бонус.</p>
   <p class="small">• Ранг D не падає, A++ вже максимальний.</p>
-  <p class="small">• 📍 Шпилька-оберіг: для речей рангу A і A+. Увімкни її перед прошивкою: якщо вийде «гірше», ранг не впаде, а шпилька порветься. При «краще» чи «так само» шпилька лишається. Шпильки інколи знаходять у трофеях босів.</p>
+  <p class="small">• 🪡 Бабин наперсток: увімкни перед прошивкою. Якщо вийде «гірше», ранг не впаде, а наперсток трісне. При «краще» чи «так само» наперсток лишається.</p>
+  <p class="small">• 🪡 Звичайний наперсток рятує речі рангу C і B, 🌟 золотий: рангу A і A+. Звичайний інколи падає з Ель Торо й Молота, золотий: з сильніших босів.</p>
   <p class="small">• Річ з рангом, відмінним від C, продається на дошці лотів. Біржа приймає тільки C.</p>`);
 }
 function bvDo(src) {
   const o = bvItem(src); if (!o || o.g >= 5) return; const cost = bvCost(o.it, o.g); if (!pay('crystals', cost)) return;
   const [up, same] = bvOdds(o), x = Math.random() * 100; let ng = x < up ? o.g + 1 : x < up + same ? o.g : o.g - 1, saved = false;
-  if (ng < o.g && o.g >= PIN_MIN_G && S.pinOn && S.pins > 0) { S.pins--; ng = o.g; saved = true; bump('pinsUsed'); }
+  const tk = thKey(o.g); if (ng < o.g && tk && S.thOn && S[tk] > 0) { S[tk]--; ng = o.g; saved = true; bump('thimUsed'); }
   o.set(ng); o.setP(ng > o.g ? 0 : o.pity + 1); bump('bvN'); bump('bvSpent', cost); bump(ng > o.g ? 'bvUp' : ng < o.g ? 'bvDown' : 'bvSame');
-  modal(`<h3>Баба Валя пошепотіла…</h3><p><b>${o.nm}</b>: ${gB(o.g)} → ${gB(ng)}</p><p><b style="color:${ng > o.g ? '#090' : ng < o.g ? '#c00' : '#555'}">${ng > o.g ? '⬆ Вийшло краще!' : ng < o.g ? '⬇ Не пощастило, стало гірше' : saved ? '📍 Шов поїхав, але шпилька-оберіг вберегла ранг! Шпилька порвалась.' : '➡ Нічого не змінилось'}</b></p>`); render();
+  modal(`<h3>Баба Валя пошепотіла…</h3><p><b>${o.nm}</b>: ${gB(o.g)} → ${gB(ng)}</p><p><b style="color:${ng > o.g ? '#090' : ng < o.g ? '#c00' : '#555'}">${ng > o.g ? '⬆ Вийшло краще!' : ng < o.g ? '⬇ Не пощастило, стало гірше' : saved ? '🪡 Шов поїхав, але наперсток вберіг ранг! Наперсток тріснув.' : '➡ Нічого не змінилось'}</b></p>`); render();
 }
 
 // --- ГАРДЕРОБ
@@ -1192,7 +1195,7 @@ function hitBoss(id) {
   let msg = `Ви завдали ${fmt(dmg)} шкоди босу ${b.name}${anote}${gnote}.`;
   if (st.hp === 0) {
     if (!S.daily.bk) S.daily.bk = {}; S.ach.bossKills++; bump('bossKills'); bump('kill_' + b.id); st.hp = b.hp; if (!S.beat) S.beat = {}; const hadCar = hasCar(); S.beat[b.id] = 1; if (!hadCar && hasCar()) setTimeout(() => modal('<h3>🚗 Перша машина!</h3><p>Ти переміг другого боса й отримав першу машину. Відкрились <b>Транспорт</b> (гараж, тюнінг) і <b>Гонки</b>.</p><button class="y" style="width:100%" onclick="closeModal()">Чудово</button>'), 400);
-    if (!S.daily.bk[b.id]) { S.daily.bk[b.id] = 1; give({ ...b.rew, ammo: 30, grenades: 1 }, 'Бос переможений'); const it = pick(ITEMS); addItem(it.id, rollG()); msg += ` БОС ПЕРЕМОЖЕНИЙ! Трофей: ${it.name}.`; if (Math.random() * 100 < (PIN_DROP[b.id] || 0)) { give({ pins: 1 }, 'Рідкісний трофей'); bump('pinsFound'); msg += ' <b>📍 Рідкісна знахідка: Шпилька-оберіг!</b>'; } msg += ' Бос відродився.'; }
+    if (!S.daily.bk[b.id]) { S.daily.bk[b.id] = 1; give({ ...b.rew, ammo: 30, grenades: 1 }, 'Бос переможений'); const it = pick(ITEMS); addItem(it.id, rollG()); msg += ` БОС ПЕРЕМОЖЕНИЙ! Трофей: ${it.name}.`; const td = TH_DROP[b.id]; if (td && Math.random() * 100 < td[1]) { give({ [td[0]]: 1 }, 'Рідкісний трофей'); bump('thimFound'); msg += td[0] === 'thimG' ? ' <b>🌟 Рідкісна знахідка: Золотий бабин наперсток!</b>' : ' <b>🪡 Рідкісна знахідка: Бабин наперсток!</b>'; } msg += ' Бос відродився.'; }
     else { give({ money: Math.round(b.rew.money * 0.1) }, 'Повторне вбивство'); msg += ' Бос переможений ще раз: сьогодні повна нагорода вже отримана, лише 10% грошей. Бос відродився.'; }
   }
   S.xp += 50; lvlCheck();
@@ -2474,7 +2477,7 @@ SCREENS.settings = p => {
     <button onclick="give({money:1000000,crystals:5000,gold:500,chips:500},'Розробник');render()">+ усе разом</button>
     <button onclick="S.energy=90;render()">⚡ 90</button>
     <button onclick="spS().pts+=300;render()">+300 очок сезону</button><button onclick="spS();S.sprem=S.sprem?0:1;render()">⭐ Преміум пропуск вкл/вимк</button>
-    <button class="y" onclick="give({ammo:200,grenades:10},'Розробник');render()">+200 🔫 +10 💣</button><button class="y" onclick="give({pins:3},'Розробник');render()">+3 📍</button></div></div>
+    <button class="y" onclick="give({ammo:200,grenades:10},'Розробник');render()">+200 🔫 +10 💣</button><button class="y" onclick="give({thim:3,thimG:3},'Розробник');render()">+3 🪡 +3 🌟</button></div></div>
   <div class="box"><b>Ліміти й день</b><div class="grid g2">
     <button onclick="S.daily.pk=0;S.daily.sb=0;S.daily.cp=0;S.daily.cpc={};S.daily.cs={};S.daily.chipsClaim=false;toast('Ліміти клубу скинуто');render()">Скинути ліміти клубу</button>
     <button onclick="S.day='';save();load();render()">Новий день</button>
@@ -2489,7 +2492,7 @@ SCREENS.settings = p => {
 const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 8192) s += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
 const unb64u = t => { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; const s = atob(t), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
 async function zip(str, mode) { const st = mode === 'c' ? new Blob([str]).stream().pipeThrough(new CompressionStream('deflate-raw')) : new Blob([str]).stream().pipeThrough(new DecompressionStream('deflate-raw')); return new Uint8Array(await new Response(st).arrayBuffer()); }
-const BUILD = 'v114';
+const BUILD = 'v115';
 const BOT = 'PotuzhneMisto_bot', PAGE = 'https://stasiya408-dev.github.io/tg-miniapp/';
 async function saveExport() {
   const o = Object.assign({}, S, { mail: [] }), t = b64u(await zip(JSON.stringify(o), 'c'));
