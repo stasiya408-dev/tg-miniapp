@@ -334,7 +334,7 @@ function render() {
   $('navbar').innerHTML = (c.name === 'home' || NAVS.includes(c.name)) ? navbar(c.name) : '';
   after.forEach(f => f());
 }
-const NAVS = ['profile', 'inventory', 'wardrobe', 'garage', 'weapons'];
+const NAVS = ['profile', 'inventory', 'wardrobe', 'garage'];
 // --- ВАЛЮТИ ЗВЕРХУ: 2 слоти (завжди 💵 і 💎 при вході), по натисканню можна показати іншу валюту
 const HUD_C = { money: ['💵', 'Гроші'], crystals: ['💎', 'Кристали'], gold: ['🟡', 'Золоті прикраси'], chips: ['🎟', 'Фішки клубу'] };
 let HUD = ['money', 'crystals'];
@@ -355,7 +355,7 @@ function topbar(name) {
   </div>`;
 }
 function navbar(a) {
-  const b = [['profile', 'Профіль', '👤'], ['inventory', 'Інвентар', '🎒'], ['wardrobe', 'Гардероб', '👔'], ['garage', 'Транспорт', '🚗'], ['weapons', 'Зброя', '🔫']];
+  const b = [['profile', 'Профіль', '👤'], ['inventory', 'Інвентар', '🎒'], ['wardrobe', 'Гардероб', '👔'], ['garage', 'Транспорт', '🚗']];
   return `<div class="navb">${b.map(([k, t, ic]) => `<button class="${a === k ? 'sel' : ''}" onclick="stack=[{name:'home',p:{}}];go('${k}')"><span class="ic">${ic}</span>${t}</button>`).join('')}</div>`;
 }
 function tabs(list, curT, key, dots) {
@@ -467,7 +467,7 @@ const QA = {
   shop: ['🛒 Магазин', 'shop'], auction: ['🏪 Аукціон', 'market', { tab: 'buy' }], market: ['📈 Ринок', 'market'], club: ['🎰 Ігровий клуб', 'club'],
   group: ['👥 Групування', 'group'], races: ['🏁 Гонки', 'races'], grace: ['🏁 Груп. заїзд', 'races', { rt: 'group' }], jobs: ['💼 Робота', 'jobs'], sh: ['🧥 Секонд-хенд', 'secondhand'],
   bv: ['🧵 Баба Валя', 'bv'], season: ['🏆 Сезон', 'season'], boss: ['💀 Наліт', 'raidBoss'], dist: ['🏙 Райони', 'district'], inv: ['🎒 Інвентар', 'inventory'], ward: ['👕 Гардероб', 'wardrobe'], garage: ['🔧 Гараж', 'garage'],
-  weap: ['🔫 Зброя', 'weapons'], prof: ['👤 Профіль', 'profile']
+  prof: ['👤 Профіль', 'profile']
 };
 const QA_MAX = 6;
 const qaKey = side => side === 'L' ? 'qaL' : 'qa';
@@ -941,7 +941,7 @@ function upPart(k, cost) { if (!pay('money', cost)) return; S.car.parts[k]++; co
 function paint(col) { if (!pay('money', 5000)) return; S.car.color = col; render(); }
 
 // --- ЗБРОЯ
-SCREENS.weapons = () => `<h2>🔫 Зброя</h2><div class="note">У макетах екрана зброї немає, тому зроблено найпростіше: купити / взяти в руки. Множник шкоди впливає на бій з босами.</div>
+const weaponsList = () => `<div class="note">Множник шкоди впливає на бій з босами.</div>
   ${WEAPONS.map(w => { const own = S.weapons.includes(w.id); return `<div class="row"><div class="f"><b>${w.name}</b><div class="small">Шкода x${w.dmg}</div></div>
   ${own ? (S.weapon === w.id ? '<button class="g" disabled>В руках</button>' : `<button class="y" onclick="S.weapon='${w.id}';render()">Взяти</button>`) : `<button class="y" onclick="buyWeapon('${w.id}')">${fmt(w.price)} ${w.cur === 'crystals' ? '💎' : '💵'}</button>`}</div>`; }).join('')}`;
 function buyWeapon(id) { const w = WEAPONS.find(x => x.id === id); if (!pay(w.cur || 'money', w.price)) return; S.weapons.push(id); S.weapon = id; render(); }
@@ -952,7 +952,8 @@ const bossMax = () => 6 + (subTier() ? TIERS[subTier()].boss : 0);
 function bossSt(b) { if (!S.bosses[b.id]) S.bosses[b.id] = { hp: b.hp, tries: bossMax() }; return S.bosses[b.id]; }
 SCREENS.raidBoss = p => {
   const t = p.tab || 'boss';
-  let h = `<h2>💀 НАЛІТ</h2>${tabs([['boss', 'Боси'], ['raids', 'Рейди'], ['ev', 'Події'], ['rank', 'Рейтинг']], t)}`;
+  let h = `<h2>💀 НАЛІТ</h2>${tabs([['boss', 'Боси'], ['weap', '🔫 Зброя'], ['raids', 'Рейди'], ['ev', 'Події'], ['rank', 'Рейтинг']], t)}`;
+  if (t === 'weap') h += weaponsList();
   if (t === 'boss') {
     h += `<div class="box"><b>Боєприпаси</b> <span class="small">(впливають на шкоду)</span>
       <div class="bar sp" style="margin-top:4px"><span>🔫 Патрони: <b>${S.ammo}</b> · ${AMMO_HIT}/удар</span><button class="${S.bossAm !== false ? 'y' : ''}" onclick="S.bossAm=${S.bossAm === false};render()">${S.bossAm !== false ? 'Увімк' : 'Вимк'}</button></div>
@@ -963,7 +964,7 @@ SCREENS.raidBoss = p => {
       <span class="small">❤ ${fmt(st.hp)} / ${fmt(b.hp)} · Нагорода (раз на добу): ${fmt(b.rew.money)}💵 ${b.rew.crystals}💎 ${b.rew.gold ? b.rew.gold + '🟡' : ''}</span></div>
       ${locked ? `<button disabled>🔒 Потрібен рівень ${b.needLvl}</button>` : `<div style="text-align:center"><div class="small">Спроб: ${st.tries}/${bossMax()} · ⚡${BOSS_EN} за удар</div><button class="y" onclick="hitBoss('${b.id}')">НАЛІТ »</button></div>`}</div>`;
     }).join('') + `<button onclick="restoreTries()">Відновити всі спроби — 50 💎</button>`;
-  } else if (t === 'raids') h += `<div class="box">Рейди на райони міста.</div><button class="y" onclick="go('district')">Рейд на Даунтаун ▶</button>`;
+  } else if (t === 'weap') { /* вже показано вище */ } else if (t === 'raids') h += `<div class="box">Рейди на райони міста.</div><button class="y" onclick="go('district')">Рейд на Даунтаун ▶</button>`;
   else if (t === 'ev') h += `<div class="box">Бос тижня: <b>Дон Карло</b> — подвійна шкода (заглушка).</div>`;
   else {
     const me = stV('bossDmg'), L = [['Козак', 9200000], ['Ла Ріка', 5100000], ['Тоні', 2400000], ['Бандерас', 800000], ['Лисий', 150000], [S.name, me]].sort((a, b) => b[1] - a[1]);
