@@ -233,7 +233,7 @@ const DEF = () => ({
   car: { name: 'Буревій GT', stars: 3, parts: { engine: 3, exhaust: 2, susp: 3, brakes: 2, wheels: 3, turbo: 3 }, color: 'Червоний', sticker: 'Немає', view: 'Спереду' },
   group: { member: false, lvl: 3, prog: 40 },
   login: { day: 0, last: '' },
-  slots: { bet: 10, bonus: 12, betSum: 120 }, bonusGame: 0, pokerPath: 3,
+  slots: { bet: 10 }, bonusGame: 0, pokerPath: 3,
   lots: [], orders: [], stall: null, vip: false, starsSpent: 0,
 });
 let S;
@@ -324,6 +324,7 @@ function cur() { return stack[stack.length - 1]; }
 function setP(k, v) { cur().p[k] = v; render(); }
 let after = [];
 function render() {
+  if (typeof spinning !== 'undefined' && spinning && cur().name === 'slots') return;
   energyTick(); save();
   const c = cur(); after = [];
   const scr = SCREENS[c.name];
@@ -463,7 +464,7 @@ function createHero(g) {
 
 // --- ШВИДКИЙ ДОСТУП: гравець сам обирає кнопки в правому стовпчику головного екрана
 const QA = {
-  shop: ['🛒 Магазин', 'shop'], auction: ['🏪 Аукціон', 'market', { tab: 'buy' }], market: ['📈 Ринок', 'market'], club: ['🎰 Казино', 'club'], slots: ['🎰 Слоти', 'slots'], poker: ['🃏 Покер', 'poker'],
+  shop: ['🛒 Магазин', 'shop'], auction: ['🏪 Аукціон', 'market', { tab: 'buy' }], market: ['📈 Ринок', 'market'], club: ['🎰 Ігровий клуб', 'club'],
   group: ['👥 Групування', 'group'], races: ['🏁 Гонки', 'races'], grace: ['🏁 Груп. заїзд', 'races', { rt: 'group' }], jobs: ['💼 Робота', 'jobs'], sh: ['🧥 Секонд-хенд', 'secondhand'],
   bv: ['🧵 Баба Валя', 'bv'], season: ['🏆 Сезон', 'season'], boss: ['💀 Наліт', 'raidBoss'], dist: ['🏙 Райони', 'district'], inv: ['🎒 Інвентар', 'inventory'], ward: ['👕 Гардероб', 'wardrobe'], garage: ['🔧 Гараж', 'garage'],
   weap: ['🔫 Зброя', 'weapons'], prof: ['👤 Профіль', 'profile']
@@ -603,7 +604,7 @@ function claimTask(t, k) {
 }
 function claimDailyChest() {
   if (S.daily.chest) return; if (Object.keys(S.daily.claimed).length < 6) return toast('Спочатку виконай всі 6 завдань');
-  S.daily.chest = true; give({ money: 30000, crystals: 20 }, 'Скриня'); S.slots.bonus = Math.min(SLOT_GOAL - 1, (S.slots.bonus || 0) + 10); toast('+10 до бонусного прогресу в слотах'); render();
+  S.daily.chest = true; give({ money: 30000, crystals: 20 }, 'Скриня'); render();
 }
 
 // --- ПОДІЇ
@@ -1167,13 +1168,13 @@ let reels = null, winCells = [], lastWin = null, slotBonus = null;
 function endIntro() { if (slotBonus && slotBonus.intro) { slotBonus.intro = false; if (cur().name === 'slots') render(); } }
 function slotBonusUI() {
   const b = slotBonus;
-  if (b.intro) return `<div onclick="endIntro()" style="text-align:center;padding:90px 10px"><div style="font-size:70px">🎁</div><div class="winban" style="font-size:26px;padding:20px">БОНУСНА ГРА!</div><div class="small">Бонусний прогрес ${SLOT_GOAL}/${SLOT_GOAL} заповнено. Приз: від x2 до x1000 від вашої ставки!</div><div class="small">(натисни, щоб пропустити)</div></div>`;
+  if (b.intro) return `<div onclick="endIntro()" style="text-align:center;padding:90px 10px"><div style="font-size:70px">🎁</div><div class="winban" style="font-size:26px;padding:20px">БОНУСНА ГРА!</div><div class="small">Приз: від x2 до x1000 від вашої ставки!</div><div class="small">(натисни, щоб пропустити)</div></div>`;
   const cells = Array.from({ length: 9 }, (_, i) => {
     if (b.picked === i) return `<div class="cell winner" style="height:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:18px"><b>x${b.mult}</b><span class="small">${fmt(b.pay)} 🎟</span></div>`;
     if (b.picked != null) return `<div class="cell" style="height:70px;display:flex;align-items:center;justify-content:center;opacity:.5">x${b.others[i]}</div>`;
     return `<button style="height:70px;font-size:26px" onclick="openSlotChest(${i})">🧰</button>`;
   }).join('');
-  return `<h2>🎁 БОНУСНА ГРА!</h2><div class="winban ${b.mult >= 100 ? 'me' : ''}">${b.picked == null ? 'ОБЕРИ СКРИНЮ ТА ЗАБЕРИ ПРИЗ!' : (b.mult >= 100 ? '🔥 ДЖЕКПОТ x' + b.mult + '! 🔥' : 'ПРИЗ x' + b.mult + '!')}<div class="small">Приз = множник × середня ставка (${fmt(b.avg)} 🎟)</div></div>
+  return `<h2>🎁 БОНУСНА ГРА!</h2><div class="winban ${b.mult >= 100 ? 'me' : ''}">${b.picked == null ? 'ОБЕРИ СКРИНЮ ТА ЗАБЕРИ ПРИЗ!' : (b.mult >= 100 ? '🔥 ДЖЕКПОТ x' + b.mult + '! 🔥' : 'ПРИЗ x' + b.mult + '!')}<div class="small">Приз = множник × ставка (${fmt(b.avg)} 🎟)</div></div>
   <div class="grid g3" style="margin:8px 0">${cells}</div>
   <div class="box small">${b.picked == null ? 'Можливі множники: x2 … x1000' : '✔ Бонус забрано. Повертаємось до слотів…'}</div>`;
 }
@@ -1188,13 +1189,12 @@ function openSlotChest(i) {
 SCREENS.slots = () => {
   if (slotBonus) return slotBonusUI();
   if (!reels) reels = buildReels(0).g;
-  const pct = Math.min(100, S.slots.bonus / SLOT_GOAL * 100);
   return `<div class="bar sp"><h2 style="margin:4px 0">🎰 СЛОТИ</h2><button class="y" onclick="slotFaq()">❓ FAQ</button></div>${ctabs('slots')}<div class="reel">${reels.map((s, i) => `<div class="${winCells.includes(i) ? 'win' : ''}">${s}</div>`).join('')}</div>
   <div class="${lastWin ? 'winban ' + (lastWin.mult >= 20 ? 'me' : '') : 'small'}" style="${lastWin ? '' : 'text-align:center;padding:10px'}">${lastWin ? (lastWin.mult >= 20 ? '🔥 ВЕЛИКИЙ ВИГРАШ ' : 'ВИГРАШ ') + 'x' + lastWin.mult + ': +' + fmt(lastWin.pay) + ' 🎟' : 'Крутни барабани'}</div>
   <div class="bar" style="justify-content:center;margin:8px 0"><button onclick="S.slots.bet=Math.max(10,S.slots.bet-10);render()">−</button><b>${S.slots.bet} 🎟</b><button onclick="S.slots.bet=Math.min(200,S.slots.bet+10);render()">+</button>
   <button class="y" style="padding:10px 24px;font-size:18px" onclick="spin()">ГРАТИ</button>
-  <label><input type="checkbox" id="auto" onchange="autoSpin(this.checked)"> АВТО</label></div>
-  <div class="box">Бонусний прогрес<div class="prog"><i style="width:${pct}%"></i></div>${Math.min(S.slots.bonus, SLOT_GOAL)}/${SLOT_GOAL} спінів → бонусна гра (x2…x1000)</div>
+  <label><input type="checkbox" id="auto" ${autoOn ? 'checked' : ''} onchange="autoSpin(this.checked)"> АВТО</label></div>
+  <div class="box small">🎁 Бонусна гра випадає випадково під час обертів: приз від x2 до x1000 від ставки.</div>
   <div class="box small">🔞 18+. Фішки не купуються й не обмінюються на інші валюти. Денний ліміт ставок ${fmt(SLOT_DAY_CAP)} 🎟 (сьогодні ${fmt(S.daily.sb || 0)}).</div>
   <div class="box"><div class="bar sp"><b>Історія спінів</b><span class="small">${slotStats()}</span></div>${slotHistory()}</div>`;
 };
@@ -1202,7 +1202,7 @@ function slotFaq() {
   modal(`<h3>FAQ: Слоти</h3><b>Таблиця виплат</b> (множник на ставку)
   <table style="width:100%;border-collapse:collapse;font-size:12px;margin:4px 0">${SLOT_BASE.map(([m, w]) => `<tr style="border-bottom:1px solid #ddd"><td>${WINMAP[m][0].repeat(WINMAP[m][1])}</td><td><b>x${m}</b></td><td class="small">шанс 1 до ${fmt(Math.round(1e6 / w))}</td></tr>`).join('')}</table>
   <p class="small">Виграє збіг символів зліва направо в одному рядку.</p>
-  <b>Бонусна гра</b><p class="small">Кожні ${SLOT_GOAL} спінів. Приз від x2 до x1000 від середньої ставки.</p>`);
+  <b>Бонусна гра</b><p class="small">Випадає випадково під час обертів (в середньому раз на ~${SLOT_GOAL} спінів). Приз від x2 до x1000 від ставки.</p>`);
 }
 function slotStats() {
   const h = S.slots.hist || []; if (!h.length) return '';
@@ -1217,29 +1217,50 @@ function slotHistory() {
 }
 function pushHist(e) { if (!S.slots.hist) S.slots.hist = []; S.slots.hist.unshift(e); S.slots.hist.length = Math.min(S.slots.hist.length, 20); }
 const SLOT_DAY_CAP = 2000;
+let spinning = false, autoOn = false;
+function animReels(final, done) {
+  spinning = true;
+  const cells = [...document.querySelectorAll('.reel div')];
+  if (cells.length !== 15) { spinning = false; done(); return; }
+  const stopAt = [650, 1000, 1350, 1750, 2250], t0 = Date.now(), stopped = [0, 0, 0, 0, 0];
+  cells.forEach(c => c.classList.remove('win'));
+  const tick = () => {
+    if (cur().name !== 'slots') { spinning = false; done(); return; }
+    const el = Date.now() - t0; let all = true;
+    for (let c = 0; c < 5; c++) {
+      if (el >= stopAt[c]) {
+        if (!stopped[c]) { stopped[c] = 1; for (let r = 0; r < 3; r++) { const d = cells[r * 5 + c]; d.textContent = final[r * 5 + c]; d.classList.remove('spin'); d.classList.add('stop'); } }
+      } else { all = false; for (let r = 0; r < 3; r++) { const d = cells[r * 5 + c]; d.textContent = pick(SYM); d.classList.add('spin'); } }
+    }
+    if (all) { spinning = false; setTimeout(done, 250); return; }
+    const next = stopAt.find((x, k) => !stopped[k]), left = next - el;
+    setTimeout(tick, left < 200 ? 170 : left < 450 ? 110 : 55);
+  };
+  tick();
+}
 function spin() {
-  if (slotBonus) return;
+  if (slotBonus || spinning) return;
   const bet = S.slots.bet;
   if (!S.daily.sb) S.daily.sb = 0;
   if (S.daily.sb + bet > SLOT_DAY_CAP) { autoSpin(false); return toast('Денний ліміт ставок у слотах ' + fmt(SLOT_DAY_CAP) + ' 🎟 вичерпано'); }
   if (!pay('chips', bet)) { autoSpin(false); return toast('Фішки закінчились. Нові: щоденні фішки в клубі'); }
   S.daily.sb += bet;
-  const mult = rollTable(SLOT_BASE), R = buildReels(mult);
-  reels = R.g; winCells = mult ? Array.from({ length: R.k }, (_, i) => R.line * 5 + i) : [];
-  S.slots.bonus++; S.slots.betSum = (S.slots.betSum || 0) + bet;
-  S.daily.casino++; bump('spins'); clubPt();
-  lastWin = null;
-  pushHist({ bet, win: bet * mult, mult });
-  if (!mult) bump('slotLost', bet); if (mult) { bump('slotWins'); bump('slotBig', mult, 'max'); bump('slotWon', bet * mult); lastWin = { mult, pay: bet * mult }; give({ chips: bet * mult }, 'Виграш x' + mult); }
-  if (S.slots.bonus >= SLOT_GOAL) {
-    const avg = Math.round(S.slots.betSum / S.slots.bonus), m = rollTable(SLOT_BONUS) || 2;
-    S.slots.bonus = 0; S.slots.betSum = 0; bump('slotBonus');
-    slotBonus = { picked: null, mult: m, avg, pay: avg * m, intro: true }; autoSpin(false); setTimeout(endIntro, 2200);
-  }
-  render();
+  const mult = rollTable(SLOT_BASE), R = buildReels(mult), bonusHit = Math.random() < 1 / SLOT_GOAL;
+  lastWin = null; winCells = [];
+  animReels(R.g, () => {
+    reels = R.g; winCells = mult ? Array.from({ length: R.k }, (_, i) => R.line * 5 + i) : [];
+    S.daily.casino++; bump('spins'); clubPt();
+    pushHist({ bet, win: bet * mult, mult });
+    if (!mult) bump('slotLost', bet); if (mult) { bump('slotWins'); bump('slotBig', mult, 'max'); bump('slotWon', bet * mult); lastWin = { mult, pay: bet * mult }; give({ chips: bet * mult }, 'Виграш x' + mult); }
+    if (bonusHit) {
+      const m = rollTable(SLOT_BONUS) || 2; bump('slotBonus');
+      slotBonus = { picked: null, mult: m, avg: bet, pay: bet * m, intro: true }; autoSpin(false); setTimeout(endIntro, 2200);
+    }
+    render();
+    if (autoOn && !slotBonus && cur().name === 'slots') setTimeout(() => { if (autoOn && cur().name === 'slots') spin(); }, 600);
+  });
 }
-let autoT = null;
-function autoSpin(on) { clearInterval(autoT); autoT = null; if (on) autoT = setInterval(() => { if (cur().name !== 'slots') return autoSpin(false); spin(); const a = $('auto'); if (a) a.checked = true; }, 900); }
+function autoSpin(on) { autoOn = !!on; if (on) spin(); }
 
 // --- БОНУСНА ГРА (скрині)
 const BONUS_POOL = [['🎟 x100', { chips: 100 }], ['🔫 патрони x30', { ammo: 30 }], ['🎟 x250', { chips: 250 }], ['💣 граната x1', { grenades: 1 }], ['🎟 x50', { chips: 50 }], ['🎟 x500', { chips: 500 }]];
@@ -1384,7 +1405,7 @@ function showdown() {
   PK.msg = all.map(x => `${x.n}: ${HAND_N[x.h[0]]}`).join('<br>') + `<br><b>Переміг: ${w.n}</b>`;
   if (w.me) {
     give({ chips: Math.floor(PK.bank * 0.92), xp: 100 }, 'Банк (комісія клубу 8%)'); S.ach.pokerWins++; bump('pokerWins'); bump('pokerWon', PK.bank); S.pokerPath++;
-    if (S.pokerPath >= 10) { S.pokerPath = 0; S.slots.bonus = Math.min(SLOT_GOAL - 1, (S.slots.bonus || 0) + 20); give({ chips: 20 }, 'Шлях гравця пройдено'); }
+    if (S.pokerPath >= 10) { S.pokerPath = 0; give({ chips: 20 }, 'Шлях гравця пройдено'); }
   }
 }
 
