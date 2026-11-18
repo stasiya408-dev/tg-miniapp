@@ -2235,21 +2235,40 @@ SCREENS.settings = p => {
   <button style="background:#f99;width:100%" onclick="if(confirmReset()){}">Скинути прогрес (почати з нуля)</button>
   <div class="note">Прототип зберігає прогрес у браузері (localStorage).</div>`;
 };
-function saveExport() {
-  const o = { v: 1, state: S, fit: FIT, fits: FITS }, t = btoa(unescape(encodeURIComponent(JSON.stringify(o))));
-  try { navigator.clipboard.writeText(t).catch(() => { }); } catch (e) { }
-  modal(`<h3>Збереження</h3><div class="small">Скопійовано. Якщо ні, виділи й скопіюй текст вручну.</div><textarea style="width:100%;height:140px" readonly onclick="this.select()">${t}</textarea><button style="width:100%;margin-top:6px" onclick="closeModal()">Готово</button>`);
+const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 8192) s += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
+const unb64u = t => { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; const s = atob(t), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
+async function zip(str, mode) { const st = mode === 'c' ? new Blob([str]).stream().pipeThrough(new CompressionStream('deflate-raw')) : new Blob([str]).stream().pipeThrough(new DecompressionStream('deflate-raw')); return new Uint8Array(await new Response(st).arrayBuffer()); }
+const SV_CH = 3000;
+async function saveExport() {
+  const o = { v: 1, state: S, fit: FIT, fits: FITS }, t = b64u(await zip(JSON.stringify(o), 'c')), n = Math.ceil(t.length / SV_CH), parts = [];
+  for (let i = 0; i < n; i++) parts.push(`PM${i + 1}/${n}:` + t.slice(i * SV_CH, (i + 1) * SV_CH));
+  window._svParts = parts;
+  modal(`<h3>Збереження</h3><div class="small">${n === 1 ? 'Натисни «Копіювати», потім надішли текст повідомленням (не файлом).' : `Текст великий: ${n} частини. Копіюй кожну окремо й надсилай окремими повідомленнями, у будь-якому порядку.`}</div>
+  ${parts.map((x, i) => `<div style="margin-top:6px"><button class="y" style="width:100%" onclick="svCopy(${i},this)">📋 Копіювати частину ${i + 1}/${n}</button><textarea id="sv${i}" style="width:100%;height:50px" readonly onclick="this.select()">${x}</textarea></div>`).join('')}
+  <button style="width:100%;margin-top:6px" onclick="closeModal()">Готово</button>`);
+}
+function svCopy(i, b) {
+  const t = window._svParts[i], ta = $('sv' + i); let ok = false;
+  try { ta.focus(); ta.select(); ok = document.execCommand('copy'); } catch (e) { }
+  if (!ok) { try { navigator.clipboard.writeText(t).then(() => { b.textContent = '✓ Скопійовано'; }, () => { }); return; } catch (e) { } }
+  b.textContent = ok ? '✓ Скопійовано' : 'Виділи текст нижче і скопіюй вручну';
 }
 function saveImport() {
-  modal(`<h3>Вставити збереження</h3><div class="small">Встав текст, скопійований кнопкою «Скопіювати». Поточний прогрес буде замінено.</div><textarea id="saveIn" style="width:100%;height:120px"></textarea><button class="y" style="width:100%;margin-top:6px" onclick="saveApply()">Завантажити</button>`);
+  modal(`<h3>Вставити збереження</h3><div class="small">Встав увесь скопійований текст (усі частини підряд, можна по черзі). Поточний прогрес буде замінено.</div><textarea id="saveIn" style="width:100%;height:120px"></textarea><div class="small" id="saveInfo"></div><button class="y" style="width:100%;margin-top:6px" onclick="saveApply()">Завантажити</button>`);
+  $('saveIn').oninput = () => { const m = ($('saveIn').value.match(/PM\d+\/\d+:/g) || []), tot = m.length ? +m[0].split('/')[1].replace(':', '') : 0; $('saveInfo').textContent = tot ? `Частин: ${new Set(m).size} з ${tot}` : ''; };
 }
-function saveApply() {
+async function saveApply() {
   try {
-    const o = JSON.parse(decodeURIComponent(escape(atob($('saveIn').value.trim()))));
+    const txt = $('saveIn').value, re = /PM(\d+)\/(\d+):([A-Za-z0-9_-]+)/g, got = {}; let m, tot = 0;
+    while ((m = re.exec(txt))) { got[+m[1]] = m[3]; tot = +m[2]; }
+    if (!tot) throw 0;
+    let all = ''; for (let i = 1; i <= tot; i++) { if (!got[i]) { toast('Бракує частини ' + i + ' з ' + tot); return; } all += got[i]; }
+    const o = JSON.parse(new TextDecoder().decode(await zip2(unb64u(all))));
     localStorage.setItem('pm_state', JSON.stringify(o.state)); localStorage.setItem('pm_fit', JSON.stringify(o.fit || {})); localStorage.setItem('pm_fit_saved', JSON.stringify(o.fits || o.fit || {}));
     location.reload();
   } catch (e) { toast('Не вдалося: текст неповний або пошкоджений'); }
 }
+async function zip2(u8) { return new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer()); }
 function confirmReset() { modal(`<p>Скинути весь прогрес?</p><button style="background:#f99" onclick="localStorage.removeItem('pm_state');load();closeModal();stack=[{name:'create',p:{}}];render()">Так, скинути</button>`); }
 
 // ---------- СТАРТ ----------
