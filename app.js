@@ -221,24 +221,24 @@ function achTab(p) {
 }
 
 const DEF = () => ({
-  created: false, name: 'Гравець', gender: 'm', lvl: 12, xp: 400,
-  money: 125000, crystals: 2430, gold: 320, chips: 450, energy: 60, energyTs: Date.now(), ammo: 100, grenades: 2,
-  owned: ['hoodie', 'cap', 'glasses'], equipped: { eyes: 'glasses' },
-  inv: [{ uid: 1, id: 'i_belt' }, { uid: 2, id: 'i_scrap' }], uidN: 10,
+  ver: 2, created: false, name: 'Гравець', gender: 'm', lvl: 1, xp: 0,
+  money: 5000, crystals: 30, gold: 0, chips: 0, energy: 60, energyTs: Date.now(), ammo: 30, grenades: 0,
+  owned: ['glasses'], equipped: { eyes: 'glasses' },
+  inv: [], uidN: 10,
   weapons: ['w_bat'], weapon: 'w_bat',
   day: today(), daily: { fights: 0, raids: 0, market: 0, donate: 0, casino: 0, collect: 0, claimed: {}, chest: false },
   week: { fights: 0, raids: 0, races: 0, bags: 0, claimed: {} },
   ach: { bossKills: 0, bags: 0, raceWins: 0, pokerWins: 0, claimed: {} },
   mail: null, bosses: {}, raidStage: 1,
   car: { name: 'Буревій GT', stars: 3, parts: { engine: 3, exhaust: 2, susp: 3, brakes: 2, wheels: 3, turbo: 3 }, color: 'Червоний', sticker: 'Немає', view: 'Спереду' },
-  group: { member: false, lvl: 3, prog: 40 },
+  group: { member: false, lvl: 1, prog: 0 },
   login: { day: 0, last: '' },
   slots: { bet: 10 }, bonusGame: 0, pokerPath: 3,
   lots: [], orders: [], stall: null, vip: false, starsSpent: 0,
 });
 let S;
 function load() {
-  try { S = Object.assign(DEF(), JSON.parse(localStorage.getItem('pm_state') || '{}')); } catch (e) { S = DEF(); }
+  try { const raw = JSON.parse(localStorage.getItem('pm_state') || '{}'); S = Object.assign(DEF(), raw); if (raw.created && !raw.ver) S.legacy = true; S.ver = 2; } catch (e) { S = DEF(); }
   if (S.pokerTickets) { S.chips = (S.chips || 0) + S.pokerTickets * 50; } delete S.pokerTickets; // квитки покеру злито з фішками клубу
   if (!S.mail) S.mail = defMail();
   if (!S.st) S.st = {};
@@ -278,7 +278,8 @@ function give(r, why) {
   if (r.xp) lvlCheck();
   toast((why ? why + ': ' : '') + '+' + parts.join(', +'));
 }
-function lvlCheck() { while (S.xp >= S.lvl * 1000) { S.xp -= S.lvl * 1000; S.lvl++; toast('Новий рівень ' + S.lvl + '!'); } }
+const xpNeed = l => l * 500;
+function lvlCheck() { while (S.xp >= xpNeed(S.lvl)) { S.xp -= xpNeed(S.lvl); S.lvl++; toast('Новий рівень ' + S.lvl + '!'); } }
 function addItem(id, g) { const u = { uid: ++S.uidN, id }; if (g != null) u.g = g; S.inv.push(u); return u; }
 const EN_MIN = 4; // хвилин на 1 енергії: 1440/4 = 360 ⚡ на добу, тобто 6 повних запасів
 function energyTick() {
@@ -322,13 +323,42 @@ function back() { if (stack.length > 1) stack.pop(); render(); }
 function home() { stack = [{ name: 'home', p: {} }]; render(); }
 function cur() { return stack[stack.length - 1]; }
 function setP(k, v) { cur().p[k] = v; render(); }
+// ---------- ПОСТУПОВЕ ВІДКРИТТЯ КОНТЕНТУ ----------
+const hasCar = () => !!(S.legacy || (S.beat && S.beat.molot));
+// ключ: [рівень, чи потрібна машина, назва]
+const UNL = {
+  chat: [3, 0, '💬 Чат'], secondhand: [3, 0, '🧥 Секонд-хенд'], jobs: [3, 0, '💼 Робота'], events: [5, 0, '🏆 Події'],
+  slots: [5, 0, '🎰 Слоти'], club: [5, 0, '🎰 Ігровий клуб'], season: [7, 0, '🏆 Сезон'], market: [8, 0, '📈 Ринок і Аукціон'],
+  group: [10, 0, '👥 Групування'], bv: [10, 0, '🧵 Баба Валя'], district: [12, 0, '🏙 Райони'], poker: [15, 0, '🃏 Покер'],
+  flip: [20, 0, '🚗 Перекуп авто'], garage: [0, 1, '🔧 Транспорт'], races: [0, 1, '🏁 Гонки']
+};
+function lockOf(n) {
+  if (S.devAll) return ''; const u = UNL[n]; if (!u) return '';
+  if (u[1] && !hasCar()) return 'Відкриється після перемоги над другим босом (Молот): там ти отримаєш першу машину.';
+  if (u[0] && S.lvl < u[0]) return 'Відкриється на рівні ' + u[0] + ' (зараз ' + S.lvl + ').';
+  return '';
+}
+function lockedScreen(n, txt) {
+  const u = UNL[n] || [0, 0, n];
+  return `<div style="text-align:center;padding:60px 12px"><div style="font-size:64px">🔒</div><h2>${u[2]}</h2><div class="box">${txt}</div><div class="small">Грай далі: переможи босів, виконуй завдання й підвищуй рівень.</div><button class="y" style="width:100%;padding:12px;margin-top:10px" onclick="home()">◀ Назад у меню</button><button style="width:100%;margin-top:6px" onclick="showUnlocks()">📋 Що коли відкривається</button></div>`;
+}
+function showUnlocks() {
+  const rows = Object.entries(UNL).sort((a, b) => (a[1][1] ? 99 : a[1][0]) - (b[1][1] ? 99 : b[1][0])).map(([k, u]) => `<div class="bar sp small" style="padding:3px 0"><span>${lockOf(k) ? '🔒' : '✅'} ${u[2]}</span><b>${u[1] ? 'після 2-го боса' : 'рівень ' + u[0]}</b></div>`).join('');
+  modal(`<h3>Що коли відкривається</h3><div class="small">З самого початку: Профіль, Інвентар, Гардероб, Наліт (боси), Завдання, Пошта, Магазин.</div><div style="margin:6px 0">${rows}</div><button class="y" style="width:100%" onclick="closeModal()">Закрити</button>`);
+}
+function chatGo() { const l = lockOf('chat'); if (l) return toast('🔒 ' + l); cur().p.chat = true; render(); }
+function showTut() {
+  if (S.tut || !S.created) return; S.tut = 1; save();
+  modal(`<h3>👋 Ласкаво просимо в Потужне Місто!</h3><div class="row"><div class="f">1️⃣ Одягни героя в <b>Гардеробі</b></div></div><div class="row"><div class="f">2️⃣ Зайди в <b>Наліт</b> і переможи першого боса, Ель Торо</div></div><div class="row"><div class="f">3️⃣ Новий рівень відкриває нові розділи. Замок 🔒 підкаже коли</div></div><div class="row"><div class="f">🚗 Після другого боса отримаєш першу машину</div></div><button class="y" style="width:100%;margin-top:6px" onclick="closeModal()">Зрозуміло</button><button style="width:100%;margin-top:6px" onclick="closeModal();showUnlocks()">📋 Що коли відкривається</button>`);
+}
 let after = [];
 function render() {
   if (typeof spinning !== 'undefined' && spinning && cur().name === 'slots') return;
   energyTick(); save();
   const c = cur(); after = [];
   const scr = SCREENS[c.name];
-  $('app').innerHTML = scr(c.p);
+  const lk = lockOf(c.name);
+  $('app').innerHTML = lk ? lockedScreen(c.name, lk) : scr(c.p);
   const noBars = c.name === 'create';
   $('topbar').innerHTML = noBars ? '' : topbar(c.name);
   $('navbar').innerHTML = (c.name === 'home' || NAVS.includes(c.name)) ? navbar(c.name) : '';
@@ -356,7 +386,7 @@ function topbar(name) {
 }
 function navbar(a) {
   const b = [['profile', 'Профіль', '👤'], ['inventory', 'Інвентар', '🎒'], ['wardrobe', 'Гардероб', '👔'], ['garage', 'Транспорт', '🚗']];
-  return `<div class="navb">${b.map(([k, t, ic]) => `<button class="${a === k ? 'sel' : ''}" onclick="stack=[{name:'home',p:{}}];go('${k}')"><span class="ic">${ic}</span>${t}</button>`).join('')}</div>`;
+  return `<div class="navb">${b.map(([k, t, ic]) => `<button class="${a === k ? 'sel' : ''}" onclick="stack=[{name:'home',p:{}}];go('${k}')"><span class="ic">${lockOf(k) ? '🔒' : ic}</span>${t}</button>`).join('')}</div>`;
 }
 function tabs(list, curT, key, dots) {
   return `<div class="tabs">${list.map(([k, t]) => `<button style="position:relative" class="${curT === k ? 'y' : ''}" onclick="setP('${key || 'tab'}','${k}')">${t}${dots && dots[k] ? DOT : ''}</button>`).join('')}</div>`;
@@ -491,6 +521,7 @@ SCREENS.season = seasonScreen;
 SCREENS.home = () => {
   const unread = S.mail.filter(m => m.box === 'in' && (!m.read || m.gift)).length, cu = chTotal();
   after.push(() => {
+    if (!S.tut) setTimeout(showTut, 500);
     const box = $('homeBox'); if (!box) return;
     const Hh = Math.max(300, $('app').clientHeight - 14), oc = cur().p.chat; box.style.height = (oc ? Math.round(Hh * 0.45) : Hh + 12) + 'px'; if (oc) box.style.overflow = 'hidden';
     const hh = oc ? Math.round(Hh * 0.45) - 24 : Math.round((Hh - 70) * 0.9); $('homeDoll').innerHTML = `<div style="position:relative;display:inline-block"><div style="position:absolute;left:6%;right:6%;bottom:-6px;height:${Math.round(hh * 0.035)}px;background:radial-gradient(ellipse,rgba(10,0,20,.85),rgba(0,0,0,0) 70%);filter:blur(2px)"></div><div style="position:relative;filter:drop-shadow(0 0 6px rgba(255,120,60,.35))">${doll(hh)}</div></div>`; $('homeDoll').style.top = (oc ? 8 : Math.round(Hh - 44 - hh * 0.97)) + 'px';
@@ -500,9 +531,9 @@ SCREENS.home = () => {
       <button onclick="go('mail')">✉️ Пошта${unread ? `<span class="badge">${unread}</span>` : ''}</button>
       <button onclick="go('tasks')">☑ Завдання${dot(N.tasks())}</button>
       <button onclick="go('events')">🏆 Події</button>
-      <button onclick="cur().p.chat=true;render()">💬 Чат${cu ? `<span class="badge">${cu}</span>` : ''}</button>
+      <button onclick="chatGo()">${lockOf('chat') ? '🔒' : '💬'} Чат${cu ? `<span class="badge">${cu}</span>` : ''}</button>
       <button class="y" onclick="qaPick('L')" style="font-size:11px"><span style="filter:brightness(.25)">⚡</span> Швидкий доступ</button>
-      ${qaList('L').map(k => `<button onclick="qaGo('${k}')">${QA[k][0]}</button>`).join('')}
+      ${qaList('L').map(k => `<button onclick="qaGo('${k}')">${lockOf(QA[k][1]) ? '🔒 ' : ''}${QA[k][0]}</button>`).join('')}
     </div>
     <div style="position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse 85% 75% at 50% 50%,rgba(0,0,0,0) 55%,rgba(8,0,16,.55) 100%)"></div>
     <div id="homeDoll" style="position:absolute;left:0;right:0;top:0;text-align:center;z-index:2"></div>
@@ -510,7 +541,7 @@ SCREENS.home = () => {
       <button onclick="go('settings')">⚙</button>
       <button onclick="go('rewards')">🎁 Нагороди${dot(N.login())}</button>
       <button class="y" onclick="qaPick('R')" style="font-size:11px"><span style="filter:brightness(.25)">⚡</span> Швидкий доступ</button>
-      ${qaList('R').map(k => `<button onclick="qaGo('${k}')">${QA[k][0]}</button>`).join('')}
+      ${qaList('R').map(k => `<button onclick="qaGo('${k}')">${lockOf(QA[k][1]) ? '🔒 ' : ''}${QA[k][0]}</button>`).join('')}
     </div>
     ${cur().p.chat ? '' : `<button class="play" style="position:absolute;left:12px;right:12px;bottom:12px;padding:14px;font-size:22px;z-index:3" onclick="go('play')">ГРАТИ ▶${dot(N.bonus())}</button>`}
   </div>${cur().p.chat ? chatPanel(cur().p, true) : ''}`;
@@ -520,10 +551,10 @@ SCREENS.home = () => {
 const QA_D = { boss: 'Боси, рейди, рейтинг шкоди', dist: 'Атака на райони, 12 етапів', club: 'Слоти, покер, клубний день', slots: 'Барабани удачі за фішки', poker: 'Столи 10 / 50 / 500 / 1000 фішок', races: 'Траси, старт, нагороди', grace: 'Командні заїзди 5×5', jobs: 'Секонд-хенд, перекуп авто', sh: 'Завезення, полиці, зміни', market: 'Купити / продати, графіки цін', auction: 'Лоти гравців і біржа', shop: 'Кристали, золото, підписки', bv: 'Прошивка речей: ранг D…A++', season: 'Нагороди за активність, 30 рівнів', group: 'Твоя група, внески, гілки', inv: 'Твої речі', ward: 'Одяг і набори', garage: 'Авто, тюнінг, ремонт', weap: 'Зброя для боса', prof: 'Герой, досягнення' };
 const PLAY_EXTRA = [['✉ Пошта', 'mail', 'Листи й подарунки'], ['☑ Завдання', 'tasks', 'Щоденні, тижневі, досягнення'], ['🏆 Події', 'events', 'Події та турніри'], ['🎁 Нагороди', 'rewards', 'Щоденний вхід, подарунки'], ['⚙ Налаштування', 'settings', 'Звук, мова, розробник']];
 SCREENS.play = () => {
-  const row = (label, scr, d, onclick, dotH) => `<div class="row" style="position:relative" onclick="${onclick}">${dotH || ''}<div class="f"><b>${label}</b><div class="small">${d}</div></div><button class="y">▶</button></div>`;
+  const row = (label, scr, d, onclick, dotH) => { const lk = lockOf(scr); return `<div class="row" style="position:relative" onclick="${onclick}">${dotH || ''}<div class="f"><b>${lk ? '🔒 ' : ''}${label}</b><div class="small">${lk || d}</div></div><button class="${lk ? 'dis' : 'y'}">${lk ? '🔒' : '▶'}</button></div>`; };
   const bk = `<button class="y" style="width:100%;padding:12px;margin:4px 0" onclick="home()">◀ Назад у меню</button>`;
-  return bk + `<h2>ГРАТИ: усі розділи</h2><div class="small">Тут усі вкладки гри. Найчастіші можна винести на головний екран у «⚡ Швидкий доступ» (по 6 з кожного боку).</div>
-  ${Object.keys(QA).map(k => row(QA[k][0], k, QA_D[k] || '', `qaGo('${k}')`, k === 'club' ? dot(N.bonus()) : '')).join('')}
+  return bk + `<h2>ГРАТИ: усі розділи</h2><button style="width:100%;margin:4px 0" onclick="showUnlocks()">📋 Що коли відкривається</button><div class="small">Тут усі вкладки гри. Найчастіші можна винести на головний екран у «⚡ Швидкий доступ» (по 6 з кожного боку).</div>
+  ${Object.keys(QA).map(k => row(QA[k][0], QA[k][1], QA_D[k] || '', `qaGo('${k}')`, k === 'club' ? dot(N.bonus()) : '')).join('')}
   ${PLAY_EXTRA.map(([l, scr, d]) => row(l, scr, d, `go('${scr}')`)).join('')}` + bk;
 };
 
@@ -797,7 +828,7 @@ function buyWear(k, curr) {
 SCREENS.profile = () => {
   const s = stats();
   return `<h2>👤 Профіль</h2><div class="bar"><div>${doll(220)}</div><div class="f" style="flex:1">
-  <div class="box" style="${cosFrame() ? 'border:3px solid ' + cosFrame() : ''}"><b>${S.name}</b> ${cosTitle() ? '<span class="small">«' + cosTitle() + '»</span>' : ''} (${S.gender === 'm' ? 'чоловік' : 'жінка'})<br>Рівень ${S.lvl}<br><span onclick="go('tasks',{tab:'ach'})" style="cursor:pointer">🏅 <b>Досягнення: ${achPts()}</b> · ${achRank(achPts())[1]}</span><div class="prog"><i style="width:${S.xp / (S.lvl * 1000) * 100}%"></i></div><span class="small">${S.xp} / ${S.lvl * 1000} XP</span></div>
+  <div class="box" style="${cosFrame() ? 'border:3px solid ' + cosFrame() : ''}"><b>${S.name}</b> ${cosTitle() ? '<span class="small">«' + cosTitle() + '»</span>' : ''} (${S.gender === 'm' ? 'чоловік' : 'жінка'})<br>Рівень ${S.lvl}<br><span onclick="go('tasks',{tab:'ach'})" style="cursor:pointer">🏅 <b>Досягнення: ${achPts()}</b> · ${achRank(achPts())[1]}</span><div class="prog"><i style="width:${S.xp / xpNeed(S.lvl) * 100}%"></i></div><span class="small">${S.xp} / ${xpNeed(S.lvl)} XP</span></div>
   <div class="box"><b>⚔️ Бойова сила</b><br>Середній удар по босу: <b>${fmt(avgHit())}</b><br>Шкода по босах: +${s.dmg}% <span class="small">(речі, набори)</span><br>Крит: ${s.crit}% <span class="small">(подвійний удар)</span><br>Колекція: ${S.owned.length}/${Object.keys(WEAR).length} речей у гардеробі<hr>Сила: ${s.str}<br>Влучність: ${s.acc} <span class="small">(шанс рейду)</span><br>Удача: ${s.luck} <span class="small">(кращі знахідки)</span><br>Здоров'я: ${s.hp} <span class="small">(шанс рейду)</span><br>Зброя: ${(WEAPONS.find(w => w.id === S.weapon) || {}).name} (x${weaponMult()})<br>Авто: ${S.car.name}</div>
   ${profBox()}
   <div class="box small">Патрони: ${S.ammo} · Гранати: ${S.grenades}</div></div></div>
@@ -998,7 +1029,7 @@ function hitBoss(id) {
   st.hp = Math.max(0, st.hp - dmg); bump('bossDmg', dmg);
   let msg = `Ви завдали ${fmt(dmg)} шкоди босу ${b.name}${anote}${gnote}.`;
   if (st.hp === 0) {
-    if (!S.daily.bk) S.daily.bk = {}; S.ach.bossKills++; bump('bossKills'); st.hp = b.hp;
+    if (!S.daily.bk) S.daily.bk = {}; S.ach.bossKills++; bump('bossKills'); st.hp = b.hp; if (!S.beat) S.beat = {}; const hadCar = hasCar(); S.beat[b.id] = 1; if (!hadCar && hasCar()) setTimeout(() => modal('<h3>🚗 Перша машина!</h3><p>Ти переміг другого боса й отримав першу машину. Відкрились <b>Транспорт</b> (гараж, тюнінг) і <b>Гонки</b>.</p><button class="y" style="width:100%" onclick="closeModal()">Чудово</button>'), 400);
     if (!S.daily.bk[b.id]) { S.daily.bk[b.id] = 1; give({ ...b.rew, ammo: 30, grenades: 1 }, 'Бос переможений'); const it = pick(ITEMS); addItem(it.id, rollG()); msg += ` БОС ПЕРЕМОЖЕНИЙ! Трофей: ${it.name}. Бос відродився.`; }
     else { give({ money: Math.round(b.rew.money * 0.2) }, 'Повторне вбивство'); msg += ' Бос переможений ще раз: сьогодні повна нагорода вже отримана, лише 20% грошей. Бос відродився.'; }
   }
@@ -1554,7 +1585,7 @@ function flipTab() {
 SCREENS.jobs = jobsScreen;
 function jobsScreen(p) {
   const t = p.tab || 'sh';
-  return `<h2>💼 РОБОТА</h2>${tabs([['sh', '🧥 Секонд-хенд'], ['car', '🚗 Перекуп авто']], t)}` + (t === 'car' ? flipTab() : `<div class="box"><b>Початкова робота</b><div class="small">Зміни, завезення й полиці секонд-хенду. Підходить для старту, без вкладень.</div></div><button class="y" style="width:100%;padding:12px" onclick="go('secondhand')">Відкрити секонд-хенд ▶</button>${swHead()}${shHead()}<div class="box small">💡 Коли назбираєш грошей, переходь на 🚗 Перекуп авто: більше вкладень, більший прибуток.</div>`);
+  return `<h2>💼 РОБОТА</h2>${tabs([['sh', '🧥 Секонд-хенд'], ['car', '🚗 Перекуп авто']], t)}` + (t === 'car' ? (lockOf('flip') ? `<div class="box" style="text-align:center"><div style="font-size:40px">🔒</div><b>Перекуп авто</b><div class="small">${lockOf('flip')}</div></div>` : flipTab()) : `<div class="box"><b>Початкова робота</b><div class="small">Зміни, завезення й полиці секонд-хенду. Підходить для старту, без вкладень.</div></div><button class="y" style="width:100%;padding:12px" onclick="go('secondhand')">Відкрити секонд-хенд ▶</button>${swHead()}${shHead()}<div class="box small">💡 Коли назбираєш грошей, переходь на 🚗 Перекуп авто: більше вкладень, більший прибуток.</div>`);
 }
 // --- ПІДРОБІТОК: денні ліміти (free-to-play базові, pay-to-play більше + бонус доходу)
 const SH_BASE = { bags: 5, shifts: 4, search: 2, flips: 3 };
@@ -2241,7 +2272,7 @@ SCREENS.settings = p => {
   const t = p.tab || 'main';
   let h = `<h2>⚙ Налаштування</h2>${tabs([['main', 'Основні'], ['dev', '🛠 Розробник']], t)}`;
   if (t === 'dev') return h + `<div class="note">Тестові кнопки для перевірки прототипу. У грі їх не буде.</div>
-  <div class="box"><button class="y" style="width:100%;padding:10px" onclick="go('fit')">👔 Примірка одягу (підгонка речей на герої)</button></div>
+  <div class="box"><button class="${S.devAll ? 'g' : ''}" style="width:100%;padding:10px;margin-bottom:6px" onclick="S.devAll=!S.devAll;render()">🔓 Відкрити все (тест): ${S.devAll ? 'УВІМК' : 'вимк'}</button><button class="y" style="width:100%;padding:10px" onclick="go('fit')">👔 Примірка одягу (підгонка речей на герої)</button></div>
   <div class="box"><b>Валюта</b><div class="grid g2">
     <button class="y" onclick="give({money:1000000},'Розробник');render()">+1 000 000 💵</button>
     <button class="y" onclick="give({crystals:5000},'Розробник');render()">+5 000 💎</button>
@@ -2255,7 +2286,7 @@ SCREENS.settings = p => {
     <button onclick="S.daily.pk=0;S.daily.sb=0;S.daily.cp=0;S.daily.cpc={};S.daily.cs={};S.daily.chipsClaim=false;toast('Ліміти казино скинуто');render()">Скинути ліміти казино</button>
     <button onclick="S.day='';save();load();render()">Новий день</button>
     <button onclick="DISTS.forEach(D=>dRate(D.id,20000));render()">+ рейтинг районів</button>
-    <button onclick="S.xp+=S.lvl*1000;lvlCheck();render()">+1 рівень</button></div></div>`;
+    <button onclick="S.xp+=xpNeed(S.lvl);lvlCheck();render()">+1 рівень</button></div></div>`;
   return h + `<div class="box">Звук: <button onclick="toast('Заглушка')">Увімк</button> Музика: <button onclick="toast('Заглушка')">Увімк</button></div>
   <div class="box">Мова: Українська</div>
   <div class="box"><b>Перенос збереження</b><div class="small">Скопіюй з одного місця і встав в іншому (наприклад, з Claude у Telegram): прогрес, одяг і підгонка.</div><div class="grid g2"><button class="y" onclick="saveExport()">📤 Скопіювати</button><button onclick="saveImport()">📥 Вставити</button></div></div>
