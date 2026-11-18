@@ -677,8 +677,8 @@ SCREENS.home = () => {
   after.push(() => {
     if (!S.tut) setTimeout(showTut, 500);
     const box = $('homeBox'); if (!box) return;
-    const Hh = Math.max(300, $('app').clientHeight - 14), oc = cur().p.chat; box.style.height = (oc ? Math.round(Hh * 0.45) : Hh + 12) + 'px'; if (oc) box.style.overflow = 'hidden';
-    const hh = oc ? Math.round(Hh * 0.45) - 24 : Math.round((Hh - 70) * 0.9); $('homeDoll').innerHTML = `<div style="position:relative;display:inline-block"><div style="position:absolute;left:6%;right:6%;bottom:-6px;height:${Math.round(hh * 0.035)}px;background:radial-gradient(ellipse,rgba(10,0,20,.85),rgba(0,0,0,0) 70%);filter:blur(2px)"></div><div style="position:relative;filter:drop-shadow(0 0 6px rgba(255,120,60,.35))">${doll(hh)}</div></div>`; $('homeDoll').style.top = (oc ? 8 : Math.round(Hh - 44 - hh * 0.97)) + 'px';
+    const Hh = Math.max(300, $('app').clientHeight - 14), oc = cur().p.chat; box.style.height = (Hh + 12) + 'px';
+    const hh = Math.round((Hh - 70) * 0.9); $('homeDoll').innerHTML = `<div style="position:relative;display:inline-block"><div style="position:absolute;left:6%;right:6%;bottom:-6px;height:${Math.round(hh * 0.035)}px;background:radial-gradient(ellipse,rgba(10,0,20,.85),rgba(0,0,0,0) 70%);filter:blur(2px)"></div><div style="position:relative;filter:drop-shadow(0 0 6px rgba(255,120,60,.35))">${doll(hh)}</div></div>`; $('homeDoll').style.top = (oc ? 8 : Math.round(Hh - 44 - hh * 0.97)) + 'px';
   });
   return `<div id="homeBox" style="position:relative;background:url(img/home_bg.jpg) center bottom/cover no-repeat;border-radius:0;overflow:hidden;margin:-6px -6px 0">
     <div class="side" style="position:absolute;left:8px;top:12px;z-index:3">
@@ -697,8 +697,8 @@ SCREENS.home = () => {
       <button class="y" onclick="qaPick('R')" style="font-size:11px"><span style="filter:brightness(.25)">⚡</span> Швидкий доступ</button>
       ${qaList('R').map(k => `<button onclick="qaGo('${k}')">${lockOf(QA[k][1]) ? '🔒 ' : ''}${QA[k][0]}</button>`).join('')}
     </div>
-    ${cur().p.chat ? '' : `<button class="play" style="position:absolute;left:12px;right:12px;bottom:12px;padding:14px;font-size:22px;z-index:3" onclick="go('play')">ГРАТИ ▶${dot(N.bonus())}</button>`}
-  </div>${cur().p.chat ? chatPanel(cur().p, true) : ''}`;
+    ${false ? '' : `<button class="play" style="position:absolute;left:12px;right:12px;bottom:12px;padding:14px;font-size:22px;z-index:3" onclick="go('play')">ГРАТИ ▶${dot(N.bonus())}</button>`}
+  ${cur().p.chat ? `<div style="position:absolute;left:0;right:0;bottom:0;height:56%;z-index:6;overflow:auto;background:rgba(18,12,26,.96);border-top:2px solid #d8b25a;padding:6px;color:#eee">${chatPanel(cur().p, true)}</div>` : ''}</div>`;
 };
 
 
