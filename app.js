@@ -2248,4 +2248,8 @@ setInterval(() => {
   if (cur().name === 'races' && S.gr && S.gr.st === 'run' && !($('modal').style.display === 'flex')) render();
   if (newMsg && chatVisible() && !typing && $('modal').style.display !== 'flex') render();
 }, 2000);
-window.addEventListener('resize', () => render());
+// Не перемальовуємо екран, поки гравець вводить текст (в Telegram клавіатура міняє розмір вікна й закривала поле)
+const isTyping = () => { const ae = document.activeElement; return !!(ae && ['INPUT', 'TEXTAREA', 'SELECT'].includes(ae.tagName)); };
+let rzT = null, rzPend = false;
+window.addEventListener('resize', () => { clearTimeout(rzT); rzT = setTimeout(() => { if (isTyping()) { rzPend = true; return; } render(); }, 200); });
+document.addEventListener('focusout', () => { if (rzPend) setTimeout(() => { if (!isTyping()) { rzPend = false; render(); } }, 300); });
