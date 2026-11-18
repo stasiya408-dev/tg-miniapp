@@ -108,49 +108,145 @@ const TRACKS = [{ n: 'Прибережна', km: 4.2, laps: 3, req: 0 }, { n: '�
 
 // ---------- СТАН ----------
 // --- ДОСЯГНЕННЯ: очки (рівень досягнень видно всім у профілі) + 💎 за верхні щаблі
-const ACH_PTS = [5, 10, 15, 25, 40, 60, 90, 140];
-const ACH = [
-  ['⚔️ Бої', 'fights', 'Перемог у боях', [10, 50, 200, 1000, 5000, 20000, 100000]],
-  ['⚔️ Бої', 'raids', 'Рейдів пройдено', [5, 25, 100, 400, 1500, 5000]],
-  ['⚔️ Бої', 'bossKills', 'Босів переможено', [1, 5, 20, 60, 200, 1000], 50],
-  ['⚔️ Бої', 'bossDmg', 'Загальна шкода по босах', [100000, 1000000, 10000000, 50000000, 250000000, 1000000000]],
-  ['📈 Торгівля', 'sellN', 'Речей продано', [5, 25, 100, 500, 2000, 10000, 50000]],
-  ['📈 Торгівля', 'buyN', 'Речей куплено', [5, 25, 100, 500, 2000, 10000, 50000]],
-  ['📈 Торгівля', 'sellSum', 'Виручка з продажів, 💵', [10000, 100000, 1000000, 10000000, 100000000, 1000000000], 50],
-  ['📈 Торгівля', 'buySum', 'Витрачено на купівлі, 💵', [500, 3000, 15000, 60000, 250000, 1000000]],
-  ['📈 Торгівля', 'lotsSold', 'Лотів продано на аукціоні', [1, 10, 50, 200, 1000, 5000]],
-  ['💼 Робота', 'bags', 'Завезень відкрито', [5, 25, 100, 400, 1500, 5000, 20000]],
-  ['💼 Робота', 'shifts', 'Змін відпрацьовано', [5, 25, 100, 400, 1500, 5000, 20000]],
-  ['💼 Робота', 'jobEarn', 'Зароблено на підробітку, 💵', [10000, 100000, 1000000, 10000000, 50000000, 250000000]],
-  ['🎰 Казино', 'spins', 'Спінів у слотах', [20, 100, 500, 2500, 10000, 50000, 200000]],
-  ['🎰 Казино', 'slotWins', 'Виграшів у слотах', [10, 50, 250, 1000, 4000, 20000]],
-  ['🎰 Казино', 'slotBig', 'Найбільший виграш у слотах, x', [5, 20, 50, 100, 200, 500, 1000], 50],
-  ['🎰 Казино', 'slotBonus', 'Бонусних ігор у слотах', [1, 3, 10, 30, 100, 300]],
-  ['🎰 Казино', 'slotLost', 'Програно в слотах, 🎟', [200, 1000, 5000, 20000, 100000, 500000]],
-  ['🎰 Казино', 'slotWon', 'Виграно в слотах, 🎟', [200, 1000, 5000, 20000, 100000, 500000]],
-  ['🎰 Казино', 'pokerPlayed', 'Роздач у покер', [5, 25, 100, 400, 1500, 5000]],
-  ['🎰 Казино', 'pokerWins', 'Перемог у покер', [3, 15, 60, 200, 800, 3000]],
-  ['🎰 Казино', 'pokerWon', 'Виграно в покер, 🎟', [10000, 100000, 1000000, 10000000, 100000000, 1000000000]],
-  ['🏁 Гонки', 'racesN', 'Гонок пройдено', [5, 20, 80, 300, 1000, 5000]],
-  ['🏁 Гонки', 'raceWins', 'Перемог у гонках', [3, 10, 40, 150, 500, 2000], 50],
-  ['💰 Гроші', 'earned', 'Отримано грошей, 💵', [10000, 100000, 1000000, 10000000, 100000000, 1000000000], 50],
-  ['💰 Гроші', 'spent', 'Витрачено грошей, 💵', [10000, 100000, 1000000, 10000000, 100000000, 1000000000]],
-  ['💰 Гроші', 'crysEarned', 'Отримано кристалів, 💎', [100, 1000, 10000, 50000, 100000, 1000000]],
-  ['💰 Гроші', 'crysSpent', 'Витрачено кристалів, 💎', [100, 1000, 10000, 50000, 100000, 1000000]],
-  ['⭐ Прогрес', 'lvl', 'Рівень гравця', [15, 20, 30, 50, 75, 100, 150], 50],
-  ['⭐ Прогрес', 'tasks', 'Завдань виконано', [5, 25, 100, 400, 1500, 5000]],
-  ['⭐ Прогрес', 'logins', 'Днів входу в гру', [3, 7, 30, 100, 200, 365]],
-  ['⭐ Прогрес', 'owned', 'Речей у гардеробі', [4, 8, 15, 25, 40]],
-  ['🚗 Перекуп', 'flipN', 'Авто продано', [1, 5, 20, 50, 150, 500]],
-  ['🚗 Перекуп', 'flipProfit', 'Прибуток від перекупу, 💵', [10000, 100000, 1000000, 10000000, 50000000, 250000000], 50],
-  ['💼 Робота', 'swlvl', 'Рівень складу', [2, 4, 6, 8, 10, 15]],
-  ['🚗 Перекуп', 'fllvl', 'Рівень перекупа', [2, 4, 6, 8, 10, 15]],
-  ['🗺 Райони', 'distTakes', 'Районів захоплено', [1, 3, 10, 30, 100]],
-  ['🗺 Райони', 'distDays', 'Діб володіння районом', [1, 7, 30, 100, 365, 1000], 50],
-  ['🗺 Райони', 'distRating', 'Найвищий рейтинг району', [500, 2000, 10000, 30000, 60000, 100000]],
-  ['👥 Клан', 'donated', 'Внесок у групування (очки)', [10, 50, 250, 1000, 5000, 25000]],
-];
-const ACH_RANKS = [[0, 'Новачок'], [100, 'Вуличний'], [300, 'Бандит'], [700, 'Авторитет'], [1500, 'Бос'], [3000, 'Легенда']];
+const ACH_PTS = [5, 10, 15, 25, 40, 60, 90, 140, 200, 300, 450, 700];
+// драбини ступенів
+const LD = {
+  n: [1, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000],
+  s: [1, 3, 5, 10, 25, 50, 100, 250, 500, 1000],
+  t: [1, 2, 3, 5, 10, 20, 30, 50],
+  m: [1000, 10000, 50000, 100000, 500000, 1000000, 5000000, 10000000, 100000000, 1000000000],
+  c: [10, 50, 100, 250, 500, 1000, 5000, 10000, 50000, 100000, 500000, 1000000],
+  g: [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000],
+  b: [100, 500, 1000, 5000, 10000, 50000, 100000, 500000, 1000000, 5000000],
+  L: [2, 3, 5, 7, 10, 15, 20, 30, 50, 75, 100],
+  d: [1, 3, 7, 14, 30, 60, 100, 200, 365, 500],
+  x: [10, 100, 500, 1000, 5000, 10000, 50000, 100000]
+};
+const ACH = [];
+const A = (cat, key, label, ld, flag) => ACH.push([cat, key, label, Array.isArray(ld) ? ld : LD[ld], flag]);
+// ⚔️ Бої
+A('⚔️ Бої', 'fights', 'Перемог у боях', [10, 50, 200, 1000, 5000, 20000, 100000]);
+A('⚔️ Бої', 'raids', 'Рейдів пройдено', [5, 25, 100, 400, 1500, 5000]);
+A('⚔️ Бої', 'distStages', 'Етапів атаки на район пройдено', 'n');
+A('⚔️ Бої', 'weapOwned', 'Зброї у власності', [2, 3, 4, 5]);
+// 💀 Боси
+A('💀 Боси', 'bossKills', 'Босів переможено', [1, 5, 20, 60, 200, 1000], 50);
+A('💀 Боси', 'bossDmg', 'Загальна шкода по босах', [100000, 1000000, 10000000, 50000000, 250000000, 1000000000, 5000000000, 25000000000]);
+A('💀 Боси', 'bossHits', 'Ударів по босах', 'n');
+A('💀 Боси', 'bossCrits', 'Критичних ударів', 'n');
+A('💀 Боси', 'grenUsed', 'Гранат використано в бою', 's');
+A('💀 Боси', 'kill_toro', 'Ель Торо переможено', 's');
+A('💀 Боси', 'kill_molot', 'Молота переможено', 's');
+A('💀 Боси', 'kill_vipera', 'Ла Віперу переможено', 's');
+A('💀 Боси', 'kill_karlo', 'Дона Карло переможено', 's');
+A('💀 Боси', 'kill_senator', 'Сенатора переможено', 's');
+// 📈 Торгівля
+A('📈 Торгівля', 'sellN', 'Речей продано', [5, 25, 100, 500, 2000, 10000, 50000]);
+A('📈 Торгівля', 'buyN', 'Речей куплено', [5, 25, 100, 500, 2000, 10000, 50000]);
+A('📈 Торгівля', 'sellSum', 'Виручка з продажів, 💵', [10000, 100000, 1000000, 10000000, 100000000, 1000000000], 50);
+A('📈 Торгівля', 'buySum', 'Витрачено на купівлі, 💵', [500, 3000, 15000, 60000, 250000, 1000000, 10000000, 100000000]);
+A('📈 Торгівля', 'lotsPosted', 'Лотів виставлено на аукціон', 'n');
+A('📈 Торгівля', 'lotsSold', 'Лотів продано на аукціоні', [1, 10, 50, 200, 1000, 5000]);
+// 💼 Робота
+A('💼 Робота', 'bags', 'Завезень відкрито', [5, 10, 30, 50, 100, 400, 1500, 5000, 20000]);
+A('💼 Робота', 'shifts', 'Змін відпрацьовано', [5, 25, 100, 400, 1500, 5000, 20000]);
+A('💼 Робота', 'jobEarn', 'Зароблено на підробітку, 💵', [10000, 100000, 1000000, 10000000, 50000000, 250000000]);
+A('💼 Робота', 'swlvl', 'Рівень секонд-хенду (склад)', [2, 3, 5, 7, 10, 15]);
+// 🎁 Знахідки
+A('🎁 Знахідки', 'itemsFound', 'Речей знайдено', 'n');
+A('🎁 Знахідки', 'itemsRare', 'Рідкісних речей (клас B і вище)', 's');
+A('🎁 Знахідки', 'itemsEpic', 'Епічних речей (клас A і вище)', 's');
+A('🎁 Знахідки', 'itemsLegend', 'Легендарних речей (A+ і вище)', 't');
+A('🎁 Знахідки', 'invN', 'Речей в інвентарі одночасно', [5, 10, 25, 50, 100, 200, 500]);
+// 🧵 Баба Валя
+A('🧵 Баба Валя', 'bvN', 'Прошивок зроблено', 'n');
+A('🧵 Баба Валя', 'bvUp', 'Вдалих прошивок (ранг вгору)', 's');
+A('🧵 Баба Валя', 'bvDown', 'Невдалих прошивок (ранг вниз)', 's');
+A('🧵 Баба Валя', 'bvSpent', 'Витрачено на прошивки, 💎', 'x');
+// 🎰 Слоти
+A('🎰 Слоти', 'spins', 'Спінів у слотах', [20, 100, 500, 2500, 10000, 50000, 200000]);
+A('🎰 Слоти', 'slotWins', 'Виграшів у слотах', [10, 50, 250, 1000, 4000, 20000]);
+A('🎰 Слоти', 'slotBig', 'Найбільший виграш у слотах, x', [5, 20, 50, 100, 200, 500, 1000], 50);
+A('🎰 Слоти', 'slotX10', 'Виграшів x10 і більше', 's');
+A('🎰 Слоти', 'slotX50', 'Виграшів x50 і більше', 't');
+A('🎰 Слоти', 'slotBonus', 'Бонусних ігор у слотах', [1, 3, 10, 30, 100, 300]);
+A('🎰 Слоти', 'bonusWon', 'Виграно в бонусних іграх, 🎟', 'b');
+A('🎰 Слоти', 'slotBet', 'Поставлено в слотах, 🎟', 'b');
+A('🎰 Слоти', 'slotLost', 'Програно в слотах, 🎟', [200, 1000, 5000, 20000, 100000, 500000]);
+A('🎰 Слоти', 'slotWon', 'Виграно в слотах, 🎟', [200, 1000, 5000, 20000, 100000, 500000]);
+// 🃏 Покер
+A('🃏 Покер', 'pokerPlayed', 'Роздач у покер', [5, 25, 100, 400, 1500, 5000]);
+A('🃏 Покер', 'pokerWins', 'Перемог у покер', [3, 15, 60, 200, 800, 3000]);
+A('🃏 Покер', 'pokerWon', 'Виграно в покер, 🎟', [10000, 100000, 1000000, 10000000, 100000000, 1000000000]);
+A('🃏 Покер', 'pokerSpent', 'Фішок витрачено в покері', 'b');
+A('🃏 Покер', 'pkPair', 'Зібрано: Пара', 'n');
+A('🃏 Покер', 'pkTwo', 'Зібрано: Дві пари', 'n');
+A('🃏 Покер', 'pkTrips', 'Зібрано: Трійка', 'n');
+A('🃏 Покер', 'pkStr', 'Зібрано: Стріт', 's');
+A('🃏 Покер', 'pkFlush', 'Зібрано: Флеш', 's');
+A('🃏 Покер', 'pkFull', 'Зібрано: Фул-хаус', 's');
+A('🃏 Покер', 'pkQuads', 'Зібрано: Каре', 't');
+A('🃏 Покер', 'pkSF', 'Зібрано: Стріт-флеш', 't');
+// 🎟 Клуб
+A('🎟 Клуб', 'chipsEarned', 'Отримано фішок, 🎟', 'b');
+A('🎟 Клуб', 'chipsSpent', 'Витрачено фішок, 🎟', 'b');
+A('🎟 Клуб', 'chipsClaimN', 'Днів із щоденними фішками', 'd');
+A('🎟 Клуб', 'clubDays', 'Днів із повним клубним днем (45 очок)', 'd');
+A('🎟 Клуб', 'clubShopN', 'Покупок у крамниці клубу', 'n');
+A('🎟 Клуб', 'cosN', 'Куплено косметики клубу', [1, 2, 3, 5, 7, 9]);
+// 🏁 Гонки
+A('🏁 Гонки', 'racesN', 'Гонок пройдено', [1, 5, 10, 20, 80, 300, 1000, 5000]);
+A('🏁 Гонки', 'raceWins', 'Перемог у гонках', [1, 3, 10, 40, 150, 500, 2000], 50);
+A('🏁 Гонки', 'raceTop3', 'Подіумів (місця 1-3)', 'n');
+A('🏁 Гонки', 'partUp', 'Покращень деталей авто', 'n');
+A('🏁 Гонки', 'carParts', 'Сума рівнів деталей авто', [10, 15, 20, 30, 40, 50, 60]);
+A('🏁 Гонки', 'carStars', 'Зірок авто', [1, 2, 3, 4, 5]);
+A('🏁 Гонки', 'carRepairs', 'Ремонтів авто', 's');
+// 🚗 Перекуп
+A('🚗 Перекуп', 'flipN', 'Авто продано', [1, 5, 20, 50, 150, 500]);
+A('🚗 Перекуп', 'flipProfit', 'Прибуток від перекупу, 💵', [10000, 100000, 1000000, 10000000, 50000000, 250000000], 50);
+A('🚗 Перекуп', 'fllvl', 'Рівень перекупа', [2, 3, 5, 7, 10, 15]);
+// 🗺 Райони
+A('🗺 Райони', 'distTakes', 'Районів захоплено', [1, 3, 10, 30, 100]);
+A('🗺 Райони', 'distDays', 'Діб володіння районом', [1, 7, 30, 100, 365, 1000], 50);
+A('🗺 Райони', 'distRating', 'Найвищий рейтинг району', [500, 2000, 10000, 30000, 60000, 100000]);
+// 👥 Клан
+A('👥 Клан', 'donated', 'Внесок у групування (очки)', [10, 50, 250, 1000, 5000, 25000]);
+A('👥 Клан', 'donateN', 'Внесків у групування', 'n');
+A('👥 Клан', 'clanLvl', 'Рівень групування', [2, 5, 10, 20, 30, 50, 75, 100]);
+A('👥 Клан', 'nodes', 'Вузлів розвитку вивчено', [1, 3, 5, 10, 20, 30, 50, 75, 99]);
+A('👥 Клан', 'nodeRace', 'Вузлів гілки «Гонщики»', [1, 3, 5, 10, 15, 20, 30, 40, 50]);
+A('👥 Клан', 'nodeFight', 'Вузлів гілки «Бійці»', [1, 3, 5, 10, 15, 20, 30, 40, 50]);
+A('👥 Клан', 'nodeTrade', 'Вузлів гілки «Торговці»', [1, 3, 5, 10, 15, 20, 30, 40, 50]);
+// 💬 Спілкування
+A('💬 Спілкування', 'chatMsgs', 'Повідомлень у чаті', 'n');
+A('💬 Спілкування', 'mailGifts', 'Подарунків з пошти забрано', 's');
+// 💰 Гроші
+A('💰 Гроші', 'earned', 'Отримано грошей, 💵', [10000, 100000, 1000000, 10000000, 100000000, 1000000000, 10000000000], 50);
+A('💰 Гроші', 'spent', 'Витрачено грошей, 💵', [10000, 100000, 1000000, 10000000, 100000000, 1000000000, 10000000000]);
+A('💰 Гроші', 'crysEarned', 'Отримано кристалів, 💎', 'c');
+A('💰 Гроші', 'crysSpent', 'Витрачено кристалів, 💎', 'c');
+A('💰 Гроші', 'goldEarned', 'Отримано золотих прикрас, 🟡', 'g');
+A('💰 Гроші', 'goldSpent', 'Витрачено золотих прикрас, 🟡', 'g');
+A('💰 Гроші', 'energySpent', 'Витрачено енергії, ⚡', 'x');
+A('💰 Гроші', 'starsN', 'Покупок за Telegram Stars', 't');
+A('💰 Гроші', 'starsSum', 'Витрачено Stars, ⭐', [50, 100, 500, 1000, 5000, 10000]);
+// ⭐ Прогрес
+A('⭐ Прогрес', 'lvl', 'Рівень гравця', [5, 10, 15, 20, 30, 50, 75, 100, 150], 50);
+A('⭐ Прогрес', 'xpEarned', 'Отримано досвіду', 'x');
+A('⭐ Прогрес', 'tasks', 'Завдань виконано', [5, 25, 100, 400, 1500, 5000]);
+A('⭐ Прогрес', 'dailyChests', 'Щоденних скринь', 'd');
+A('⭐ Прогрес', 'logins', 'Днів входу в гру', [1, 3, 7, 14, 30, 100, 200, 365]);
+A('⭐ Прогрес', 'streakMax', 'Входів поспіль', [2, 3, 5, 7, 14, 30, 60, 100]);
+A('⭐ Прогрес', 'owned', 'Речей у гардеробі', [4, 8, 15, 25, 40]);
+A('⭐ Прогрес', 'outfits', 'Змін одягу', 'n');
+// 🏆 Сезон
+A('🏆 Сезон', 'spClaims', 'Нагород сезонного пропуску', [1, 5, 10, 25, 50, 100, 250, 500]);
+A('🏆 Сезон', 'spMax', 'Найвищий рівень сезонного пропуску', [1, 5, 10, 15, 20, 25, 30]);
+const ACH_CAT_NOCR = ['🎰', '🃏', '🎟'];
+const ACH_MAXPTS = () => ACH.reduce((s, a) => s + a[3].reduce((t, g, i) => t + ACH_PTS[i], 0), 0);
+const ACH_TIERS = () => ACH.reduce((s, a) => s + a[3].length, 0);
+const ACH_RANKS = [[0, 'Новачок'], [0.02, 'Вуличний'], [0.07, 'Бандит'], [0.18, 'Авторитет'], [0.35, 'Бос'], [0.6, 'Легенда'], [0.9, 'Король міста'], [1, '👑 FULL']];
 // --- СЕЗОННИЙ ПРОПУСК (місяць): очки за активність, безкоштовна й платна гілка
 const SP_PTS = { fights: 10, racesN: 8, raids: 5, shifts: 4, bags: 3, flipN: 6, lotsSold: 3 }, SP_LV = 30, SP_PER = 100, SP_BUY = 40;
 function spS() { const m = new Date().toISOString().slice(0, 7); if (!S.sp || S.sp.m !== m) { S.sp = { m, pts: 0, fr: {}, pr: {} }; S.sprem = 0; } return S.sp; }
@@ -174,7 +270,7 @@ function spRew(l, prem) {
 function spTxt(r) { return Object.entries(r).map(([k, v]) => k === 'item' ? IT[v[0]].name + ' ' + GRD[v[1]] : fmt(v) + ' ' + ({ money: '💵', crystals: '💎', gold: '🟡', chips: '🎟', ammo: '🔫', grenades: '💣', energy: '⚡' }[k])).join(' · '); }
 function spClaim(l, prem) {
   const sp = spS(), box = prem ? sp.pr : sp.fr; if (box[l] || spLvl() < l || (prem && !S.sprem)) return;
-  box[l] = 1; const r = { ...spRew(l, prem) }; const it = r.item; delete r.item; if (Object.keys(r).length) give(r, 'Сезонний пропуск'); if (it) { addItem(it[0], it[1]); toast('Річ: ' + IT[it[0]].name + ' ' + GRD[it[1]]); } render();
+  box[l] = 1; bump('spClaims'); bump('spMax', spLvl(), 'max'); const r = { ...spRew(l, prem) }; const it = r.item; delete r.item; if (Object.keys(r).length) give(r, 'Сезонний пропуск'); if (it) { addItem(it[0], it[1]); toast('Річ: ' + IT[it[0]].name + ' ' + GRD[it[1]]); } render();
 }
 function spBuyLvl() { if (spLvl() >= SP_LV) return; if (!pay('crystals', SP_BUY)) return; spS().pts = (spLvl() + 1) * SP_PER; render(); }
 function seasonScreen() {
@@ -190,30 +286,41 @@ function seasonScreen() {
   return h;
 }
 function bump(k, n, mode) { if (!S.st) S.st = {}; n = n === undefined ? 1 : n; if (mode === 'max') S.st[k] = Math.max(S.st[k] || 0, n); else S.st[k] = (S.st[k] || 0) + n; if (SP_PTS[k] && mode !== 'max' && n > 0) spS().pts += SP_PTS[k]; achScan(); }
-const stV = k => k === 'swlvl' ? swLvl() : k === 'fllvl' ? flLvl() : k === 'lvl' ? S.lvl : k === 'owned' ? S.owned.length : (S.st && S.st[k]) || 0;
-const achCr = (a, i) => { if (a[0] === '🎰 Казино') return 0; const k = a[3].length - 1 - i; return k === 0 ? (a[4] ? 15 : 8) : k === 1 ? 4 : k === 2 ? 2 : k === 3 ? 1 : 0; };
+const STSP = { swlvl: () => swLvl(), fllvl: () => flLvl(), lvl: () => S.lvl, owned: () => S.owned.length, invN: () => Math.max(S.inv.length, (S.st && S.st.invN) || 0), clanLvl: () => (S.group && S.group.member ? S.group.lvl : 0), carParts: () => partsTot(), carStars: () => S.car.stars || 0, weapOwned: () => S.weapons.length, spMax: () => Math.max((S.st && S.st.spMax) || 0, S.sp ? spLvl() : 0) };
+const stV = k => STSP[k] ? STSP[k]() : (S.st && S.st[k]) || 0;
+const achCr = (a, i) => { if (ACH_CAT_NOCR.some(c => a[0].startsWith(c))) return 0; const k = a[3].length - 1 - i; return k === 0 ? (a[4] ? 15 : 8) : k === 1 ? 4 : k === 2 ? 2 : k === 3 ? 1 : 0; };
 function achPts() { let p = 0; ACH.forEach(a => { const v = stV(a[1]); a[3].forEach((g, i) => { if (v >= g) p += ACH_PTS[i]; }); }); return p; }
-function achRank(p) { let r = ACH_RANKS[0]; ACH_RANKS.forEach(x => { if (p >= x[0]) r = x; }); return r; }
+const achPct = () => achPts() / ACH_MAXPTS();
+function achRank(p) { const f = p / ACH_MAXPTS(); let r = ACH_RANKS[0]; ACH_RANKS.forEach(x => { if (f >= x[0] - 1e-9) r = x; }); return r; }
+function achDone() { let n = 0; ACH.forEach(a => { const v = stV(a[1]); a[3].forEach(g => { if (v >= g) n++; }); }); return n; }
 function achScan(silent) {
+  if (S.ach.v !== 2) { S.ach.v = 2; S.ach.seen = undefined; S.ach.cl = {}; }
   if (!S.ach.seen) { S.ach.seen = {}; silent = true; }
-  ACH.forEach(a => { const v = stV(a[1]); a[3].forEach((g, i) => { const key = a[1] + i; if (v >= g && !S.ach.seen[key]) { S.ach.seen[key] = 1; if (!silent) toast(`🏅 Досягнення: ${a[2]} ${fmtG(g)} · +${ACH_PTS[i]} очок${achCr(a, i) ? ' · 💎' + achCr(a, i) + ' у «Завданнях»' : ''}`); } }); });
+  if (!S.st) S.st = {}; S.st.invN = Math.max(S.st.invN || 0, S.inv.length);
+  const fresh = [];
+  ACH.forEach(a => { const v = stV(a[1]); a[3].forEach((g, i) => { const key = a[1] + i; if (v >= g && !S.ach.seen[key]) { S.ach.seen[key] = 1; if (!silent) { fresh.push([a, g, i]); (S.ach.recent = S.ach.recent || []).unshift([a[2], g, i]); S.ach.recent.length = Math.min(S.ach.recent.length, 5); } } }); });
+  fresh.slice(0, 3).forEach(([a, g, i]) => toast(`🏅 Досягнення: ${a[2]} ${fmtG(g)} · +${ACH_PTS[i]} очок${achCr(a, i) ? ' · 💎' + achCr(a, i) + ' у «Завданнях»' : ''}`));
+  if (fresh.length > 3) toast(`🏅 І ще ${fresh.length - 3} нових досягнень (вкладка «Завдання» → «Досягнення»)`);
 }
 const fmtG = g => g >= 1e9 ? g / 1e9 + ' млрд' : g >= 1e6 ? g / 1e6 + ' млн' : g >= 1e3 ? g / 1e3 + ' тис.' : g;
 function achClaimable() { return ACH.some(a => a[3].some((g, i) => stV(a[1]) >= g && achCr(a, i) > 0 && !(S.ach.cl || {})[a[1] + i])); }
-function claimAch(key) { const a = ACH.find(x => key.startsWith(x[1]) && /^\d$/.test(key.slice(x[1].length))); if (!a) return; const i = +key.slice(a[1].length); if (stV(a[1]) < a[3][i]) return; if (!S.ach.cl) S.ach.cl = {}; if (S.ach.cl[key]) return; S.ach.cl[key] = 1; give({ crystals: achCr(a, i) }, 'Досягнення'); render(); }
+function claimAch(key) { const a = ACH.find(x => x[3].some((g, j) => x[1] + j === key)); if (!a) return; const i = +key.slice(a[1].length); if (stV(a[1]) < a[3][i]) return; if (!S.ach.cl) S.ach.cl = {}; if (S.ach.cl[key]) return; S.ach.cl[key] = 1; give({ crystals: achCr(a, i) }, 'Досягнення'); render(); }
 function claimAllAch() { ACH.forEach(a => a[3].forEach((g, i) => { const key = a[1] + i; if (stV(a[1]) >= g && achCr(a, i) > 0 && !(S.ach.cl || {})[key]) { if (!S.ach.cl) S.ach.cl = {}; S.ach.cl[key] = 1; give({ crystals: achCr(a, i) }, 'Досягнення'); } })); render(); }
 function achHeader() {
-  const p = achPts(), r = achRank(p), nx = ACH_RANKS.find(x => x[0] > p);
-  return `<div class="box" style="text-align:center"><div style="font-size:30px">🏅 ${p}</div><b>Рівень досягнень · ${r[1]}</b>${nx ? `<div class="prog"><i style="width:${(p - r[0]) / (nx[0] - r[0]) * 100}%"></i></div><span class="small">до звання «${nx[1]}»: ще ${nx[0] - p} очок</span>` : '<div class="small">Максимальне звання!</div>'}<div class="small">Цей рівень бачать усі гравці у твоєму профілі.</div></div>`;
+  const p = achPts(), mx = ACH_MAXPTS(), f = p / mx, r = achRank(p), nx = ACH_RANKS.find(x => x[0] > f + 1e-9), done = achDone(), tot = ACH_TIERS();
+  return `<div class="box" style="text-align:center"><div style="font-size:30px">🏅 ${fmt(p)}</div><b>${r[1]}</b> <span class="small">· ${(f * 100).toFixed(1)}% усіх досягнень</span><div class="prog"><i style="width:${f * 100}%"></i></div>
+  <div class="small">Отримано ${fmt(done)} з ${fmt(tot)} досягнень · ${fmt(p)} з ${fmt(mx)} очок</div>${nx ? `<div class="small">До звання «${nx[1]}»: ще ${fmt(Math.ceil(nx[0] * mx - p))} очок</div>` : '<div class="small">Максимальне звання! Ти один із найкращих гравців міста.</div>'}<div class="small">Звання й відсоток бачать усі гравці у твоєму профілі.</div></div>`;
 }
+function achCatStat(cat) { let d = 0, t = 0; ACH.forEach(a => { if (cat && a[0] !== cat) return; const v = stV(a[1]); a[3].forEach(g => { t++; if (v >= g) d++; }); }); return [d, t]; }
 function achTab(p) {
   const cats = [...new Set(ACH.map(a => a[0]))], c = p.ac || 'all';
   const pend = achClaimable();
-  let h = achHeader() + `<div class="bar" style="margin:4px 0"><button class="${c === 'all' ? 'sel' : ''}" onclick="setP('ac','all')">Усі</button>${cats.map(x => `<button class="${c === x ? 'sel' : ''}" onclick="setP('ac','${x}')">${x.split(' ')[0]}</button>`).join('')}</div>${pend ? '<button class="y" style="width:100%;margin-bottom:4px" onclick="claimAllAch()">🎁 Забрати всі нагороди 💎</button>' : ''}`;
-  const rows = ACH.filter(a => c === 'all' || a[0] === c).map(a => {
+  let h = achHeader() + `<div class="bar" style="margin:4px 0"><button class="${c === 'all' ? 'sel' : ''}" onclick="setP('ac','all')">Усі</button>${cats.map(x => `<button class="${c === x ? 'sel' : ''}" onclick="setP('ac','${x}')">${x.split(' ')[0]}</button>`).join('')}</div>${c !== 'all' ? (() => { const [d, t] = achCatStat(c); return `<div class="box small"><b>${c}</b>: ${d} з ${t} (${Math.round(d / t * 100)}%)<div class="prog"><i style="width:${d / t * 100}%"></i></div></div>`; })() : ''}${pend ? '<button class="y" style="width:100%;margin-bottom:4px" onclick="claimAllAch()">🎁 Забрати всі нагороди 💎</button>' : ''}`;
+  const sk = a => { const v = stV(a[1]), g = a[3], cl = S.ach.cl || {}; if (g.some((x, j) => v >= x && achCr(a, j) > 0 && !cl[a[1] + j])) return 3; const i = g.findIndex(x => v < x); return i < 0 ? 0 : 1 + v / g[i]; };
+  const rows = ACH.filter(a => c === 'all' || a[0] === c).sort((a, b) => sk(b) - sk(a)).map(a => {
     const v = stV(a[1]), g = a[3]; let i = g.findIndex((x, j) => v < x || (achCr(a, j) > 0 && !(S.ach.cl || {})[a[1] + j])); const done = i < 0; if (done) i = g.length - 1;
     const reached = v >= g[i], cr = achCr(a, i), cl = (S.ach.cl || {})[a[1] + i];
-    const dots = g.map((x, j) => v >= x ? '●' : '○').join('');
+    const dots = g.map((x, j) => v >= x ? '●' : '○').join('') + ' ' + g.filter(x => v >= x).length + '/' + g.length;
     return `<div class="row" style="position:relative">${reached && cr && !cl ? DOT : ''}<div class="f"><b>${a[2]}</b> <span class="small">${dots}</span><div class="prog"><i style="width:${Math.min(1, v / g[i]) * 100}%"></i></div><span class="small">${fmtG(Math.min(v, g[i]))} / ${fmtG(g[i])} · +${ACH_PTS[i]} очок${cr ? ' · +' + cr + ' 💎' : ''}</span></div>
     ${reached && cr && !cl ? `<button class="y" onclick="claimAch('${a[1] + i}')">Забрати</button>` : reached ? '<button class="g" disabled>✓</button>' : '<span class="small">' + a[0].split(' ')[0] + '</span>'}</div>`;
   }).join('');
@@ -245,7 +352,54 @@ function load() {
   if (!S.ach.seen) achScan(true);
   if (S.day !== today()) { S.day = today(); S.daily = DEF().daily; Object.values(S.bosses).forEach(b => b.tries = bossMax()); }
 }
-function save() { try { localStorage.setItem('pm_state', JSON.stringify(S)); } catch (e) {} }
+// ---------- НАДІЙНЕ ЗБЕРЕЖЕННЯ: localStorage + Telegram CloudStorage ----------
+const TGW = window.Telegram && Telegram.WebApp;
+const CS = TGW && TGW.CloudStorage && TGW.isVersionAtLeast && TGW.isVersionAtLeast('6.9') ? TGW.CloudStorage : null;
+const csSet = (k, v) => new Promise(r => { try { CS.setItem(k, v, (e, ok) => r(!e && !!ok)); } catch (e) { r(false); } });
+const csGet = ks => new Promise(r => { try { CS.getItems(ks, (e, v) => r(e ? null : v)); } catch (e) { r(null); } });
+const csDel = ks => new Promise(r => { try { CS.removeItems(ks, () => r()); } catch (e) { r(); } });
+const SAVE_CH = 3500;
+let lastJ = '', cloudT = null, cloudBusy = false, cloudN = 0;
+const stateJ = () => JSON.stringify(S, (k, v) => k === 'savedAt' ? undefined : v);
+let restoring = !!CS;
+function save() {
+  if (restoring) return;
+  try {
+    const j = stateJ();
+    if (j !== lastJ) { lastJ = j; S.savedAt = Date.now(); localStorage.setItem('pm_state', JSON.stringify(S)); schedCloud(); schedUp(); }
+  } catch (e) { }
+}
+// дзеркало в базу артефакта (лише всередині Claude): звідти я забираю стан і вшиваю в збірку Telegram
+async function stateUpload() { try { if (!window.claude || !claude.use || !S || !S.created) return; const db = await claude.use('db'); if (!db) return; await db.doc('sync/state').set({ state: JSON.stringify(S), ts: Date.now() }); } catch (e) { } }
+let upT = null;
+function schedUp() { if (CS || !window.claude) return; clearTimeout(upT); upT = setTimeout(stateUpload, 3000); }
+function schedCloud(now) { if (!CS) return; clearTimeout(cloudT); cloudT = setTimeout(cloudPush, now ? 0 : 2500); }
+async function cloudPush() {
+  if (!CS || cloudBusy || !S || !S.created) return; cloudBusy = true;
+  try {
+    const t = S.savedAt || Date.now(), z = b64u(await zip(JSON.stringify(S), 'c')), n = Math.ceil(z.length / SAVE_CH);
+    for (let i = 0; i < n; i++) if (!(await csSet('pm' + i, z.slice(i * SAVE_CH, (i + 1) * SAVE_CH)))) throw 0;
+    if (!(await csSet('pm_n', String(n)))) throw 0; await csSet('pm_t', String(t));
+    if (cloudN > n) await csDel(Array.from({ length: cloudN - n }, (_, k) => 'pm' + (n + k)));
+    cloudN = n;
+  } catch (e) { }
+  cloudBusy = false;
+}
+async function cloudRestore() {
+  if (!CS) return false;
+  const m = await Promise.race([csGet(['pm_t', 'pm_n']), new Promise(r => setTimeout(() => r(null), 2500))]);
+  if (!m || !+m.pm_n) return false;
+  cloudN = +m.pm_n; const ct = +m.pm_t || 0;
+  if (S.created && ct <= (S.savedAt || 0)) return false;
+  const keys = Array.from({ length: cloudN }, (_, i) => 'pm' + i), v = await csGet(keys);
+  if (!v) return false;
+  const z = keys.map(k => v[k] || '').join(''); if (!z) return false;
+  const o = JSON.parse(new TextDecoder().decode(await zip2(unb64u(z))));
+  if (!o || !o.created) return false;
+  localStorage.setItem('pm_state', JSON.stringify(o)); return true;
+}
+document.addEventListener('visibilitychange', () => { if (document.hidden) { save(); schedCloud(true); } });
+window.addEventListener('pagehide', () => { save(); schedCloud(true); });
 function defMail() {
   return [
     { id: 1, from: 'Системне повідомлення', t: 'Щоденна нагорода', body: 'Ваша щоденна нагорода вже доступна.', when: 'Сьогодні, 20:14', gift: { money: 10000, crystals: 20 }, read: false, box: 'in' },
@@ -266,21 +420,21 @@ function modal(html) { $('modalIn').innerHTML = html + '<div style="margin-top:8
 function closeModal() { $('modal').style.display = 'none'; }
 function pay(cur, n) {
   if (S[cur] < n) { toast('Не вистачає: ' + curName(cur)); return false; }
-  S[cur] -= n; if (cur === 'money') bump('spent', n); else if (cur === 'crystals') bump('crysSpent', n); return true;
+  S[cur] -= n; if (cur === 'money') bump('spent', n); else if (cur === 'crystals') bump('crysSpent', n); else if (cur === 'gold') bump('goldSpent', n); else if (cur === 'chips') bump('chipsSpent', n); else if (cur === 'energy') bump('energySpent', n); return true;
 }
 function curName(c) { return { money: 'гроші 💵', crystals: 'кристали 💎', gold: 'золоті прикраси 🟡', energy: 'енергія ⚡', chips: 'фішки 🎟' }[c] || c; }
 function give(r, why) {
   const parts = [];
   for (const k in r) {
     let v = r[k]; if (S.vip && (k === 'money')) v *= 2;
-    S[k] = (S[k] || 0) + v; if (k === 'money') bump('earned', v); else if (k === 'crystals') bump('crysEarned', v); parts.push(fmt(v) + ' ' + ({ money: '💵', crystals: '💎', gold: '🟡', chips: '🎟', sprem: 'преміум пропуск', ammo: 'патронів', grenades: 'гранат', xp: 'XP' }[k] || k));
+    S[k] = (S[k] || 0) + v; if (k === 'money') bump('earned', v); else if (k === 'crystals') bump('crysEarned', v); else if (k === 'gold') bump('goldEarned', v); else if (k === 'chips') bump('chipsEarned', v); else if (k === 'xp') bump('xpEarned', v); parts.push(fmt(v) + ' ' + ({ money: '💵', crystals: '💎', gold: '🟡', chips: '🎟', sprem: 'преміум пропуск', ammo: 'патронів', grenades: 'гранат', xp: 'XP' }[k] || k));
   }
   if (r.xp) lvlCheck();
   toast((why ? why + ': ' : '') + '+' + parts.join(', +'));
 }
 const xpNeed = l => l * 500;
 function lvlCheck() { while (S.xp >= xpNeed(S.lvl)) { S.xp -= xpNeed(S.lvl); S.lvl++; toast('Новий рівень ' + S.lvl + '!'); } }
-function addItem(id, g) { const u = { uid: ++S.uidN, id }; if (g != null) u.g = g; S.inv.push(u); return u; }
+function addItem(id, g) { const u = { uid: ++S.uidN, id }; if (g != null) u.g = g; S.inv.push(u); bump('itemsFound'); if (g >= 2) bump('itemsRare'); if (g >= 3) bump('itemsEpic'); if (g >= 4) bump('itemsLegend'); return u; }
 const EN_MIN = 4; // хвилин на 1 енергії: 1440/4 = 360 ⚡ на добу, тобто 6 повних запасів
 function energyTick() {
   const iv = EN_MIN * (subTier() ? TIERS[subTier()].regen : 1) * 60000, mins = Math.floor((Date.now() - S.energyTs) / iv);
@@ -401,7 +555,7 @@ if (!Object.keys(FIT).length) FIT = JSON.parse(JSON.stringify(FITS_DEFAULT));
 if (!FITS || !Object.keys(FITS).length) FITS = JSON.parse(JSON.stringify(FITS_DEFAULT));
 // вивантаження підгонки в базу артефакта (працює лише всередині Claude; у Telegram тихо пропускається)
 async function fitUpload() { try { if (!window.claude || !claude.use || !Object.keys(FITS || {}).length) return; const db = await claude.use('db'); if (!db) return; await db.doc('sync/fit').set({ fits: JSON.stringify(FITS), fit: JSON.stringify(FIT), ts: Date.now() }); } catch (e) { } }
-setTimeout(fitUpload, 1500);
+setTimeout(fitUpload, 1500); setTimeout(() => { if (typeof schedUp === 'function') stateUpload(); }, 2500);
 const FSRC = () => (cur().name === 'fit' ? FIT : FITS);
 const FIT0 = { dx: 0, dy: 0, s: 1, r: 0, z: 0, o: 100 };
 const defOf = (g, key) => { const w = WEAR[key.split(':')[0]]; return w && w.layer && w.layer[g] && w.def ? w.def : {}; };
@@ -577,7 +731,7 @@ function openMail(id) {
     ${m.act === 'group' && !S.group.member ? `<button class="g" onclick="joinClan('Miami Syndicate');closeModal();toast('Ви в групуванні Miami Syndicate');go('group')">Прийняти запрошення</button>` : ''}
     ${m.act === 'races' ? `<button onclick="closeModal();go('races')">До гонок</button>` : ''}`);
 }
-function claimMail(id) { const m = S.mail.find(x => x.id === id); give(m.gift, 'Пошта'); delete m.gift; S.daily.collect++; closeModal(); render(); }
+function claimMail(id) { const m = S.mail.find(x => x.id === id); bump('mailGifts'); give(m.gift, 'Пошта'); delete m.gift; S.daily.collect++; closeModal(); render(); }
 function sendMail(from, t, body, gift) { S.mail.unshift({ id: Date.now() + Math.random(), from, t, body, when: 'Щойно', gift, read: false, box: 'in' }); }
 
 // --- ЗАВДАННЯ
@@ -635,7 +789,7 @@ function claimTask(t, k) {
 }
 function claimDailyChest() {
   if (S.daily.chest) return; if (Object.keys(S.daily.claimed).length < 6) return toast('Спочатку виконай всі 6 завдань');
-  S.daily.chest = true; give({ money: 30000, crystals: 20 }, 'Скриня'); render();
+  S.daily.chest = true; bump('dailyChests'); give({ money: 30000, crystals: 20 }, 'Скриня'); render();
 }
 
 // --- ПОДІЇ
@@ -683,7 +837,7 @@ const clanFee = () => S.group.member ? clanEff('fee') + Math.min(1, 0.01 * S.gro
 function learnNode(b, i) {
   if (!S.group.owner) return toast('Розвиток обирає лише лідер клану');
   const t = gTree(); if (t[b].includes(i)) return; if (gFree() < 1) return toast('Немає вільних очок. Очко дається за кожен рівень клану');
-  t[b].push(i); toast('Вивчено: ' + CT[b].nodes[i][0]); render();
+  t[b].push(i); bump('nodes'); bump('node' + b[0].toUpperCase() + b.slice(1)); toast('Вивчено: ' + CT[b].nodes[i][0]); render();
 }
 function resetTree() { if (!S.group.owner) return; if (!pay('crystals', 50)) return; S.group.tree = { race: [], fight: [], trade: [] }; toast('Гілки скинуто'); render(); }
 const CT_IC = { raceRew: '💰', raceSpd: '🏎', bossDmg: '💥', raidRew: '🎁', fee: '📉', jobInc: '💼', lim: '📦', ord: '🏷', shifts: '⏱' };
@@ -755,7 +909,7 @@ function donate(c) {
   S.group.prog += gPts(c, n); bump('donated', gPts(c, n)); { const g = S.group; if (!g.don) g.don = { money: 0, crystals: 0, gold: 0 }; g.don[c] += n; if (!g.hist) g.hist = []; g.hist.unshift({ n: S.name + ' (ви)', c, a: n, t: new Date().toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' }) }); g.hist.length = Math.min(g.hist.length, 20); } let up = 0;
   while (S.group.prog >= gNeed() && S.group.lvl < CLAN_MAX) { S.group.prog -= gNeed(); S.group.lvl++; up++; }
   if (up) toast('Групування підняло рівень до ' + S.group.lvl + '!');
-  S.daily.donate++; give({ xp: 100 }, 'Внесок ' + fmt(n) + ' ' + GCUR[c][0]); p.amt = undefined; render();
+  S.daily.donate++; bump('donateN'); give({ xp: 100 }, 'Внесок ' + fmt(n) + ' ' + GCUR[c][0]); p.amt = undefined; render();
 }
 function joinClan(n) { S.group = { member: true, name: n, lvl: 3, prog: 40, owner: false, tree: { race: [0, 1], fight: [], trade: [] } }; render(); }
 function createClan() {
@@ -779,6 +933,7 @@ SCREENS.rewards = () => {
 };
 function claimLogin() {
   if (S.login.last === today()) return; give(LOGIN[S.login.day % 7], 'День ' + (S.login.day % 7 + 1));
+  { const y = new Date(Date.now() - 864e5).toISOString().slice(0, 10); S.streak = S.login.last === y ? (S.streak || 0) + 1 : 1; bump('streakMax', S.streak, 'max'); }
   S.login.day = (S.login.day + 1) % 7; S.login.last = today(); S.daily.collect++; bump('logins'); render();
 }
 
@@ -813,7 +968,7 @@ SCREENS.shop = p => {
 };
 function buyStars(stars, r, what) {
   modal(`<h3>Оплата Telegram Stars</h3><p>${what}</p><p>До сплати: <b>⭐ ${fmt(stars)}</b></p><p class="note">Симуляція. У грі тут відкриється вікно оплати Telegram.</p>
-  <button class="y" onclick='S.starsSpent+=${stars};give(${JSON.stringify(r)},"Покупка");closeModal();render()'>Сплатити ⭐ ${fmt(stars)}</button>`);
+  <button class="y" onclick='S.starsSpent+=${stars};bump("starsN");bump("starsSum",${stars});give(${JSON.stringify(r)},"Покупка");closeModal();render()'>Сплатити ⭐ ${fmt(stars)}</button>`);
 }
 function exch(m, g) { if (!pay('gold', g)) return; give({ money: m }, 'Обмін'); render(); }
 function buyPack(c, r, items) {
@@ -828,7 +983,7 @@ function buyWear(k, curr) {
 SCREENS.profile = () => {
   const s = stats();
   return `<h2>👤 Профіль</h2><div class="bar"><div>${doll(220)}</div><div class="f" style="flex:1">
-  <div class="box" style="${cosFrame() ? 'border:3px solid ' + cosFrame() : ''}"><b>${S.name}</b> ${cosTitle() ? '<span class="small">«' + cosTitle() + '»</span>' : ''} (${S.gender === 'm' ? 'чоловік' : 'жінка'})<br>Рівень ${S.lvl}<br><span onclick="go('tasks',{tab:'ach'})" style="cursor:pointer">🏅 <b>Досягнення: ${achPts()}</b> · ${achRank(achPts())[1]}</span><div class="prog"><i style="width:${S.xp / xpNeed(S.lvl) * 100}%"></i></div><span class="small">${S.xp} / ${xpNeed(S.lvl)} XP</span></div>
+  <div class="box" style="${cosFrame() ? 'border:3px solid ' + cosFrame() : ''}"><b>${S.name}</b> ${cosTitle() ? '<span class="small">«' + cosTitle() + '»</span>' : ''} (${S.gender === 'm' ? 'чоловік' : 'жінка'})<br>Рівень ${S.lvl}<br><span onclick="go('tasks',{tab:'ach'})" style="cursor:pointer">🏅 <b>${achRank(achPts())[1]}</b> · ${(achPct() * 100).toFixed(1)}% досягнень · ${fmt(achPts())} очок</span><div class="prog"><i style="width:${S.xp / xpNeed(S.lvl) * 100}%"></i></div><span class="small">${S.xp} / ${xpNeed(S.lvl)} XP</span></div>
   <div class="box"><b>⚔️ Бойова сила</b><br>Середній удар по босу: <b>${fmt(avgHit())}</b><br>Шкода по босах: +${s.dmg}% <span class="small">(речі, набори)</span><br>Крит: ${s.crit}% <span class="small">(подвійний удар)</span><br>Колекція: ${S.owned.length}/${Object.keys(WEAR).length} речей у гардеробі<hr>Сила: ${s.str}<br>Влучність: ${s.acc} <span class="small">(шанс рейду)</span><br>Удача: ${s.luck} <span class="small">(кращі знахідки)</span><br>Здоров'я: ${s.hp} <span class="small">(шанс рейду)</span><br>Зброя: ${(WEAPONS.find(w => w.id === S.weapon) || {}).name} (x${weaponMult()})<br>Авто: ${S.car.name}</div>
   ${profBox()}
   <div class="box small">Патрони: ${S.ammo} · Гранати: ${S.grenades}</div></div></div>
@@ -892,7 +1047,7 @@ function bvFaq() {
 function bvDo(src) {
   const o = bvItem(src); if (!o || o.g >= 5) return; const cost = bvCost(o.it, o.g); if (!pay('crystals', cost)) return;
   const [up, same] = bvOdds(o), x = Math.random() * 100, ng = x < up ? o.g + 1 : x < up + same ? o.g : o.g - 1;
-  o.set(ng); o.setP(ng > o.g ? 0 : o.pity + 1); bump('bvN');
+  o.set(ng); o.setP(ng > o.g ? 0 : o.pity + 1); bump('bvN'); bump('bvSpent', cost); bump(ng > o.g ? 'bvUp' : ng < o.g ? 'bvDown' : 'bvSame');
   modal(`<h3>Баба Валя пошепотіла…</h3><p><b>${o.nm}</b>: ${gB(o.g)} → ${gB(ng)}</p><p><b style="color:${ng > o.g ? '#090' : ng < o.g ? '#c00' : '#555'}">${ng > o.g ? '⬆ Вийшло краще!' : ng < o.g ? '⬇ Не пощастило, стало гірше' : '➡ Нічого не змінилось'}</b></p>`); render();
 }
 
@@ -931,7 +1086,7 @@ SCREENS.wardrobe = p => {
   return h;
 };
 function fromWardrobe(k) { const it = ITEMS.find(x => x.wear === k); if (!it) return; if (S.equipped[WEAR[k].slot] === k) delete S.equipped[WEAR[k].slot]; addItem(it.id, wgOf(k)); S.owned = S.owned.filter(x => x !== k); delete wg()[k]; toast('Річ в інвентарі'); render(); }
-function equip(k) { S.equipped[WEAR[k].slot] = k; render(); }
+function equip(k) { S.equipped[WEAR[k].slot] = k; bump('outfits'); render(); }
 function unequip(sl) { delete S.equipped[sl]; render(); }
 function wearSet(id) { SETS.find(s => s.id === id).items.forEach(k => S.equipped[WEAR[k].slot] = k); render(); }
 
@@ -941,7 +1096,7 @@ const carMult = () => 0.6 + 0.4 * carCond() / 100;
 const partsTot = () => Object.values(S.car.parts).reduce((a, b) => a + b, 0);
 const repairCost = () => Math.round((100 - carCond()) * (60 + partsTot() * 20));
 function carPower() { const s = carStats(); return Math.round((s.pow + s.spd + s.hand) * carMult()); }
-function repairCar() { const c = repairCost(); if (c <= 0) return toast('Авто в ідеальному стані'); if (!pay('money', c)) return; S.car.cond = 100; toast('Авто відремонтовано'); render(); }
+function repairCar() { const c = repairCost(); if (c <= 0) return toast('Авто в ідеальному стані'); if (!pay('money', c)) return; S.car.cond = 100; bump('carRepairs'); toast('Авто відремонтовано'); render(); }
 function wearCar(n) { S.car.cond = Math.max(0, carCond() - n); }
 function carStats() {
   const p = S.car.parts, s = { pow: 300, spd: 250, dur: 420, hand: 240 };
@@ -968,7 +1123,7 @@ SCREENS.garage = p => {
   } else h += `<div class="box small">Стиль: диски, спойлер, обвіс (заглушка)</div>`;
   return h + `<button style="width:100%;margin-top:6px" onclick="go('races')">🏁 До гонок</button>`;
 };
-function upPart(k, cost) { if (!pay('money', cost)) return; S.car.parts[k]++; const tot = Object.values(S.car.parts).reduce((a, b) => a + b, 0); S.car.stars = Math.min(5, 1 + Math.floor(tot / 8)); toast('Покращено!'); render(); }
+function upPart(k, cost) { if (!pay('money', cost)) return; S.car.parts[k]++; bump('partUp'); const tot = Object.values(S.car.parts).reduce((a, b) => a + b, 0); S.car.stars = Math.min(5, 1 + Math.floor(tot / 8)); toast('Покращено!'); render(); }
 function paint(col) { if (!pay('money', 5000)) return; S.car.color = col; render(); }
 
 // --- ЗБРОЯ
@@ -1025,11 +1180,11 @@ function hitBoss(id) {
   const s = stats(); let am = 1, gnote = '', anote = '';
   if (S.bossAm !== false) { if (S.ammo >= AMMO_HIT) { S.ammo -= AMMO_HIT; anote = ` (−${AMMO_HIT} 🔫)`; } else { am = NOAMMO_MULT; anote = ' (без патронів, слабкий удар)'; } } else { am = NOAMMO_MULT; anote = ' (без патронів)'; }
   let dmg = Math.round(bossBase() * am * (0.8 + Math.random() * 0.4)), crit = Math.random() * 100 < s.crit; if (crit) dmg *= 2; if (crit) anote += ' 💥КРИТ ×2!';
-  if (S.bossGr && S.grenades >= 1) { S.grenades--; const ex = Math.round(dmg * GREN_MULT); dmg += ex; gnote = ` + 💣 граната ${fmt(ex)}`; }
-  st.hp = Math.max(0, st.hp - dmg); bump('bossDmg', dmg);
+  if (S.bossGr && S.grenades >= 1) { S.grenades--; bump('grenUsed'); const ex = Math.round(dmg * GREN_MULT); dmg += ex; gnote = ` + 💣 граната ${fmt(ex)}`; }
+  st.hp = Math.max(0, st.hp - dmg); bump('bossDmg', dmg); bump('bossHits'); if (crit) bump('bossCrits');
   let msg = `Ви завдали ${fmt(dmg)} шкоди босу ${b.name}${anote}${gnote}.`;
   if (st.hp === 0) {
-    if (!S.daily.bk) S.daily.bk = {}; S.ach.bossKills++; bump('bossKills'); st.hp = b.hp; if (!S.beat) S.beat = {}; const hadCar = hasCar(); S.beat[b.id] = 1; if (!hadCar && hasCar()) setTimeout(() => modal('<h3>🚗 Перша машина!</h3><p>Ти переміг другого боса й отримав першу машину. Відкрились <b>Транспорт</b> (гараж, тюнінг) і <b>Гонки</b>.</p><button class="y" style="width:100%" onclick="closeModal()">Чудово</button>'), 400);
+    if (!S.daily.bk) S.daily.bk = {}; S.ach.bossKills++; bump('bossKills'); bump('kill_' + b.id); st.hp = b.hp; if (!S.beat) S.beat = {}; const hadCar = hasCar(); S.beat[b.id] = 1; if (!hadCar && hasCar()) setTimeout(() => modal('<h3>🚗 Перша машина!</h3><p>Ти переміг другого боса й отримав першу машину. Відкрились <b>Транспорт</b> (гараж, тюнінг) і <b>Гонки</b>.</p><button class="y" style="width:100%" onclick="closeModal()">Чудово</button>'), 400);
     if (!S.daily.bk[b.id]) { S.daily.bk[b.id] = 1; give({ ...b.rew, ammo: 30, grenades: 1 }, 'Бос переможений'); const it = pick(ITEMS); addItem(it.id, rollG()); msg += ` БОС ПЕРЕМОЖЕНИЙ! Трофей: ${it.name}. Бос відродився.`; }
     else { give({ money: Math.round(b.rew.money * 0.2) }, 'Повторне вбивство'); msg += ' Бос переможений ще раз: сьогодні повна нагорода вже отримана, лише 20% грошей. Бос відродився.'; }
   }
@@ -1106,6 +1261,7 @@ function attackStage(id) {
   S.daily.raids++; S.week.raids++; bump('raids');
   if (Math.random() < raidChance()) {
     const r = RAID_REW[st - 1], m = clanMul('raidRew') * D.mult;
+    bump('distStages');
     give({ money: Math.round(r[0] * m), crystals: Math.round(r[1] * m), gold: r[2], xp: st * 10 }, D.n + ', етап ' + st + ' пройдено'); setStage(id, st + 1);
     dRate(id, Math.round(st * 8 + (st === 12 ? 200 : 0)));
   } else toast('Атака відбита! Спробуй ще.');
@@ -1122,14 +1278,14 @@ function ctabs(a) {
 // --- КЛУБНИЙ ДЕНЬ (тест): очки за кількість ігор, не за виграш; цінності клубу: лише косметика
 const CP_MAX = 45;
 const CP_TRACK = [[10, { money: 10000 }, '10 000 💵'], [25, { energy: 10 }, '10 ⚡'], [45, { money: 25000, chips: 100 }, '25 000 💵 + 100 🎟']];
-function clubPt() { const n = S.daily.cp || 0; if (n < CP_MAX) { S.daily.cp = n + 1; if (S.daily.cp === CP_MAX) toast('⭐ Клубний день: 45 очок, максимум на сьогодні'); } }
+function clubPt() { const n = S.daily.cp || 0; if (n < CP_MAX) { S.daily.cp = n + 1; if (S.daily.cp === CP_MAX) { bump('clubDays'); toast('⭐ Клубний день: 45 очок, максимум на сьогодні'); } } }
 function cpClaim(i) { const [need, r] = CP_TRACK[i]; if ((S.daily.cp || 0) < need) return; const c = S.daily.cpc || (S.daily.cpc = {}); if (c[i]) return; c[i] = true; give(r, 'Клубний день'); render(); }
 const CLUB_COS = [
   ['t1', '🏷 Титул «Новачок клубу»', 500], ['t2', '🏷 Титул «Азартний»', 1500], ['t3', '🏷 Титул «Везунчик»', 3000], ['t4', '🏷 Титул «Шулер»', 6000], ['t5', '🏷 Титул «Бос столу»', 12000], ['t6', '🏷 Титул «Король барабанів»', 20000],
   ['f1', '🖼 Рамка профілю: золото', 800, '#d9a400'], ['f2', '🖼 Рамка профілю: неон', 2500, '#d0f'], ['f3', '🖼 Рамка профілю: вогонь', 8000, '#e33']
 ];
 const clubOwn = () => S.cos || (S.cos = { own: [], title: '', frame: '' });
-function cosBuy(k) { const c = CLUB_COS.find(x => x[0] === k), o = clubOwn(); if (o.own.includes(k)) return; if (!pay('chips', c[2])) return; o.own.push(k); toast('Куплено: ' + c[1]); render(); }
+function cosBuy(k) { const c = CLUB_COS.find(x => x[0] === k), o = clubOwn(); if (o.own.includes(k)) return; if (!pay('chips', c[2])) return; o.own.push(k); bump('cosN'); toast('Куплено: ' + c[1]); render(); }
 function cosUse(k) { const c = CLUB_COS.find(x => x[0] === k), o = clubOwn(), key = k[0] === 't' ? 'title' : 'frame'; o[key] = o[key] === k ? '' : k; render(); }
 const cosTitle = () => { const k = clubOwn().title, c = CLUB_COS.find(x => x[0] === k); return c ? c[1].replace(/^🏷 Титул /, '') : ''; };
 const cosFrame = () => { const k = clubOwn().frame, c = CLUB_COS.find(x => x[0] === k); return c ? c[3] : ''; };
@@ -1143,9 +1299,9 @@ const CLUB_SHOP = [
   ['key', '🔑 Ключ складу ×1', 400, () => { sw().keys++; }], ['crt', '📦 Ящики складу ×2', 250, () => { sw().crates += 2; }],
   ['flp', '🔄 +1 купівля авто', 180, () => { const x = shS(); x.flips = Math.max(0, x.flips - 1); }]
 ];
-function clubBuy(k) { const c = CLUB_SHOP.find(x => x[0] === k), d = S.daily.cs || (S.daily.cs = {}); if (d[k]) return toast('Сьогодні вже куплено'); if (!pay('chips', c[2])) return; d[k] = true; c[3](); toast('Куплено: ' + c[1]); render(); }
+function clubBuy(k) { const c = CLUB_SHOP.find(x => x[0] === k), d = S.daily.cs || (S.daily.cs = {}); if (d[k]) return toast('Сьогодні вже куплено'); if (!pay('chips', c[2])) return; d[k] = true; bump('clubShopN'); c[3](); toast('Куплено: ' + c[1]); render(); }
 const CHIPS_SPINS = 20, CHIPS_POKER = 25, CHIPS_DAILY = CHIPS_SPINS * 10 + CHIPS_POKER * 10; // 450
-function claimChips() { if (S.daily.chipsClaim) return; S.daily.chipsClaim = true; give({ chips: CHIPS_DAILY }, 'Щоденні фішки'); render(); }
+function claimChips() { if (S.daily.chipsClaim) return; S.daily.chipsClaim = true; bump('chipsClaimN'); give({ chips: CHIPS_DAILY }, 'Щоденні фішки'); render(); }
 SCREENS.club = p => {
   const t = p.tab || 'bon';
   let h = `<h2>🎰 ІГРОВИЙ КЛУБ</h2>${ctabs('club')}
@@ -1214,7 +1370,7 @@ function openSlotChest(i) {
   const b = slotBonus; if (!b || b.picked != null) return;
   b.picked = i; b.others = {}; const pool = SLOT_BONUS.map(x => x[0]);
   for (let k = 0; k < 9; k++) if (k !== i) b.others[k] = pick(pool);
-  give({ chips: b.pay }, 'БОНУС x' + b.mult); pushHist({ bet: 0, win: b.pay, mult: b.mult, bonus: true });
+  bump('bonusWon', b.pay); give({ chips: b.pay }, 'БОНУС x' + b.mult); pushHist({ bet: 0, win: b.pay, mult: b.mult, bonus: true });
   setTimeout(() => { slotBonus = null; if (cur().name === 'slots') render(); }, 3200);
   render();
 }
@@ -1281,7 +1437,7 @@ function spin() {
   lastWin = null; winCells = [];
   animReels(R.g, () => {
     reels = R.g; winCells = mult ? Array.from({ length: R.k }, (_, i) => R.line * 5 + i) : [];
-    S.daily.casino++; bump('spins'); clubPt();
+    S.daily.casino++; bump('spins'); bump('slotBet', bet); if (mult >= 10) bump('slotX10'); if (mult >= 50) bump('slotX50'); clubPt();
     pushHist({ bet, win: bet * mult, mult });
     if (!mult) bump('slotLost', bet); if (mult) { bump('slotWins'); bump('slotBig', mult, 'max'); bump('slotWon', bet * mult); lastWin = { mult, pay: bet * mult }; give({ chips: bet * mult }, 'Виграш x' + mult); }
     if (bonusHit) {
@@ -1325,7 +1481,7 @@ function pokerNew() {
   if (S.chips < STAKE) return toast('Мінімум ' + STAKE + ' 🎟. Нові фішки: щоденні в клубі');
   const d = deck();
   PK = { d, me: [d.pop(), d.pop()], bots: ['Тоні', 'Сеньйор', 'Лисий', 'Ла Ріка'].map((n, i) => ({ n, c: [d.pop(), d.pop()], fold: false, stack: STAKE * 10, th: [0.42, 0.38, 0.3, 0.45][i], bl: [0.05, 0.03, 0.12, 0.04][i] })), board: [d.pop(), d.pop(), d.pop(), d.pop(), d.pop()], st: 0, bank: 0, over: false, msg: '', owe: 0, raises: 0 };
-  S.daily.pk = (S.daily.pk || 0) + 1; S.chips -= STAKE; PK.bank = STAKE * 5; S.daily.casino++; bump('pokerPlayed'); clubPt(); render();
+  S.daily.pk = (S.daily.pk || 0) + 1; S.chips -= STAKE; bump('pokerSpent', STAKE); bump('chipsSpent', STAKE); PK.bank = STAKE * 5; S.daily.casino++; bump('pokerPlayed'); clubPt(); render();
 }
 SCREENS.poker = () => {
   let h = `<h2>🃏 ПОКЕР</h2>${ctabs('poker')}<div class="box small">Шлях гравця: ${Array.from({ length: 10 }, (_, i) => i < S.pokerPath ? '■' : '□').join('')} ${S.pokerPath}/10 (кожна перемога +1, на 10 — скриня)</div>`;
@@ -1433,6 +1589,7 @@ function showdown() {
   PK.over = true;
   const all = [{ n: 'Ви', me: true, h: best7([...PK.me, ...PK.board]) }, ...PK.bots.filter(b => !b.fold).map(b => ({ n: b.n, h: best7([...b.c, ...PK.board]) }))];
   all.sort((x, y) => cmp(y.h, x.h));
+  { const mh = all.find(x => x.me), kk = ['', 'pkPair', 'pkTwo', 'pkTrips', 'pkStr', 'pkFlush', 'pkFull', 'pkQuads', 'pkSF'][mh.h[0]]; if (kk) bump(kk); }
   const w = all[0]; PK.win = w.n; PK.hands = Object.fromEntries(all.map(x => [x.n, HAND_N[x.h[0]]]));
   PK.msg = all.map(x => `${x.n}: ${HAND_N[x.h[0]]}`).join('<br>') + `<br><b>Переміг: ${w.n}</b>`;
   if (w.me) {
@@ -1465,6 +1622,7 @@ function race(ti) {
   S.week.races++; bump('racesN');
   const rew = [[15000, 1], [8000, 0], [4000, 0], [1500, 0]][place - 1]; // ≈1500 💵 на 1 ⚡ (гонка 5 ⚡)
   if (place === 1) { S.ach.raceWins++; bump('raceWins'); }
+  if (place <= 3) bump('raceTop3');
   give({ money: Math.round(rew[0] * clanMul('raceRew')), crystals: Math.round(rew[1] * clanMul('raceRew')), xp: 60 }, `Місце ${place}`);
   modal(`<h3>Фініш!</h3><p>Ви прийшли <b>${place}-м</b> з 4.</p>`); render();
 }
@@ -1709,7 +1867,7 @@ function openBag(id, mode) {
 function bagKeep() { bagRes.items.forEach(id => addItem(id, rollG())); toast('Речі в інвентарі (одяг → кнопка «У гардероб»)'); bagRes = null; render(); }
 function bagSell(sum) { give({ money: sum }, 'Продано все'); bagRes = null; render(); }
 function buyStall(i) { const id = S.stall[i]; if (!pay('money', stallPrice(id))) return; addItem(id, rollG()); S.stall.splice(i, 1); toast('Куплено: ' + IT[id].name); render(); }
-function putLot(uid) { const i = S.inv.find(x => x.uid === uid); S.inv = S.inv.filter(x => x.uid !== uid); S.lots.push({ id: i.id, price: IT[i.id].base, end: Date.now() + 30000 }); render(); }
+function putLot(uid) { bump('lotsPosted'); const i = S.inv.find(x => x.uid === uid); S.inv = S.inv.filter(x => x.uid !== uid); S.lots.push({ id: i.id, price: IT[i.id].base, end: Date.now() + 30000 }); render(); }
 function checkLots() { const now = Date.now(); S.lots.filter(l => l.end <= now).forEach(l => sendMail('Ринок', 'Предмет продано', `Ваш лот «${IT[l.id].name}» успішно продано.`, { money: l.price })); S.lots = S.lots.filter(l => l.end > now); }
 
 /*CHAT*/
@@ -1734,6 +1892,7 @@ function chSend() {
   if (!txt) return toast('Напиши повідомлення');
   if (ch === 'group' && !S.group.member) return toast('Спочатку вступи в групування');
   if (ch === 'dm' && !p.to) return toast('Обери співрозмовника');
+  bump('chatMsgs');
   if (!pay('crystals', CHAT_COST)) return;
   chPush(ch, { n: S.name, t: txt, w: nowT(), me: 1, to: p.to });
   if (ch === 'dm') { const to = p.to; setTimeout(() => { chPush('dm', { n: to, t: pick(['Привіт! Що пропонуєш?', 'Зараз зайнятий, напишу пізніше', 'Давай, цікаво', 'Домовились']), w: nowT(), to }); if (chatVisible()) render(); }, 3000); }
@@ -2330,10 +2489,16 @@ async function zip2(u8) { return new Uint8Array(await new Response(new Blob([u8]
 function confirmReset() { modal(`<p>Скинути весь прогрес?</p><button style="background:#f99" onclick="localStorage.removeItem('pm_state');load();closeModal();stack=[{name:'create',p:{}}];render()">Так, скинути</button>`); }
 
 // ---------- СТАРТ ----------
+// @@SEED@@ (підставляється при деплої в Telegram: стан гри з артефакта; null = немає)
+const SEED = null;
+(function applySeed() { try { if (!SEED || localStorage.getItem('pm_seedver') === String(SEED.ver)) return; const o = JSON.parse(SEED.state); o.savedAt = Date.now(); localStorage.setItem('pm_state', JSON.stringify(o)); localStorage.setItem('pm_seedver', String(SEED.ver)); } catch (e) { } })();
 load();
 catchUpLots();
 stack = [{ name: S.created ? 'home' : 'create', p: {} }];
-render();
+if (CS) {
+  $('app').innerHTML = '<div style="text-align:center;padding:120px 10px"><div style="font-size:40px">⏳</div><b>Завантаження прогресу…</b></div>';
+  cloudRestore().catch(() => false).then(ok => { restoring = false; if (ok) { load(); catchUpLots(); stack = [{ name: S.created ? 'home' : 'create', p: {} }]; } lastJ = stateJ(); render(); if (S.created) schedCloud(); });
+} else { lastJ = stateJ(); render(); }
 if (S.chips == null) S.chips = 450;
 setInterval(() => {
   distDaily(); tickMarket(); tickLots(1); const newMsg = tickChat(); const grDone = grTick(); if (grDone) toast('🏁 Груповий заїзд завершено!'); save();
