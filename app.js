@@ -1352,7 +1352,7 @@ function buildReels(mult, scat) {
     for (let L = 0; L < 7; L++) { if (L !== line && rowRun(LINES[L].map((r, i) => g[r * 5 + i])) >= 3) ok = false; }
     if (ok) {
       const used = new Set(); if (line >= 0) lineCells(line, WINMAP[mult][1]).forEach(c => used.add(c));
-      const free = Array.from({ length: 15 }, (_, i) => i).filter(i => !used.has(i)).sort(() => Math.random() - 0.5), sc = free.slice(0, scat || 0); sc.forEach(i => g[i] = SCAT);
+      const sc = [0, 1, 2, 3, 4].sort(() => Math.random() - 0.5).slice(0, scat || 0).map(c => { const rows = [0, 1, 2].filter(r => !used.has(r * 5 + c)); return pick(rows) * 5 + c; }); sc.forEach(i => g[i] = SCAT); // максимум 1 бонус-символ на барабан
       return { g, line, k: mult > 0 ? WINMAP[mult][1] : 0, sc };
     }
   }
@@ -2462,7 +2462,7 @@ SCREENS.settings = p => {
 const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 8192) s += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
 const unb64u = t => { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; const s = atob(t), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
 async function zip(str, mode) { const st = mode === 'c' ? new Blob([str]).stream().pipeThrough(new CompressionStream('deflate-raw')) : new Blob([str]).stream().pipeThrough(new DecompressionStream('deflate-raw')); return new Uint8Array(await new Response(st).arrayBuffer()); }
-const BUILD = 'v107';
+const BUILD = 'v108';
 const BOT = 'PotuzhneMisto_bot', PAGE = 'https://stasiya408-dev.github.io/tg-miniapp/';
 async function saveExport() {
   const o = Object.assign({}, S, { mail: [] }), t = b64u(await zip(JSON.stringify(o), 'c'));
