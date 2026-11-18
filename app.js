@@ -91,20 +91,21 @@ const ico = id => { const it = IT[id]; if (!it) return ''; return it.wear ? wear
 const WEAPONS = [
   { id: 'w_bat', name: 'Бита', price: 0, dmg: 1.0 },
   { id: 'w_pistol', name: 'Пістолет', price: 25000, dmg: 1.4 },
-  { id: 'w_shotgun', name: 'Дробовик', price: 90000, dmg: 2.0 },
-  { id: 'w_smg', name: 'Пістолет-кулемет', price: 250000, dmg: 3.0 },
-  { id: 'w_rifle', name: 'Автомат', price: 120, cur: 'crystals', dmg: 4.0 },
+  { id: 'w_shotgun', name: 'Дробовик', price: 120000, dmg: 2.0, lvl: 5 },
+  { id: 'w_smg', name: 'Пістолет-кулемет', price: 450000, dmg: 3.0, lvl: 10 },
+  { id: 'w_rifle', name: 'Автомат', price: 900, cur: 'crystals', dmg: 4.0, lvl: 15 },
 ];
 const BOSSES = [
   { id: 'toro', name: 'Ель Торо', lvl: 1, hp: 150000, rew: { money: 30000, crystals: 3 } },
-  { id: 'molot', name: 'Молот', lvl: 3, hp: 480000, rew: { money: 80000, crystals: 5 } },
-  { id: 'vipera', name: 'Ла Віпера', lvl: 5, hp: 1200000, rew: { money: 200000, crystals: 8 } },
-  { id: 'karlo', name: 'Дон Карло', lvl: 8, hp: 3500000, rew: { money: 600000, crystals: 15, gold: 5 } },
-  { id: 'senator', name: 'Сенатор', lvl: 12, hp: 9000000, needLvl: 13, rew: { money: 2000000, crystals: 40, gold: 15 } },
+  { id: 'molot', name: 'Молот', lvl: 3, hp: 480000, rew: { money: 60000, crystals: 5 } },
+  { id: 'vipera', name: 'Ла Віпера', lvl: 5, hp: 1200000, rew: { money: 120000, crystals: 8 } },
+  { id: 'karlo', name: 'Дон Карло', lvl: 8, hp: 3500000, rew: { money: 220000, crystals: 10, gold: 3 } },
+  { id: 'senator', name: 'Сенатор', lvl: 12, hp: 9000000, needLvl: 13, rew: { money: 500000, crystals: 20, gold: 8 } },
 ];
-const RAID_REW = [[5000, 0, 0], [6000, 0, 0], [7000, 1, 1], [8000, 1, 0], [9000, 1, 1], [11000, 1, 0], [13000, 1, 1], [15000, 2, 0], [17000, 2, 1], [22000, 2, 2], [25000, 2, 2], [28000, 2, 3]]; // ≈165 тис. 💵 і 15 💎 за повний рейд (≈1000 💵 і 0.09 💎 на 1 ⚡)
+const RAID_REW = [[5000, 0, 0], [6000, 0, 0], [7000, 1, 0], [8000, 1, 0], [9000, 1, 0], [11000, 1, 0], [13000, 1, 0], [15000, 2, 0], [17000, 2, 0], [22000, 2, 0], [25000, 2, 0], [28000, 2, 3]]; // ≈165 тис. 💵 × lvM() і 15 💎 за повний рейд; 🟡 лише за боса району раз на добу
 const PARTS = [['engine', 'Двигун', 'pow'], ['exhaust', 'Вихлоп', 'pow'], ['susp', 'Підвіска', 'hand'], ['brakes', 'Гальма', 'hand'], ['wheels', 'Колеса', 'spd'], ['turbo', 'Турбо', 'spd']];
-const TRACKS = [{ n: 'Прибережна', km: 4.2, laps: 3, req: 0 }, { n: 'Даунтаун', km: 3.1, laps: 4, req: 1200 }, { n: 'Нічне шосе', km: 6.8, laps: 2, req: 1500 }];
+const RACE_NORM = 8, RACE_AFTER = 0.4, RACE_CR = 3; // денна норма гонок: далі 40% нагороди; 💎 лише за 3 перші перемоги на добу
+const TRACKS = [{ n: 'Прибережна', km: 4.2, laps: 3, req: 0, rw: 1 }, { n: 'Даунтаун', km: 3.1, laps: 4, req: 1200, rw: 1.5 }, { n: 'Нічне шосе', km: 6.8, laps: 2, req: 1500, rw: 2 }];
 
 // ---------- СТАН ----------
 // --- ДОСЯГНЕННЯ: очки (рівень досягнень видно всім у профілі) + 💎 за верхні щаблі
@@ -248,7 +249,7 @@ const ACH_MAXPTS = () => ACH.reduce((s, a) => s + a[3].reduce((t, g, i) => t + A
 const ACH_TIERS = () => ACH.reduce((s, a) => s + a[3].length, 0);
 const ACH_RANKS = [[0, 'Новачок'], [0.02, 'Вуличний'], [0.07, 'Бандит'], [0.18, 'Авторитет'], [0.35, 'Бос'], [0.6, 'Легенда'], [0.9, 'Король міста'], [1, '👑 FULL']];
 // --- СЕЗОННИЙ ПРОПУСК (місяць): очки за активність, безкоштовна й платна гілка
-const SP_PTS = { fights: 10, racesN: 8, raids: 5, shifts: 4, bags: 3, flipN: 6, lotsSold: 3 }, SP_LV = 30, SP_PER = 100, SP_BUY = 40;
+const SP_PTS = { fights: 2, racesN: 3, raids: 5, shifts: 6, bags: 5, flipN: 8, lotsSold: 3 }, SP_LV = 30, SP_PER = 150, SP_BUY = 40;
 function spS() { const m = new Date().toISOString().slice(0, 7); if (!S.sp || S.sp.m !== m) { S.sp = { m, pts: 0, fr: {}, pr: {} }; S.sprem = 0; } return S.sp; }
 const spLvl = () => Math.min(SP_LV, Math.floor(spS().pts / SP_PER));
 function spRew(l, prem) {
@@ -329,7 +330,7 @@ function achTab(p) {
 
 const DEF = () => ({
   ver: 2, created: false, name: 'Гравець', gender: 'm', lvl: 1, xp: 0,
-  money: 5000, crystals: 30, gold: 0, chips: 0, energy: 60, energyTs: Date.now(), ammo: 30, grenades: 0,
+  money: 5000, crystals: 30, gold: 0, chips: 0, energy: 90, energyTs: Date.now(), ammo: 30, grenades: 0,
   owned: ['glasses'], equipped: { eyes: 'glasses' },
   inv: [], uidN: 10,
   weapons: ['w_bat'], weapon: 'w_bat',
@@ -433,12 +434,13 @@ function give(r, why) {
   toast((why ? why + ': ' : '') + '+' + parts.join(', +'));
 }
 const xpNeed = l => l * 500;
+const lvM = () => 1 + 0.12 * (S.lvl - 1); // спільний множник нагород за рівнем героя (рейди, гонки, робота, райони)
 function lvlCheck() { while (S.xp >= xpNeed(S.lvl)) { S.xp -= xpNeed(S.lvl); S.lvl++; toast('Новий рівень ' + S.lvl + '!'); } }
 function addItem(id, g) { const u = { uid: ++S.uidN, id }; if (g != null) u.g = g; S.inv.push(u); bump('itemsFound'); if (g >= 2) bump('itemsRare'); if (g >= 3) bump('itemsEpic'); if (g >= 4) bump('itemsLegend'); return u; }
-const EN_MIN = 4; // хвилин на 1 енергії: 1440/4 = 360 ⚡ на добу, тобто 6 повних запасів
+const EN_MIN = 6, EN_CAP = 90; // 1 ⚡ за 6 хв: 240 ⚡ на добу, повний запас 90 ⚡ за 9 годин
 function energyTick() {
   const iv = EN_MIN * (subTier() ? TIERS[subTier()].regen : 1) * 60000, mins = Math.floor((Date.now() - S.energyTs) / iv);
-  if (mins > 0) { if (S.energy < 60) S.energy = Math.min(60, S.energy + mins); S.energyTs += mins * iv; }
+  if (mins > 0) { if (S.energy < EN_CAP) S.energy = Math.min(EN_CAP, S.energy + mins); S.energyTs += mins * iv; }
 }
 function stats() {
   const s = { luck: 5, dmg: 0, crit: 5 };
@@ -533,7 +535,7 @@ function topbar(name) {
   return `<div class="top">
     ${name !== 'home' ? '<button onclick="back()">◀</button>' : ''}
     <span class="cur" onclick="go('profile')">👤 ${S.lvl} · <span class="nm">${S.name}</span></span>
-    <span class="cur" onclick="go('district',{tab:'shop'})">⚡ ${S.energy}${S.energy <= 60 ? '/60' : ''} +</span>
+    <span class="cur" onclick="go('district',{tab:'shop'})">⚡ ${S.energy}${S.energy <= EN_CAP ? '/' + EN_CAP : ''} +</span>
     ${['money','crystals','gold'].map(k => `<span class="cur" onclick="go('shop',{tab:'cur'})">${HUD_C[k][0]} ${fmt(S[k] || 0)}</span>`).join('')}
     ${name !== 'home' ? `<button style="position:relative" onclick="home()">⌂${dot(N.any())}</button>` : ''}
   </div>`;
@@ -739,11 +741,11 @@ function dailyList() {
   const d = S.daily;
   return [
     { k: 'fights', t: 'Проведи 3 бої', v: d.fights, goal: 3, r: { money: 5000 }, go: 'raidBoss' },
-    { k: 'raids', t: 'Виконай 2 рейди', v: d.raids, goal: 2, r: { crystals: 8 }, go: 'district' },
+    { k: 'raids', t: 'Виконай 2 рейди', v: d.raids, goal: 2, r: { crystals: 5 }, go: 'district' },
     { k: 'market', t: 'Здійсни 1 покупку на ринку', v: d.market, goal: 1, r: { money: 10000 }, go: 'market' },
     { k: 'donate', t: 'Зроби внесок у групування', v: d.donate, goal: 1, r: { money: 5000 }, go: 'group' },
     { k: 'casino', t: 'Зіграй у клубі 1 раз', v: d.casino, goal: 1, r: { chips: 100 }, go: 'club' },
-    { k: 'collect', t: 'Збери 3 нагороди', v: d.collect, goal: 3, r: { crystals: 4 }, go: 'mail' },
+    { k: 'collect', t: 'Збери 3 нагороди', v: d.collect, goal: 3, r: { crystals: 3 }, go: 'mail' },
   ];
 }
 function weekList() {
@@ -759,9 +761,9 @@ function achList() {
   const a = S.ach;
   return [
     { k: 'bossKills', t: 'Переможи 3 босів', v: a.bossKills, goal: 3, r: { gold: 30 }, go: 'raidBoss' },
-    { k: 'bags', t: 'Відкрий 20 завезень', v: a.bags, goal: 20, r: { crystals: 300 }, go: 'secondhand' },
+    { k: 'bags', t: 'Відкрий 20 завезень', v: a.bags, goal: 20, r: { crystals: 60 }, go: 'secondhand' },
     { k: 'raceWins', t: 'Виграй 10 гонок', v: a.raceWins, goal: 10, r: { gold: 25 }, go: 'races' },
-    { k: 'pokerWins', t: 'Виграй 5 роздач у турнірі', v: a.pokerWins, goal: 5, r: { crystals: 200 }, go: 'poker' },
+    { k: 'pokerWins', t: 'Виграй 5 роздач у турнірі', v: a.pokerWins, goal: 5, r: { crystals: 40 }, go: 'poker' },
   ];
 }
 SCREENS.tasks = p => {
@@ -778,7 +780,7 @@ SCREENS.tasks = p => {
     return `<div class="row" style="position:relative">${ok && !cl ? DOT : ''}<div class="f"><b>${x.t}</b><div class="prog"><i style="width:${Math.min(1, x.v / x.goal) * 100}%"></i></div><span class="small">${Math.min(x.v, x.goal)} / ${x.goal} · нагорода: ${Object.entries(x.r).map(([k, v]) => fmt(v) + ' ' + curName(k)).join(', ')}</span></div>
     ${cl ? '<button class="g" disabled>✓ Виконано</button>' : ok ? `<button class="y" onclick="claimTask('${t}','${x.k}')">Забрати</button>` : `<button onclick="go('${x.go}')">Перейти ›</button>`}</div>`;
   }).join('')}
-  ${t === 'day' ? `<div class="box" style="position:relative">${doneN >= 6 && !S.daily.chest ? DOT : ''}<b>Нагорода за всі щоденні завдання</b><div>30 000 💵 · 20 💎 · +10 до бонус-прогресу барабанів</div>
+  ${t === 'day' ? `<div class="box" style="position:relative">${doneN >= 6 && !S.daily.chest ? DOT : ''}<b>Нагорода за всі щоденні завдання</b><div>30 000 💵 · 10 💎 · +10 до бонус-прогресу барабанів</div>
     <button class="${doneN >= 6 && !S.daily.chest ? 'y' : 'dis'}" onclick="claimDailyChest()">${S.daily.chest ? 'Отримано' : 'Отримати'}</button></div>` : ''}`;
 };
 function claimTask(t, k) {
@@ -789,7 +791,7 @@ function claimTask(t, k) {
 }
 function claimDailyChest() {
   if (S.daily.chest) return; if (Object.keys(S.daily.claimed).length < 6) return toast('Спочатку виконай всі 6 завдань');
-  S.daily.chest = true; bump('dailyChests'); give({ money: 30000, crystals: 20 }, 'Скриня'); render();
+  S.daily.chest = true; bump('dailyChests'); give({ money: 30000, crystals: 10 }, 'Скриня'); render();
 }
 
 // --- ПОДІЇ
@@ -909,7 +911,7 @@ function donate(c) {
   S.group.prog += gPts(c, n); bump('donated', gPts(c, n)); { const g = S.group; if (!g.don) g.don = { money: 0, crystals: 0, gold: 0 }; g.don[c] += n; if (!g.hist) g.hist = []; g.hist.unshift({ n: S.name + ' (ви)', c, a: n, t: new Date().toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' }) }); g.hist.length = Math.min(g.hist.length, 20); } let up = 0;
   while (S.group.prog >= gNeed() && S.group.lvl < CLAN_MAX) { S.group.prog -= gNeed(); S.group.lvl++; up++; }
   if (up) toast('Групування підняло рівень до ' + S.group.lvl + '!');
-  S.daily.donate++; bump('donateN'); give({ xp: 100 }, 'Внесок ' + fmt(n) + ' ' + GCUR[c][0]); p.amt = undefined; render();
+  S.daily.donate++; bump('donateN'); { const dx = Math.max(0, Math.min(Math.round(gPts(c, n) * 5), 300 - (S.daily.dxp || 0))); S.daily.dxp = (S.daily.dxp || 0) + dx; if (dx) give({ xp: dx }, 'Внесок ' + fmt(n) + ' ' + GCUR[c][0]); else toast('Внесок ' + fmt(n) + ' ' + GCUR[c][0] + ' (XP за внески на сьогодні: максимум 300)'); } p.amt = undefined; render();
 }
 function joinClan(n) { S.group = { member: true, name: n, lvl: 3, prog: 40, owner: false, tree: { race: [0, 1], fight: [], trade: [] } }; render(); }
 function createClan() {
@@ -1114,7 +1116,7 @@ SCREENS.garage = p => {
   ${tabs([['tune', 'Тюнінг'], ['style', 'Стиль'], ['paint', 'Фарбування'], ['stick', 'Наліпки']], t)}`;
   if (t === 'tune') {
     h += `<div class="grid g3">${PARTS.map(([k, n]) => `<div class="cell" onclick="setP('part','${k}')" style="${part === k ? 'outline:3px solid #000' : ''}">${n}<br>${'■'.repeat(c.parts[k])}${'□'.repeat(6 - c.parts[k])}</div>`).join('')}</div>`;
-    const lv = c.parts[part], cost = 5000 * (lv + 1) * (lv + 1);
+    const lv = c.parts[part], cost = 8000 * (lv + 1) * (lv + 1);
     h += lv >= 6 ? '<div class="box">Максимальний рівень</div>' : `<button class="g" style="width:100%;padding:10px;margin-top:5px" onclick="upPart('${part}',${cost})">🔧 Покращити ${PARTS.find(x => x[0] === part)[1]} — ${fmt(cost)} 💵</button>`;
   } else if (t === 'paint') {
     h += `<div class="bar">${['Червоний', 'Чорний', 'Жовтий', 'Білий', 'Фіолетовий неон'].map(col => `<button class="${c.color === col ? 'y' : ''}" onclick="paint('${col}')">${col} (5 000)</button>`).join('')}</div>`;
@@ -1129,8 +1131,8 @@ function paint(col) { if (!pay('money', 5000)) return; S.car.color = col; render
 // --- ЗБРОЯ
 const weaponsList = () => `<div class="note">Множник шкоди впливає на бій з босами.</div>
   ${WEAPONS.map(w => { const own = S.weapons.includes(w.id); return `<div class="row"><div class="f"><b>${w.name}</b><div class="small">Шкода x${w.dmg}</div></div>
-  ${own ? (S.weapon === w.id ? '<button class="g" disabled>В руках</button>' : `<button class="y" onclick="S.weapon='${w.id}';render()">Взяти</button>`) : `<button class="y" onclick="buyWeapon('${w.id}')">${fmt(w.price)} ${w.cur === 'crystals' ? '💎' : '💵'}</button>`}</div>`; }).join('')}`;
-function buyWeapon(id) { const w = WEAPONS.find(x => x.id === id); if (!pay(w.cur || 'money', w.price)) return; S.weapons.push(id); S.weapon = id; render(); }
+  ${own ? (S.weapon === w.id ? '<button class="g" disabled>В руках</button>' : `<button class="y" onclick="S.weapon='${w.id}';render()">Взяти</button>`) : (w.lvl && S.lvl < w.lvl ? `<button disabled>🔒 рівень ${w.lvl}</button>` : `<button class="y" onclick="buyWeapon('${w.id}')">${fmt(w.price)} ${w.cur === 'crystals' ? '💎' : '💵'}</button>`)}</div>`; }).join('')}`;
+function buyWeapon(id) { const w = WEAPONS.find(x => x.id === id); if (w.lvl && S.lvl < w.lvl) return toast('Потрібен рівень ' + w.lvl); if (!pay(w.cur || 'money', w.price)) return; S.weapons.push(id); S.weapon = id; render(); }
 
 // --- НАЛІТ (боси)
 const BOSS_EN = 3, AMMO_HIT = 10, NOAMMO_MULT = 0.4, GREN_MULT = 2;
@@ -1161,7 +1163,7 @@ SCREENS.raidBoss = p => {
 const EN_PACKS = [[50, 22, 5], [100, 40, 5], [500, 180, 3], [1000, 330, 2]]; // [енергія, 💎, ліміт на день]
 function raidShop() {
   const d = S.daily.en || {};
-  return `<div class="box"><b>⚡ Енергія</b><div class="small">Енергія відновлюється сама (1 за 4 хв до 60, повний запас 60 ⚡ за 4 години, це 6 запасів на добу). Куплена понад 60 не пропадає й не заважає відновленню. У тебе: <b>${S.energy}</b> ⚡</div></div>` + EN_PACKS.map(([n, c, lim]) => `<div class="row"><div class="f"><b>+${n} ⚡</b><div class="small">${c} 💎 · ${(c / n).toFixed(2)} 💎 за 1 ⚡ · сьогодні ${d[n] || 0}/${lim}</div></div><button class="${(d[n] || 0) >= lim ? 'dis' : 'y'}" onclick="buyEnergy(${n})">${c} 💎</button></div>`).join('') +
+  return `<div class="box"><b>⚡ Енергія</b><div class="small">Енергія відновлюється сама (1 за 6 хв до 90, повний запас 90 ⚡ за 9 годин, 240 ⚡ на добу). Куплена понад 90 не пропадає й не заважає відновленню. У тебе: <b>${S.energy}</b> ⚡</div></div>` + EN_PACKS.map(([n, c, lim]) => `<div class="row"><div class="f"><b>+${n} ⚡</b><div class="small">${c} 💎 · ${(c / n).toFixed(2)} 💎 за 1 ⚡ · сьогодні ${d[n] || 0}/${lim}</div></div><button class="${(d[n] || 0) >= lim ? 'dis' : 'y'}" onclick="buyEnergy(${n})">${c} 💎</button></div>`).join('') +
     `<div class="box"><b>🔫 Боєприпаси</b><div class="small">У тебе: патрони <b>${S.ammo}</b> · гранати <b>${S.grenades}</b></div></div>` + AMMO_SHOP.map(([k, n, c, nm]) => `<div class="row"><div class="f"><b>${nm}</b></div><button class="y" onclick="buyAmmo('${k}',${n},${c})">${fmt(c)} 💵</button></div>`).join('');
 }
 const AMMO_SHOP = [['ammo', 50, 5000, '🔫 Патрони ×50'], ['ammo', 200, 18000, '🔫 Патрони ×200'], ['grenades', 1, 8000, '💣 Граната ×1'], ['grenades', 5, 36000, '💣 Гранати ×5']];
@@ -1186,7 +1188,7 @@ function hitBoss(id) {
   if (st.hp === 0) {
     if (!S.daily.bk) S.daily.bk = {}; S.ach.bossKills++; bump('bossKills'); bump('kill_' + b.id); st.hp = b.hp; if (!S.beat) S.beat = {}; const hadCar = hasCar(); S.beat[b.id] = 1; if (!hadCar && hasCar()) setTimeout(() => modal('<h3>🚗 Перша машина!</h3><p>Ти переміг другого боса й отримав першу машину. Відкрились <b>Транспорт</b> (гараж, тюнінг) і <b>Гонки</b>.</p><button class="y" style="width:100%" onclick="closeModal()">Чудово</button>'), 400);
     if (!S.daily.bk[b.id]) { S.daily.bk[b.id] = 1; give({ ...b.rew, ammo: 30, grenades: 1 }, 'Бос переможений'); const it = pick(ITEMS); addItem(it.id, rollG()); msg += ` БОС ПЕРЕМОЖЕНИЙ! Трофей: ${it.name}. Бос відродився.`; }
-    else { give({ money: Math.round(b.rew.money * 0.2) }, 'Повторне вбивство'); msg += ' Бос переможений ще раз: сьогодні повна нагорода вже отримана, лише 20% грошей. Бос відродився.'; }
+    else { give({ money: Math.round(b.rew.money * 0.1) }, 'Повторне вбивство'); msg += ' Бос переможений ще раз: сьогодні повна нагорода вже отримана, лише 10% грошей. Бос відродився.'; }
   }
   S.xp += 50; lvlCheck();
   modal(`<h3>Бій</h3><p>${msg}</p>`); render();
@@ -1225,7 +1227,7 @@ function distDaily() {
     const d = S.dist.d[D.id], was = dMine(D.id);
     d.r = Math.round(d.r * 0.95); d.riv.forEach(x => { x[1] = Math.round(x[1] * 0.95 + rnd(D.gain[0], D.gain[1])); });
     const now = dMine(D.id);
-    if (was && now) { sendMail('Район ' + D.n, 'Дохід з району', `Ваш район ${D.n} приніс дохід за добу.`, { money: D.inc[0], crystals: D.inc[1] }); bump('distDays'); }
+    if (was && now) { sendMail('Район ' + D.n, 'Дохід з району', `Ваш район ${D.n} приніс дохід за добу.`, { money: Math.round(D.inc[0] * lvM()), crystals: D.inc[1] }); bump('distDays'); }
     else if (was && !now) sendMail('Район ' + D.n, 'Район втрачено', `Гравець ${dHolder(D.id)[0]} випередив вас за рейтингом і тепер тримає ${D.n}. Поверніть район рейдами.`);
   });
   S.dist.ts = t;
@@ -1245,7 +1247,7 @@ SCREENS.district = p => {
     <div class="bar sp" style="align-items:flex-start"><div class="box" style="margin:0"><b>Район: ${D.n}</b><br><span class="small">Прогрес рейду: ${Math.min(st - 1, 12)}/12<br>Ваш рейтинг: ${fmt(dS(id).r)}</span></div>${holderPlate(id)}</div>
     <div class="map">${Array.from({ length: 12 }, (_, i) => i + 1).map(n => `<div class="cell ${n < st ? 'done' : n === st ? 'cur-st' : 'lock'}">${n === 12 ? '💀 Бос' : 'Етап ' + n}<br>${n < st ? '✓' : n === st ? '◉' : '🔒'}</div>`).join('')}</div>
     ${st > 12 ? `<div class="box">Район пройдено! <button class="y" onclick="setStage('${id}',1);render()">Почати знову</button></div>` :
-      `<div class="box"><b>Нагорода за етап ${st}</b><div>${fmt(Math.round(r[0] * D.mult))} 💵 · ${Math.round(r[1] * D.mult)} 💎 · ${r[2]} 🟡 · ${st * 10} XP · ⭐ +${Math.round(st * 8 + (st === 12 ? 200 : 0))} рейтингу району</div></div>
+      `<div class="box"><b>Нагорода за етап ${st}</b><div>${fmt(Math.round(r[0] * D.mult * lvM()))} 💵 · ${Math.round(r[1] * D.mult)} 💎${r[2] ? ' · ' + ((S.daily.rg || {})[id] ? '0 🟡 (сьогодні вже отримано)' : r[2] + ' 🟡') : ''} · ${st * 10} XP · ⭐ +${Math.round(st * 8 + (st === 12 ? 200 : 0))} рейтингу району</div></div>
       <button class="y" style="width:100%;padding:10px" onclick="attackStage('${id}')">${st === 12 ? '💀 Атакувати боса' : 'Атакувати'} ⚡${RAID_EN[st - 1]}</button><div class="small" style="text-align:center">Ціна етапів: ${RAID_EN.map((e, i) => i + 1 === st ? '<b>' + e + '</b>' : e).join(' → ')} ⚡</div>`}`;
   } else if (t === 'rank') h += `<div class="bar" style="margin:3px 0">${DISTS.map(x => `<button class="${x.id === id ? 'sel' : ''}" onclick="setP('dd','${x.id}')">${x.n}</button>`).join('')}</div><div class="box"><b>Рейтинг району ${D.n}</b>${dBoard(id).map((x, i) => `<div class="bar sp" style="${x[2] ? 'font-weight:bold;background:#fff6cc' : ''}"><span>${i + 1}. ${i === 0 ? '👑 ' : ''}${x[2] ? S.name + ' (ви)' : x[0]}</span><span>${fmt(x[1])}</span></div>`).join('')}</div><div class="small">Рейтинг щодоби спадає на 5%, тож щоб залишатись першим, треба регулярно проходити рейд.</div>`;
   else if (t === 'ctrl') h += `<div class="box"><b>Контроль районів</b><div class="small">Район тримає гравець із найвищим рейтингом по ньому. Володар щодоби отримує дохід листом у пошту. Ваші райони: <b>${dMineCount()}</b></div></div>` + DISTS.map(x => { const hd = dHolder(x.id), b = dBoard(x.id), me = b.findIndex(y => y[2]); return `<div class="box"><div class="bar sp"><b>${x.n}</b>${holderPlate(x.id)}</div><div class="small">Дохід володаря: ${fmt(x.inc[0])} 💵 + ${x.inc[1]} 💎 на добу · ваше місце: ${me + 1}/4 (${fmt(dS(x.id).r)})${hd[2] ? '' : ' · до лідера ще ' + fmt(hd[1] - dS(x.id).r + 1)}</div><button class="y" style="width:100%;margin-top:3px" onclick="cur().p.dd='${x.id}';setP('tab','raid')">Рейд на ${x.n}</button></div>`; }).join('');
@@ -1261,8 +1263,8 @@ function attackStage(id) {
   S.daily.raids++; S.week.raids++; bump('raids');
   if (Math.random() < raidChance()) {
     const r = RAID_REW[st - 1], m = clanMul('raidRew') * D.mult;
-    bump('distStages');
-    give({ money: Math.round(r[0] * m), crystals: Math.round(r[1] * m), gold: r[2], xp: st * 10 }, D.n + ', етап ' + st + ' пройдено'); setStage(id, st + 1);
+    bump('distStages'); const rg = S.daily.rg || (S.daily.rg = {}), gl = r[2] && !rg[id] ? r[2] : 0; if (gl) rg[id] = 1;
+    give({ money: Math.round(r[0] * m * lvM()), crystals: Math.round(r[1] * m), gold: gl, xp: st * 10 }, D.n + ', етап ' + st + ' пройдено'); setStage(id, st + 1);
     dRate(id, Math.round(st * 8 + (st === 12 ? 200 : 0)));
   } else toast('Атака відбита! Спробуй ще.');
   render();
@@ -1291,7 +1293,7 @@ const cosTitle = () => { const k = clubOwn().title, c = CLUB_COS.find(x => x[0] 
 const cosFrame = () => { const k = clubOwn().frame, c = CLUB_COS.find(x => x[0] === k); return c ? c[3] : ''; };
 const CLUB_SHOP = [
   ['en10', '⚡ +10 енергії', 150, () => give({ energy: 10 })], ['en25', '⚡ +25 енергії', 350, () => give({ energy: 25 })],
-  ['m5', '💵 5 000', 100, () => give({ money: 5000 })], ['m15', '💵 15 000', 250, () => give({ money: 15000 })],
+  ['m5', '💵 5 000 × рівень', 100, () => give({ money: Math.round(5000 * lvM()) })], ['m15', '💵 15 000 × рівень', 250, () => give({ money: Math.round(15000 * lvM()) })],
   ['am', '🔫 Патрони ×50', 80, () => give({ ammo: 50 })], ['gr', '💣 Гранати ×2', 120, () => give({ grenades: 2 })],
   ['bag', '📦 +1 завезення в секонд-хенді', 300, () => { const x = shS(); x.bags = Math.max(0, x.bags - 1); }],
   ['srch', '🧥 +1 оновлення полиць', 200, () => { const x = shS(); x.search = Math.max(0, x.search - 1); }],
@@ -1619,7 +1621,7 @@ SCREENS.races = p => {
   <div><b>Траса: ${tr.n}</b><br>Довжина: ${tr.km} км · Кіл: ${tr.laps}${tr.req ? `<br><span class="small">Рекомендована сила авто: ${tr.req}</span>` : ''}</div>
   <button onclick="setP('tr',${(ti + 1) % TRACKS.length})">▶</button></div>
   <div class="box">Ваше авто: ${S.car.name} · сила ${power} · стан ${Math.round(carCond())}%</div>
-  <button class="y" style="width:100%;padding:16px;font-size:20px" onclick="race(${ti})">СТАРТ ⚡5</button>
+  <button class="y" style="width:100%;padding:16px;font-size:20px" onclick="race(${ti})">СТАРТ ⚡5</button><div class="small" style="text-align:center">Гонок сьогодні: ${S.daily.rc || 0}/${RACE_NORM} з повною нагородою · 💎 за перемоги: ${S.daily.rcw || 0}/${RACE_CR}${(tr.rw || 1) > 1 ? ' · траса ×' + tr.rw : ''}</div>
   <div class="grid g4" style="margin-top:6px"><button onclick="go('garage')">Гараж</button><button onclick="toast('Турніри: заглушка')">Турніри</button><button onclick="toast('Нагороди сезону гонок: заглушка')">Нагороди</button><button onclick="modal(rankTable(['Тоні','${S.name}','Козак','Бандерас','Ла Ріка'],'очок'))">Рейтинг</button></div>`;
 };
 function race(ti) {
@@ -1630,11 +1632,13 @@ function race(ti) {
   const myScore = me * (0.85 + Math.random() * 0.3) * (1 + clanEff('raceSpd') / 100);
   const place = 1 + opp.filter(o => o > myScore).length;
   S.week.races++; bump('racesN');
-  const rew = [[15000, 1], [8000, 0], [4000, 0], [1500, 0]][place - 1]; // ≈1500 💵 на 1 ⚡ (гонка 5 ⚡)
+  const rew = [[9000, 1], [5000, 0], [2500, 0], [1000, 0]][place - 1]; // × рівень × траса; після денної норми 40%
+  const rn = S.daily.rc = (S.daily.rc || 0) + 1, rk = (rn > RACE_NORM ? RACE_AFTER : 1) * lvM() * (tr.rw || 1);
+  let rc = 0; if (rew[1] && (S.daily.rcw || 0) < RACE_CR) { rc = rew[1]; S.daily.rcw = (S.daily.rcw || 0) + 1; }
   if (place === 1) { S.ach.raceWins++; bump('raceWins'); }
   if (place <= 3) bump('raceTop3');
-  give({ money: Math.round(rew[0] * clanMul('raceRew')), crystals: Math.round(rew[1] * clanMul('raceRew')), xp: 60 }, `Місце ${place}`);
-  modal(`<h3>Фініш!</h3><p>Ви прийшли <b>${place}-м</b> з 4.</p>`); render();
+  give({ money: Math.round(rew[0] * rk * clanMul('raceRew')), crystals: rc, xp: 60 }, `Місце ${place}`);
+  modal(`<h3>Фініш!</h3><p>Ви прийшли <b>${place}-м</b> з 4.</p>${rn > RACE_NORM ? '<p class="small">Денна норма гонок (' + RACE_NORM + ') виконана: далі нагорода 40%. Завтра знову повна.</p>' : ''}`); render();
 }
 
 // --- ГРУПОВІ ЗАЇЗДИ 5×5 (15 хв)
@@ -1654,10 +1658,12 @@ function grStart() {
 function grFinish() {
   const g = S.gr, sc = t => t.reduce((a, x) => a + x.pw * (0.85 + Math.random() * 0.3), 0), a = sc(g.A), b = sc(g.B), win = a >= b;
   const all = [...g.A, ...g.B].map(x => ({ n: x.n, v: x.pw * (0.85 + Math.random() * 0.3), me: x.me })).sort((x, y) => y.v - x.v), place = all.findIndex(x => x.me) + 1;
-  const rew = win ? { money: 20000, crystals: 1, xp: 80 } : { money: 6000, xp: 30 };
-  if (place === 1) rew.money += 8000;
+  const rew = win ? { money: 12000, crystals: 1, xp: 80 } : { money: 4000, xp: 30 };
+  if (place === 1) rew.money += 5000;
+  const rn = S.daily.rc = (S.daily.rc || 0) + 1; rew.money = rew.money * lvM() * (rn > RACE_NORM ? RACE_AFTER : 1);
+  if (rew.crystals) { if ((S.daily.rcw || 0) < RACE_CR) S.daily.rcw = (S.daily.rcw || 0) + 1; else rew.crystals = 0; }
   S.week.races++; bump('racesN'); if (win) { S.ach.raceWins++; bump('raceWins'); }
-  give({ money: Math.round(rew.money * clanMul('raceRew')), crystals: rew.crystals ? Math.round(rew.crystals * clanMul('raceRew')) : 0, xp: rew.xp }, win ? 'Перемога команди' : 'Заїзд завершено');
+  give({ money: Math.round(rew.money * clanMul('raceRew')), crystals: rew.crystals || 0, xp: rew.xp }, win ? 'Перемога команди' : 'Заїзд завершено');
   g.st = 'done'; g.res = { win, a: Math.round(a), b: Math.round(b), place };
 }
 function grTick() { if (S.gr && S.gr.st === 'run' && Date.now() >= S.gr.end) { grFinish(); return true; } return false; }
@@ -1756,6 +1762,7 @@ function jobsScreen(p) {
   return `<h2>💼 РОБОТА</h2>${tabs([['sh', '🧥 Секонд-хенд'], ['car', '🚗 Перекуп авто']], t)}` + (t === 'car' ? (lockOf('flip') ? `<div class="box" style="text-align:center"><div style="font-size:40px">🔒</div><b>Перекуп авто</b><div class="small">${lockOf('flip')}</div></div>` : flipTab()) : `<div class="box"><b>Початкова робота</b><div class="small">Зміни, завезення й полиці секонд-хенду. Підходить для старту, без вкладень.</div></div><button class="y" style="width:100%;padding:12px" onclick="go('secondhand')">Відкрити секонд-хенд ▶</button>${swHead()}${shHead()}<div class="box small">💡 Коли назбираєш грошей, переходь на 🚗 Перекуп авто: більше вкладень, більший прибуток.</div>`);
 }
 // --- ПІДРОБІТОК: денні ліміти (free-to-play базові, pay-to-play більше + бонус доходу)
+const JOB_K = 1.8; // множник оплати змін (робота не повинна бути мертвою)
 const SH_BASE = { bags: 5, shifts: 4, search: 2, flips: 3 };
 const SH_PACK = { bags: { n: 3, c: 40, max: 3, t: 'завезень' }, shifts: { n: 2, c: 25, max: 3, t: 'змін' }, search: { n: 2, c: 15, max: 3, t: 'оновлень' }, flips: { n: 2, c: 30, max: 3, t: 'купівель авто' } };
 const SH_TIER = { start: { flips: 1, bags: 1, shifts: 1, search: 1, inc: 10, rar: 0.05 }, street: { flips: 2, bags: 2, shifts: 2, search: 2, inc: 20, rar: 0.10 }, boss: { flips: 3, bags: 4, shifts: 3, search: 3, inc: 35, rar: 0.20 } };
@@ -1776,10 +1783,10 @@ function doJob(id) {
   if (shLeft('shifts') < 1) return toast('Зміни на сьогодні закінчились. Завтра нові або докупи за 💎');
   if (!pay('energy', j.en)) return;
   s.shifts++; bump('shifts');
-  const inc = Math.round(rnd(j.pay[0], j.pay[1]) * (1 + T.inc / 100) * clanMul('jobInc') * swInc());
+  const inc = Math.round(rnd(j.pay[0], j.pay[1]) * JOB_K * lvM() * (1 + T.inc / 100) * clanMul('jobInc') * swInc());
   const w = sw(), ol = swLvl(); w.xp += j.xp; if (swLvl() > ol) lvGrant('sw', ol, swLvl()); w.crates += j.cr; let key = 0; if (j.key && Math.random() < j.key) { w.keys++; key = 1; }
   let msg = `Зміна відпрацьована: +${fmt(inc)} 💵 · +${j.cr} 📦${key ? ' · +1 🔑' : ''}${swLvl() > ol ? ' · 🎉 рівень складу ' + swLvl() : ''}`;
-  const o = { money: inc };
+  const o = { money: inc, xp: j.xp * 2 };
   if (Math.random() < 0.06) { o.money += 5000; msg += ' · 🍀 знайшов гаманець +5 000'; }
   if (Math.random() < j.find + luckB()) { let r = Math.random() < 0.15 ? j.rar : Math.min(j.rar, 1); if (Math.random() < T.rar) r = Math.min(4, r + 1); const pool = ITEMS.filter(x => x.rar === r); const it = pick(pool.length ? pool : ITEMS); addItem(it.id, rollG()); msg += ' · знайшов «' + it.name + '»'; }
   S.week.bags = S.week.bags || 0; bump('jobEarn', o.money); give(o, 'Підробіток'); lastJob = msg; render();
@@ -1819,7 +1826,7 @@ function shHead() {
 }
 function workTab() {
   return swHead() + lvTable('sw') + shHead() + (lastJob ? `<div class="winban" style="font-size:13px">${lastJob}</div>` : '') +
-    JOBS.map(j => `<div class="row"><div class="f"><b>${j.n}</b><div class="small">${j.d}<br>Платять ${fmt(j.pay[0] * (1 + shTier().inc / 100))}–${fmt(j.pay[1] * (1 + shTier().inc / 100))} 💵 · витрата ${j.en} ⚡ · дає ${j.cr} 📦${j.key ? ' і шанс на 🔑' : ''} · +${j.xp} досвіду</div></div>${swLvl() < j.lvl ? `<button disabled>🔒 рівень ${j.lvl}</button>` : `<button class="y" onclick="doJob('${j.id}')">Працювати</button>`}</div>`).join('') +
+    JOBS.map(j => `<div class="row"><div class="f"><b>${j.n}</b><div class="small">${j.d}<br>Платять ${fmt(Math.round(j.pay[0] * JOB_K * lvM() * (1 + shTier().inc / 100)))}–${fmt(Math.round(j.pay[1] * JOB_K * lvM() * (1 + shTier().inc / 100)))} 💵 · +${j.xp * 2} XP героя · витрата ${j.en} ⚡ · дає ${j.cr} 📦${j.key ? ' і шанс на 🔑' : ''} · +${j.xp} досвіду</div></div>${swLvl() < j.lvl ? `<button disabled>🔒 рівень ${j.lvl}</button>` : `<button class="y" onclick="doJob('${j.id}')">Працювати</button>`}</div>`).join('') +
     `<div class="box"><b>Не вистачає змін?</b><div class="small">Докупи на сьогодні за кристали:</div><div class="bar">${shBuyBtn('shifts')}</div></div>
     <div class="box small">💡 Підробіток доступний усім і дає стабільний дохід. Знахідки можна залишити, продати одразу чи виставити на аукціоні дорожче.</div>`;
 }
@@ -2460,7 +2467,7 @@ SCREENS.settings = p => {
     <button class="y" onclick="give({gold:500},'Розробник');render()">+500 🟡</button>
     <button class="y" onclick="give({chips:500},'Розробник');render()">+500 🎟</button>
     <button onclick="give({money:1000000,crystals:5000,gold:500,chips:500},'Розробник');render()">+ усе разом</button>
-    <button onclick="S.energy=60;render()">⚡ 60</button>
+    <button onclick="S.energy=90;render()">⚡ 90</button>
     <button onclick="spS().pts+=300;render()">+300 очок сезону</button><button onclick="spS();S.sprem=S.sprem?0:1;render()">⭐ Преміум пропуск вкл/вимк</button>
     <button class="y" onclick="give({ammo:200,grenades:10},'Розробник');render()">+200 🔫 +10 💣</button></div></div>
   <div class="box"><b>Ліміти й день</b><div class="grid g2">
@@ -2477,7 +2484,7 @@ SCREENS.settings = p => {
 const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 8192) s += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
 const unb64u = t => { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; const s = atob(t), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
 async function zip(str, mode) { const st = mode === 'c' ? new Blob([str]).stream().pipeThrough(new CompressionStream('deflate-raw')) : new Blob([str]).stream().pipeThrough(new DecompressionStream('deflate-raw')); return new Uint8Array(await new Response(st).arrayBuffer()); }
-const BUILD = 'v112';
+const BUILD = 'v113';
 const BOT = 'PotuzhneMisto_bot', PAGE = 'https://stasiya408-dev.github.io/tg-miniapp/';
 async function saveExport() {
   const o = Object.assign({}, S, { mail: [] }), t = b64u(await zip(JSON.stringify(o), 'c'));
