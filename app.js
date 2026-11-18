@@ -698,7 +698,7 @@ SCREENS.home = () => {
       ${qaList('R').map(k => `<button onclick="qaGo('${k}')">${lockOf(QA[k][1]) ? '🔒 ' : ''}${QA[k][0]}</button>`).join('')}
     </div>
     ${false ? '' : `<button class="play" style="position:absolute;left:12px;right:12px;bottom:12px;padding:14px;font-size:22px;z-index:3" onclick="go('play')">ГРАТИ ▶${dot(N.bonus())}</button>`}
-  ${cur().p.chat ? `<div style="position:absolute;left:0;right:0;bottom:0;height:56%;z-index:6;overflow:auto;background:rgba(18,12,26,.96);border-top:2px solid #d8b25a;padding:6px;color:#eee">${chatPanel(cur().p, true)}</div>` : ''}</div>`;
+  ${cur().p.chat ? `<div style="position:absolute;left:0;right:0;bottom:0;height:62%;z-index:6;display:flex;flex-direction:column;background:#f4efe6;border-top:3px solid #d8b25a;padding:6px;color:#111;font-size:14px">${chatPanel(cur().p, true)}</div>` : ''}</div>`;
 };
 
 
@@ -1923,10 +1923,10 @@ function chatPanel(p, over) {
   let h = over ? `<div class="bar sp" style="margin:2px 0"><b>💬 Чат</b><button onclick="cur().p.chat=false;render()">✕ Закрити</button></div>${chTabs(ch)}` : `<h2>💬 Чат</h2>${chTabs(ch)}`;
   if (ch === 'dm') h += `<div class="bar" style="margin:3px 0">${CH_NPC.slice(0, 5).map(n => `<button class="${p.to === n ? 'sel' : ''}" style="position:relative" onclick="cur().p.to='${n}';render()">${n}${(c.dm[n] || []).length ? ' ●' : ''}${u.dm[n] ? `<span class="badge" style="top:-8px;border-radius:3px">${u.dm[n]}</span>` : ''}</button>`).join('')}</div>${p.to ? '' : '<div class="box small">Обери гравця зверху, щоб написати особисто.</div>'}`;
   if (ch === 'group' && !S.group.member) return h + `<div class="box">Ти не в групуванні. <button class="y" onclick="go('group')">До групувань</button></div>`;
-  h += `<div class="box" id="chBox" style="height:${over ? 120 : Math.max(160, Math.round(window.innerHeight * 0.4))}px;overflow-y:auto;background:#fff">${list.length ? list.map(m => `<div style="margin:3px 0;${m.me ? 'text-align:right' : ''}"><span class="small">${m.n}${m.w ? ' · ' + m.w : ''}</span><div style="display:inline-block;max-width:85%;background:${m.me ? '#ffe98a' : '#eee'};border-radius:6px;padding:3px 6px;text-align:left">${m.t.replace(/</g, '&lt;')}</div></div>`).join('') : '<div class="small">Поки порожньо.</div>'}</div>
+  h += `<div class="box" id="chBox" style="${over ? 'flex:1;min-height:90px' : 'height:' + Math.max(160, Math.round(window.innerHeight * 0.4)) + 'px'};overflow-y:auto;background:#fff;color:#111">${list.length ? list.map(m => `<div style="margin:3px 0;${m.me ? 'text-align:right' : ''}"><span class="small">${m.n}${m.w ? ' · ' + m.w : ''}</span><div style="display:inline-block;max-width:85%;background:${m.me ? '#ffe98a' : '#eee'};border-radius:6px;padding:3px 6px;text-align:left">${m.t.replace(/</g, '&lt;')}</div></div>`).join('') : '<div class="small">Поки порожньо.</div>'}</div>
   <div class="bar"><input id="chIn" maxlength="120" placeholder="${ch === 'buy' ? 'Куплю: що саме і за скільки' : ch === 'sell' ? 'Продам: що саме і за скільки' : 'Повідомлення…'}" style="flex:1" onkeydown="if(event.key==='Enter')chSend()"><button class="y" onclick="chSend()">Надіслати ${CHAT_COST} 💎</button></div>
   <div class="small">Кожне повідомлення коштує ${CHAT_COST} 💎. У тебе ${fmt(S.crystals)} 💎.</div>`;
-  after.push(() => { const b = $('chBox'); if (over && b) b.style.height = Math.max(70, $('app').clientHeight - $('homeBox').offsetHeight - 168) + 'px'; if (b) b.scrollTop = b.scrollHeight; });
+  after.push(() => { const b = $('chBox'); if (b) b.scrollTop = b.scrollHeight; });
   return h;
 }
 
@@ -2462,7 +2462,7 @@ SCREENS.settings = p => {
 const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 8192) s += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
 const unb64u = t => { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; const s = atob(t), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
 async function zip(str, mode) { const st = mode === 'c' ? new Blob([str]).stream().pipeThrough(new CompressionStream('deflate-raw')) : new Blob([str]).stream().pipeThrough(new DecompressionStream('deflate-raw')); return new Uint8Array(await new Response(st).arrayBuffer()); }
-const BUILD = 'v108';
+const BUILD = 'v109';
 const BOT = 'PotuzhneMisto_bot', PAGE = 'https://stasiya408-dev.github.io/tg-miniapp/';
 async function saveExport() {
   const o = Object.assign({}, S, { mail: [] }), t = b64u(await zip(JSON.stringify(o), 'c'));
