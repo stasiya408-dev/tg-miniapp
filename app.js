@@ -532,9 +532,9 @@ function hudSet(i, k) { const o = 1 - i; if (HUD[o] === k) HUD[o] = HUD[i]; HUD[
 function topbar(name) {
   return `<div class="top">
     ${name !== 'home' ? '<button onclick="back()">◀</button>' : ''}
-    <span class="cur" onclick="go('profile')">👤 <span class="nm">${S.name}</span> · ${name === 'home' ? 'Рів. ' : ''}${S.lvl}</span>
+    <span class="cur" onclick="go('profile')">👤 ${S.lvl} · <span class="nm">${S.name}</span></span>
     <span class="cur" onclick="go('district',{tab:'shop'})">⚡ ${S.energy}${S.energy <= 60 ? '/60' : ''} +</span>
-    ${hudChip(0)}${hudChip(1)}
+    ${['money','crystals','gold'].map(k => `<span class="cur" onclick="go('shop',{tab:'cur'})">${HUD_C[k][0]} ${fmt(S[k] || 0)}</span>`).join('')}
     ${name !== 'home' ? `<button style="position:relative" onclick="home()">⌂${dot(N.any())}</button>` : ''}
   </div>`;
 }
