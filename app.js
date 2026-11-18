@@ -983,7 +983,7 @@ function buyWear(k, curr) {
 SCREENS.profile = () => {
   const s = stats();
   return `<h2>👤 Профіль</h2><div class="bar"><div>${doll(220)}</div><div class="f" style="flex:1">
-  <div class="box" style="${cosFrame() ? 'border:3px solid ' + cosFrame() : ''}"><b>${S.name}</b> ${cosTitle() ? '<span class="small">«' + cosTitle() + '»</span>' : ''} (${S.gender === 'm' ? 'чоловік' : 'жінка'})<br>Рівень ${S.lvl}<br><span onclick="go('tasks',{tab:'ach'})" style="cursor:pointer">🏅 <b>${achRank(achPts())[1]}</b> · ${(achPct() * 100).toFixed(1)}% досягнень · ${fmt(achPts())} очок</span><div class="prog"><i style="width:${S.xp / xpNeed(S.lvl) * 100}%"></i></div><span class="small">${S.xp} / ${xpNeed(S.lvl)} XP</span></div>
+  <div class="box" style="${cosFrame() ? 'border:3px solid ' + cosFrame() : ''}"><b style="${nickSt(subTier())}">${S.name}</b> ${cosTitle() ? '<span class="small">«' + cosTitle() + '»</span>' : ''} (${S.gender === 'm' ? 'чоловік' : 'жінка'})<br>Рівень ${S.lvl}<br><span onclick="go('tasks',{tab:'ach'})" style="cursor:pointer">🏅 <b>${achRank(achPts())[1]}</b> · ${(achPct() * 100).toFixed(1)}% досягнень · ${fmt(achPts())} очок</span><div class="prog"><i style="width:${S.xp / xpNeed(S.lvl) * 100}%"></i></div><span class="small">${S.xp} / ${xpNeed(S.lvl)} XP</span></div>
   <div class="box" style="text-align:center"><b>⚔️ Бойова сила</b><div style="font-size:34px;font-weight:800;line-height:1.1">${fmt(avgHit())}</div><div class="small">середній удар по босу</div><hr style="margin:6px 0"><div style="text-align:left">Шкода по босах: +${s.dmg}%<br>Крит: ${s.crit}% <span class="small">(подвійний удар)</span><br>Удача: ${s.luck} <span class="small">(кращі знахідки)</span><br>Колекція: ${S.owned.length}/${Object.keys(WEAR).length} речей у гардеробі<br>Зброя: ${(WEAPONS.find(w => w.id === S.weapon) || {}).name} (x${weaponMult()})<br>Авто: ${S.car.name}</div>
   ${profBox()}
   <div class="box small">Патрони: ${S.ammo} · Гранати: ${S.grenades}</div></div></div>
@@ -1923,7 +1923,7 @@ function chatPanel(p, over) {
   let h = over ? `<div class="bar sp" style="margin:2px 0"><b>💬 Чат</b><button onclick="cur().p.chat=false;render()">✕ Закрити</button></div>${chTabs(ch)}` : `<h2>💬 Чат</h2>${chTabs(ch)}`;
   if (ch === 'dm') h += `<div class="bar" style="margin:3px 0">${CH_NPC.slice(0, 5).map(n => `<button class="${p.to === n ? 'sel' : ''}" style="position:relative" onclick="cur().p.to='${n}';render()">${n}${(c.dm[n] || []).length ? ' ●' : ''}${u.dm[n] ? `<span class="badge" style="top:-8px;border-radius:3px">${u.dm[n]}</span>` : ''}</button>`).join('')}</div>${p.to ? '' : '<div class="box small">Обери гравця зверху, щоб написати особисто.</div>'}`;
   if (ch === 'group' && !S.group.member) return h + `<div class="box">Ти не в групуванні. <button class="y" onclick="go('group')">До групувань</button></div>`;
-  h += `<div class="box" id="chBox" style="${over ? 'flex:1;min-height:90px' : 'height:' + Math.max(160, Math.round(window.innerHeight * 0.4)) + 'px'};overflow-y:auto;background:#fff;color:#111">${list.length ? list.map(m => `<div style="margin:3px 0;${m.me ? 'text-align:right' : ''}"><span class="small">${m.n}${m.w ? ' · ' + m.w : ''}</span><div style="display:inline-block;max-width:85%;background:${m.me ? '#ffe98a' : '#eee'};border-radius:6px;padding:3px 6px;text-align:left">${m.t.replace(/</g, '&lt;')}</div></div>`).join('') : '<div class="small">Поки порожньо.</div>'}</div>
+  h += `<div class="box" id="chBox" style="${over ? 'flex:1;min-height:90px' : 'height:' + Math.max(160, Math.round(window.innerHeight * 0.4)) + 'px'};overflow-y:auto;background:#fff;color:#111">${list.length ? list.map(m => `<div style="margin:3px 0;${m.me ? 'text-align:right' : ''}"><span class="small"><span style="${nickSt(m.me ? subTier() : NPC_SUB[m.n])}">${m.n}</span>${m.w ? ' · ' + m.w : ''}</span><div style="display:inline-block;max-width:85%;background:${m.me ? '#ffe98a' : '#eee'};border-radius:6px;padding:3px 6px;text-align:left">${m.t.replace(/</g, '&lt;')}</div></div>`).join('') : '<div class="small">Поки порожньо.</div>'}</div>
   <div class="bar"><input id="chIn" maxlength="120" placeholder="${ch === 'buy' ? 'Куплю: що саме і за скільки' : ch === 'sell' ? 'Продам: що саме і за скільки' : 'Повідомлення…'}" style="flex:1" onkeydown="if(event.key==='Enter')chSend()"><button class="y" onclick="chSend()">Надіслати ${CHAT_COST} 💎</button></div>
   <div class="small">Кожне повідомлення коштує ${CHAT_COST} 💎. У тебе ${fmt(S.crystals)} 💎.</div>`;
   after.push(() => { const b = $('chBox'); if (b) b.scrollTop = b.scrollHeight; });
@@ -2066,6 +2066,10 @@ const TIERS = {
   street: { n: 'Вуличний', stars: 800,  fee: 11, lim: 12, ord: 8,  daily: 25, regen: 0.8, en: 60, chips: 450, boss: 2, who: 'Для активного торговця: 14-25 млн 💵 на місяць' },
   boss:   { n: 'Бос',      stars: 1800, fee: 7,  lim: 20, ord: 12, daily: 55, regen: 0.7, en: 120, chips: 900, boss: 3, who: 'Для великого торговця: понад 25 млн 💵 на місяць' },
 };
+function devSub(k) { S.sub = Object.assign({}, S.sub || {}, k ? { tier: k, until: Date.now() + 30 * 864e5 } : { until: 0 }); render(); }
+const SUB_COL = { start: '#b8692a', street: '#8a9199', boss: '#d49a00' }; // бронза / срібло / золото
+const NPC_SUB = { 'Козак': 'start', 'Ла Ріка': 'street', 'Бандерас': 'boss', 'Тоні': 'start', 'Мікі': 'street', 'Дон Карло': 'boss' };
+const nickSt = t => t && SUB_COL[t] ? `color:${SUB_COL[t]};font-weight:800;text-shadow:0 0 1px rgba(0,0,0,.5)` : '';
 function subTier() { if (S.sub && S.sub.until > Date.now()) return S.sub.tier; return null; }
 const subDays = () => S.sub ? Math.max(0, Math.ceil((S.sub.until - Date.now()) / 864e5)) : 0;
 const ringOn = () => S.ring && S.ring > Date.now();
@@ -2438,7 +2442,7 @@ SCREENS.settings = p => {
   const t = p.tab || 'main';
   let h = `<h2>⚙ Налаштування</h2>${tabs([['main', 'Основні'], ['dev', '🛠 Розробник']], t)}`;
   if (t === 'dev') return h + `<div class="note">Тестові кнопки для перевірки прототипу. У грі їх не буде.</div>
-  <div class="box"><button class="${S.devAll ? 'g' : ''}" style="width:100%;padding:10px;margin-bottom:6px" onclick="S.devAll=!S.devAll;render()">🔓 Відкрити все (тест): ${S.devAll ? 'УВІМК' : 'вимк'}</button><button class="y" style="width:100%;padding:10px" onclick="go('fit')">👔 Примірка одягу (підгонка речей на герої)</button></div>
+  <div class="box"><b>Підписка (тест)</b><div class="grid g2" style="margin:4px 0 8px">${[[null, 'Без'], ['start', 'Старт'], ['street', 'Вуличний'], ['boss', 'Бос']].map(([k, n]) => `<button class="${subTier() === k ? 'g' : ''}" onclick="devSub(${k ? "'" + k + "'" : 'null'})">${n}</button>`).join('')}</div><button class="${S.devAll ? 'g' : ''}" style="width:100%;padding:10px;margin-bottom:6px" onclick="S.devAll=!S.devAll;render()">🔓 Відкрити все (тест): ${S.devAll ? 'УВІМК' : 'вимк'}</button><button class="y" style="width:100%;padding:10px" onclick="go('fit')">👔 Примірка одягу (підгонка речей на герої)</button></div>
   <div class="box"><b>Валюта</b><div class="grid g2">
     <button class="y" onclick="give({money:1000000},'Розробник');render()">+1 000 000 💵</button>
     <button class="y" onclick="give({crystals:5000},'Розробник');render()">+5 000 💎</button>
@@ -2462,7 +2466,7 @@ SCREENS.settings = p => {
 const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 8192) s += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
 const unb64u = t => { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; const s = atob(t), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
 async function zip(str, mode) { const st = mode === 'c' ? new Blob([str]).stream().pipeThrough(new CompressionStream('deflate-raw')) : new Blob([str]).stream().pipeThrough(new DecompressionStream('deflate-raw')); return new Uint8Array(await new Response(st).arrayBuffer()); }
-const BUILD = 'v109';
+const BUILD = 'v110';
 const BOT = 'PotuzhneMisto_bot', PAGE = 'https://stasiya408-dev.github.io/tg-miniapp/';
 async function saveExport() {
   const o = Object.assign({}, S, { mail: [] }), t = b64u(await zip(JSON.stringify(o), 'c'));
