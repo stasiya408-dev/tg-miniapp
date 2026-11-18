@@ -1330,7 +1330,7 @@ SCREENS.club = p => {
 // --- СЛОТИ
 // Математика: результат спіну визначається таблицею ваг (RTP ≈ 97%), барабани малюються під результат.
 const SYM = ['7️⃣', '💲', '🔫', '💵', '🎲', '👑', '💎', '🥃', '🂡', '🔒', '🥇', '🚬'];
-const SLOT_GOAL = 50;
+const SLOT_GOAL = 50, SCAT = '🧰'; // скриня-скатер: 3+ на барабанах = бонусна гра (вага символу підібрана під ~1 раз на 50 спінів)
 const SLOT_BASE = [[1, 220000], [2, 104000], [3, 50000], [5, 24000], [10, 8000], [20, 2500], [50, 600], [100, 100], [200, 25], [500, 5]];
 const SLOT_BONUS = [[2, 560000], [3, 230000], [5, 120000], [10, 55000], [25, 22000], [50, 8000], [100, 3500], [250, 1000], [500, 400], [1000, 100]];
 const WINMAP = { 1: ['🥃', 3], 2: ['🚬', 3], 3: ['🎲', 3], 5: ['🔫', 3], 10: ['💵', 4], 20: ['💲', 4], 50: ['👑', 5], 100: ['💎', 5], 200: ['🥇', 5], 500: ['7️⃣', 5] };
@@ -1338,7 +1338,7 @@ function rollTable(t) { let x = Math.random() * 1e6; for (const [m, w] of t) { x
 const tableEV = t => t.reduce((s, [m, w]) => s + m * w / 1e6, 0);
 const SLOT_RTP = tableEV(SLOT_BASE) + tableEV(SLOT_BONUS) / SLOT_GOAL;
 function rowRun(row) { let n = 1; while (n < 5 && row[n] === row[0]) n++; return n; }
-function buildReels(mult) {
+function buildReels(mult, scat) {
   for (let tries = 0; tries < 200; tries++) {
     const g = Array.from({ length: 15 }, () => pick(SYM));
     let line = -1;
@@ -1348,7 +1348,12 @@ function buildReels(mult) {
     }
     let ok = true;
     for (let r = 0; r < 3; r++) { if (r !== line && rowRun(g.slice(r * 5, r * 5 + 5)) >= 3) ok = false; }
-    if (ok) return { g, line, k: mult > 0 ? WINMAP[mult][1] : 0 };
+    if (ok) {
+      const used = new Set(); if (line >= 0) for (let i = 0; i < WINMAP[mult][1]; i++) used.add(line * 5 + i);
+      const cols = [0, 1, 2, 3, 4].sort(() => Math.random() - 0.5).slice(0, scat || 0), sc = [];
+      cols.forEach(c => { const rows = [0, 1, 2].filter(r => !used.has(r * 5 + c)); if (rows.length) { const i = pick(rows) * 5 + c; g[i] = SCAT; sc.push(i); } });
+      return { g, line, k: mult > 0 ? WINMAP[mult][1] : 0, sc };
+    }
   }
   return { g: Array.from({ length: 15 }, (_, i) => SYM[(i * 5 + i) % 12]), line: -1, k: 0 };
 }
@@ -1390,7 +1395,7 @@ function slotFaq() {
   modal(`<h3>FAQ: Слоти</h3><b>Таблиця виплат</b> (множник на ставку)
   <table style="width:100%;border-collapse:collapse;font-size:12px;margin:4px 0">${SLOT_BASE.map(([m, w]) => `<tr style="border-bottom:1px solid #ddd"><td>${WINMAP[m][0].repeat(WINMAP[m][1])}</td><td><b>x${m}</b></td><td class="small">шанс 1 до ${fmt(Math.round(1e6 / w))}</td></tr>`).join('')}</table>
   <p class="small">Виграє збіг символів зліва направо в одному рядку.</p>
-  <b>Бонусна гра</b><p class="small">Випадає випадково під час обертів (в середньому раз на ~${SLOT_GOAL} спінів). Приз від x2 до x1000 від ставки.</p>`);
+  <b>Бонусна гра</b><p class="small">Символ ${SCAT} (скриня) на барабанах: коли випадає 3 і більше ${SCAT} у будь-яких місцях, починається бонусна гра (в середньому раз на ~${SLOT_GOAL} спінів). Приз від x2 до x1000 від ставки.</p>`);
 }
 function slotStats() {
   const h = S.slots.hist || []; if (!h.length) return '';
@@ -1405,7 +1410,7 @@ function slotHistory() {
 }
 function pushHist(e) { if (!S.slots.hist) S.slots.hist = []; S.slots.hist.unshift(e); S.slots.hist.length = Math.min(S.slots.hist.length, 20); }
 const SLOT_DAY_CAP = 2000;
-let spinning = false, autoOn = false;
+let spinning = false, autoOn = false, bonusPend = false;
 function animReels(final, done) {
   spinning = true;
   const cells = [...document.querySelectorAll('.reel div')];
@@ -1427,13 +1432,13 @@ function animReels(final, done) {
   tick();
 }
 function spin() {
-  if (slotBonus || spinning) return;
+  if (slotBonus || spinning || bonusPend) return;
   const bet = S.slots.bet;
   if (!S.daily.sb) S.daily.sb = 0;
   if (S.daily.sb + bet > SLOT_DAY_CAP) { autoSpin(false); return toast('Денний ліміт ставок у слотах ' + fmt(SLOT_DAY_CAP) + ' 🎟 вичерпано'); }
   if (!pay('chips', bet)) { autoSpin(false); return toast('Фішки закінчились. Нові: щоденні фішки в клубі'); }
   S.daily.sb += bet;
-  const mult = rollTable(SLOT_BASE), R = buildReels(mult), bonusHit = Math.random() < 1 / SLOT_GOAL;
+  const mult = rollTable(SLOT_BASE), bonusHit = Math.random() < 1 / SLOT_GOAL, nsc = bonusHit ? (() => { const x = Math.random(); return x < 0.85 ? 3 : x < 0.97 ? 4 : 5; })() : (Math.random() < 0.12 ? rnd(1, 2) : 0), R = buildReels(mult, nsc);
   lastWin = null; winCells = [];
   animReels(R.g, () => {
     reels = R.g; winCells = mult ? Array.from({ length: R.k }, (_, i) => R.line * 5 + i) : [];
@@ -1441,8 +1446,9 @@ function spin() {
     pushHist({ bet, win: bet * mult, mult });
     if (!mult) bump('slotLost', bet); if (mult) { bump('slotWins'); bump('slotBig', mult, 'max'); bump('slotWon', bet * mult); lastWin = { mult, pay: bet * mult }; give({ chips: bet * mult }, 'Виграш x' + mult); }
     if (bonusHit) {
-      const m = rollTable(SLOT_BONUS) || 2; bump('slotBonus');
-      slotBonus = { picked: null, mult: m, avg: bet, pay: bet * m, intro: true }; autoSpin(false); setTimeout(endIntro, 2200);
+      const m = rollTable(SLOT_BONUS) || 2; bump('slotBonus'); autoSpin(false); bonusPend = true;
+      winCells = winCells.concat(R.sc); toast('🎁 Бонусна гра! ' + R.sc.length + '× ' + SCAT);
+      setTimeout(() => { bonusPend = false; slotBonus = { picked: null, mult: m, avg: bet, pay: bet * m, intro: true }; if (cur().name === 'slots') render(); setTimeout(endIntro, 2200); }, 1800);
     }
     render();
     if (autoOn && !slotBonus && cur().name === 'slots') setTimeout(() => { if (autoOn && cur().name === 'slots') spin(); }, 600);
