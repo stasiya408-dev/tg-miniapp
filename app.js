@@ -108,7 +108,7 @@ const ITEMS = [
 ];
 const IT = Object.fromEntries(ITEMS.map(i => [i.id, i]));
 // Видалені з гри речі (dev): WDEL_BAKED вшито в код, pm_wdel: видалені Тарасом у грі (ще не вшиті)
-const WDEL_BAKED = [];
+const WDEL_BAKED = ["sn02","hoodie"];
 let WDEL = []; try { WDEL = JSON.parse(localStorage.getItem('pm_wdel') || '[]'); } catch (e) { }
 function wdelApply() {
   [...WDEL_BAKED, ...WDEL].forEach(w => { delete WEAR[w]; for (let i = ITEMS.length - 1; i >= 0; i--) if (ITEMS[i].wear === w) { delete IT[ITEMS[i].id]; ITEMS.splice(i, 1); } });
@@ -316,7 +316,8 @@ const ACH_RANKS = [[0, 'Новачок'], [0.02, 'Вуличний'], [0.07, 'Б
 const SP_PTS = { fights: 2, racesN: 3, raids: 5, shifts: 6, bags: 5, flipN: 8, lotsSold: 3 }, SP_LV = 30, SP_PER = 150, SP_BUY = 40;
 function spS() { const m = new Date().toISOString().slice(0, 7); if (!S.sp || S.sp.m !== m) { S.sp = { m, pts: 0, fr: {}, pr: {} }; S.sprem = 0; } return S.sp; }
 const spLvl = () => Math.min(SP_LV, Math.floor(spS().pts / SP_PER));
-function spRew(l, prem) {
+function spRew(l, prem) { const r = spRew0(l, prem); if (r.item && !IT[r.item[0]]) { const q = { ...r }; delete q.item; q.crystals = (q.crystals || 0) + 30; return q; } return r; }
+function spRew0(l, prem) {
   if (!prem) {
     if (l === 30) return { item: ['i_hoodie', 2], chips: 300 };
     if (l % 5 === 0) return { chips: 100 + l * 5 };
@@ -1085,7 +1086,7 @@ SCREENS.shop = p => {
     <div class="box"><b>💵 Обмін валют</b> <span class="small">золоті прикраси → ігрові гроші</span><div class="grid g3">${EXCH.map(([m, g]) => `<div class="cell">${fmt(m)} 💵<button class="y" style="width:100%" onclick="exch(${m},${g})">🟡 ${g}</button></div>`).join('')}</div></div>`;
   } else if (t === 'sets') {
     h += [['Стартовий', 300, { money: 200000, gold: 20 }, ['hoodie', 'pants']], ['Вуличний', 900, { money: 500000 }, ['hoodie', 'pants', 'sneakers', 'cap']], ['Бос', 2500, { money: 1000000, gold: 100 }, ['vest', 'chain', 'watch', 'glasses']]]
-      .map(([n, c, r, it]) => `<div class="row"><div class="f"><b>Набір «${n}»</b><div class="small">${fmt(r.money)} 💵${r.gold ? ' + ' + r.gold + ' 🟡' : ''} + речі: ${it.map(i => WEAR[i].name).join(', ')}</div></div><button class="y" onclick="buyPack(${c},${JSON.stringify(r).replace(/"/g, "'")},'${it.join(',')}')">${c} 💎</button></div>`).join('');
+      .map(([n, c, r, it]) => [n, c, r, it.filter(i => WEAR[i])]).map(([n, c, r, it]) => `<div class="row"><div class="f"><b>Набір «${n}»</b><div class="small">${fmt(r.money)} 💵${r.gold ? ' + ' + r.gold + ' 🟡' : ''} + речі: ${it.map(i => WEAR[i].name).join(', ')}</div></div><button class="y" onclick="buyPack(${c},${JSON.stringify(r).replace(/"/g, "'")},'${it.join(',')}')">${c} 💎</button></div>`).join('');
   } else if (t === 'prem') {
     const cur_ = subTier();
     h += `<div class="small">Підписки на 30 днів, як Value Pack у Black Desert: менше комісії на аукціоні, більше лімітів, щоденні кристали.</div>`
@@ -1106,7 +1107,7 @@ function buyStars(stars, r, what) {
 }
 function exch(m, g) { if (!pay('gold', g)) return; give({ money: m }, 'Обмін'); render(); }
 function buyPack(c, r, items) {
-  if (!pay('crystals', c)) return; give(r, 'Набір'); items.split(',').forEach(i => { if (!S.owned.includes(i)) S.owned.push(i); }); render();
+  if (!pay('crystals', c)) return; give(r, 'Набір'); items.split(',').filter(i => WEAR[i]).forEach(i => { if (!S.owned.includes(i)) S.owned.push(i); }); render();
 }
 function buyWear(k, curr) {
   const w = WEAR[k]; const price = curr === 'crystals' ? Math.round(w.price / 100) : w.price;
@@ -2412,7 +2413,7 @@ function marketSell(uid) { const i = S.inv.find(x => x.uid === uid); if (itG(i) 
 
 // АУКЦІОН: стакан, свічки, свої заявки
 function auction(p) {
-  const id = p.aid || 'i_cap', it = IT[id], per = p.per || 'live', side = p.side || 'buy', m = mk(id), pr = price(id), st = perStats(id, 'd');
+  const id = p.aid && IT[p.aid] ? p.aid : IT.i_cap ? 'i_cap' : ITEMS.find(x => x.rar > 0).id, it = IT[id], per = p.per || 'live', side = p.side || 'buy', m = mk(id), pr = price(id), st = perStats(id, 'd');
   const myOrd = (S.orders || []).filter(o => o.id === id), owned = S.inv.filter(x => x.id === id).length;
   const lp = p.lp || (side === 'buy' ? Math.round(pr * 0.97) : Math.round(pr * 1.03));
   const asks = [5, 4, 3, 2, 1].map(k => ({ p: Math.round(pr * (1 + 0.006 * k)), q: 1 + ((k * 7 + m.ticks) % 6) }));
@@ -2465,18 +2466,19 @@ function cancelOrder(k) { const o = S.orders[k]; if (o.side === 'buy') S.money +
 
 // ---------- ПРИМІРКА ОДЯГУ (інструмент розробника) ----------
 function fitKeys(id) { const g = cur().p.g || S.gender; return WEAR[id].slot === 'feet' && !(WEAR[id].layer && WEAR[id].layer[g] && !Array.isArray(WEAR[id].layer[g])) ? [id + ':L', id + ':R'] : [id]; }
+const fitId = p => (p && p.id && WEAR[p.id]) ? p.id : (WEAR.hoodie ? 'hoodie' : Object.keys(WEAR)[0]);
 function fitDoll() {
-  const p = cur().p, g = p.g || S.gender, id = p.id || 'hoodie';
+  const p = cur().p, g = p.g || S.gender, id = fitId(p);
   const eq = Object.assign({}, p.all ? S.equipped : {}, { [WEAR[id].slot]: id });
   return doll(Math.round(470 * (p.zoom || 1)), g, eq);
 }
-function fitSel() { const p = cur().p; return p.key || fitKeys(p.id || 'hoodie')[0]; }
+function fitSel() { const p = cur().p; return p.key || fitKeysfitId(p)[0]; }
 function fitUpd(field, v, soft) {
   if (field === 'r') v = ((+v + 180) % 360 + 360) % 360 - 180;
   const p = cur().p, g = p.g || S.gender, key = fitSel();
   const old = fitOf(g, key)[field];
   (FIT[g] = FIT[g] || {})[key] = Object.assign(fitOf(g, key), { [field]: +v });
-  if (p.link) { const ks = fitKeys(p.id || 'hoodie'); if (ks.length > 1) { const ok = ks.find(k => k !== key); if (ok) { const of = fitOf(g, ok); fitEnt(g, ok)[field] = field === 's' ? +(of.s * (+v / (old || 1))).toFixed(3) : +(of[field] + (+v - old)).toFixed(2); } } }
+  if (p.link) { const ks = fitKeysfitId(p); if (ks.length > 1) { const ok = ks.find(k => k !== key); if (ok) { const of = fitOf(g, ok); fitEnt(g, ok)[field] = field === 's' ? +(of.s * (+v / (old || 1))).toFixed(3) : +(of[field] + (+v - old)).toFixed(2); } } }
   fitSave();
   if (soft) { fitRefresh(); } else render();
 }
@@ -2541,7 +2543,7 @@ function fitImport() {
   modal(`<h3>Імпорт</h3><textarea id="fitIn" style="width:100%;height:140px" placeholder="Встав JSON"></textarea><button class="y" style="width:100%" onclick="try{FIT=JSON.parse($('fitIn').value);fitSave();closeModal();render()}catch(e){toast('Невірний JSON')}">Застосувати</button>`);
 }
 SCREENS.fit = p => {
-  const g = p.g || S.gender, id = p.id || 'hoodie', keys = fitKeys(id), key = p.key && keys.includes(p.key) ? p.key : keys[0];
+  const g = p.g || S.gender, id = fitId(p), keys = fitKeys(id), key = p.key && keys.includes(p.key) ? p.key : keys[0];
   p.key = key; const f = fitOf(g, key);
   if ((p.tool || 'move') !== 'move') fitEnt(g, key).pad = true;
   after.push(() => {
@@ -2646,7 +2648,7 @@ SCREENS.settings = p => {
 const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 8192) s += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
 const unb64u = t => { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; const s = atob(t), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
 async function zip(str, mode) { const st = mode === 'c' ? new Blob([str]).stream().pipeThrough(new CompressionStream('deflate-raw')) : new Blob([str]).stream().pipeThrough(new DecompressionStream('deflate-raw')); return new Uint8Array(await new Response(st).arrayBuffer()); }
-const BUILD = 'v123';
+const BUILD = 'v124';
 const BOT = 'PotuzhneMisto_bot', PAGE = 'https://stasiya408-dev.github.io/tg-miniapp/';
 async function saveExport() {
   const o = Object.assign({}, S, { mail: [] }), t = b64u(await zip(JSON.stringify(o), 'c'));
