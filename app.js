@@ -720,7 +720,7 @@ function fitRevert() { FIT = JSON.parse(JSON.stringify(FITS)); fitSave(); render
 function doll(height, gender, equipped) {
   const g = gender || S.gender, A = ANCH[g], eq = equipped || S.equipped;
   const W = A.W, k = height / 900;
-  let html = `<div class="doll" style="width:${W * k}px;height:${height}px"><img src="img/hero_${g}.png" style="left:0;top:0;width:100%;height:100%">`;
+  let html = `<div class="doll" style="width:${W * k}px;height:${height}px"><img src="img/hero_${g}.png?v=129" style="left:0;top:0;width:100%;height:100%">`;
   ZORD.forEach((slot, zi) => {
     const id = eq[slot]; if (!id) return;
     const it = WEAR[id];
@@ -2714,7 +2714,7 @@ SCREENS.settings = p => {
 const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 8192) s += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
 const unb64u = t => { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; const s = atob(t), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
 async function zip(str, mode) { const st = mode === 'c' ? new Blob([str]).stream().pipeThrough(new CompressionStream('deflate-raw')) : new Blob([str]).stream().pipeThrough(new DecompressionStream('deflate-raw')); return new Uint8Array(await new Response(st).arrayBuffer()); }
-const BUILD = 'v128';
+const BUILD = 'v129';
 const BOT = 'PotuzhneMisto_bot', PAGE = 'https://stasiya408-dev.github.io/tg-miniapp/';
 async function saveExport() {
   const o = Object.assign({}, S, { mail: [] }), t = b64u(await zip(JSON.stringify(o), 'c'));
