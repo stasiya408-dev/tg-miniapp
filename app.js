@@ -787,7 +787,7 @@ SCREENS.home = () => {
     if (!S.tut) setTimeout(showTut, 500);
     const box = $('homeBox'); if (!box) return;
     const Hh = Math.max(300, $('app').clientHeight - 14), oc = cur().p.chat; box.style.height = (Hh + 12) + 'px';
-    const HPv = hpGet(), hh = Math.round((Hh - 130) * 0.9 * HPv.s), Pc = PATH[pathSt()].col; $('homeDoll').innerHTML = `<div style="position:relative;display:inline-block"><div style="position:absolute;left:6%;right:6%;bottom:-6px;height:${Math.round(hh * 0.035)}px;background:radial-gradient(ellipse,rgba(10,0,20,.85),rgba(0,0,0,0) 70%);filter:blur(2px)"></div><div style="position:relative;filter:drop-shadow(0 0 ${6 + pathSt() * 3}px ${Pc}${pathSt() ? 'aa' : '55'})">${doll(hh)}</div></div>`; $('homeDoll').style.top = (oc ? 8 : Math.round(Hh - 104 - hh * 0.97 + Hh * HPv.y / 100)) + 'px'; $('homeDoll').style.transform = `translateX(${HPv.x}%)`;
+    const HPv = hpGet(), hh = Math.round((Hh - 130) * 0.9 * HPv.s), Pc = PATH[pathSt()].col; $('homeDoll').innerHTML = `<div style="position:relative;display:inline-block"><div style="position:absolute;left:6%;right:6%;bottom:-6px;height:${Math.round(hh * 0.035)}px;background:radial-gradient(ellipse,rgba(10,0,20,.85),rgba(0,0,0,0) 70%);filter:blur(2px)"></div><div style="position:relative;filter:drop-shadow(0 0 ${2 + pathSt() * 2}px #ffcc44${Math.round(0x30 + (0xaa - 0x30) * pathSt() / (PATH.length - 1)).toString(16)})">${doll(hh)}</div></div>`; $('homeDoll').style.top = (oc ? 8 : Math.round(Hh - 104 - hh * 0.97 + Hh * HPv.y / 100)) + 'px'; $('homeDoll').style.transform = `translateX(${HPv.x}%)`;
   });
   return `<div id="homeBox" style="position:relative;background:url(img/home_bg.jpg) center bottom/cover no-repeat;border-radius:0;overflow:hidden;margin:-6px -6px 0">
     <div class="side" style="position:absolute;left:8px;top:12px;z-index:3">
@@ -2603,7 +2603,7 @@ SCREENS.settings = p => {
 const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 8192) s += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
 const unb64u = t => { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; const s = atob(t), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
 async function zip(str, mode) { const st = mode === 'c' ? new Blob([str]).stream().pipeThrough(new CompressionStream('deflate-raw')) : new Blob([str]).stream().pipeThrough(new DecompressionStream('deflate-raw')); return new Uint8Array(await new Response(st).arrayBuffer()); }
-const BUILD = 'v119';
+const BUILD = 'v120';
 const BOT = 'PotuzhneMisto_bot', PAGE = 'https://stasiya408-dev.github.io/tg-miniapp/';
 async function saveExport() {
   const o = Object.assign({}, S, { mail: [] }), t = b64u(await zip(JSON.stringify(o), 'c'));
