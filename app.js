@@ -1328,7 +1328,7 @@ function carView(d) { const i = CAR_VIEWS.indexOf(S.car.view); S.car.view = CAR_
 const CAR_VIMG = { 'Спереду': 'front', 'Ззаду': 'back', 'Збоку (ліва)': 'left', 'Збоку (права)': 'right' };
 const CAR_IMG = { 'Чорний': 'black', 'Білий': 'white', 'Жовтий': 'yellow' }, CAR_COLS = ['Червоний', 'Чорний', 'Білий', 'Жовтий'], CAR_COL_HEX = { 'Червоний': '#d22', 'Чорний': '#222', 'Білий': '#eee', 'Жовтий': '#f4c20d' };
 const carOwned = () => { const c = S.car; if (!c.owned) c.owned = ['Червоний']; if (!CAR_COLS.includes(c.color)) c.color = 'Червоний'; if (!c.owned.includes(c.color)) c.owned.push(c.color); return c.owned; };
-function garCarPlace() { const im = $('garCar'), sh = im && im.parentElement; if (!sh) return; const w = sh.clientWidth, h = sh.clientHeight, k = Math.max(w / 941, h / 576), W = 941 * k, H = 576 * k, ox = (w - W) / 2, oy = (h - H) * 0.75, bx = 205, bw = 545, bb = 574, bh = bw * 470 / 699; Object.assign(im.style, { left: ox + bx * k + 'px', width: bw * k + 'px', top: oy + (bb - bh) * k + 'px' }); }
+function garCarPlace() { const im = $('garCar'), sh = im && im.parentElement; if (!sh) return; const w = sh.clientWidth, h = sh.clientHeight, k = Math.max(w / 941, h / 576), W = 941 * k, H = 576 * k, ox = (w - W) / 2, oy = (h - H) * 0.75, bx = 223, bw = 497, bt = 258, bh = 294; Object.assign(im.style, { left: ox + bx * k + 'px', width: bw * k + 'px', top: oy + bt * k + 'px', height: bh * k + 'px' }); }
 function carShow() {
   const c = S.car, v = c.view || 'Спереду', ready = v === 'Спереду', cc = Math.round(carCond()); carOwned(); after.push(garCarPlace);
   return `<div class="garShow" style="${ready ? '' : 'filter:brightness(.55)'}">
@@ -2738,7 +2738,7 @@ SCREENS.settings = p => {
 const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 8192) s += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
 const unb64u = t => { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; const s = atob(t), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
 async function zip(str, mode) { const st = mode === 'c' ? new Blob([str]).stream().pipeThrough(new CompressionStream('deflate-raw')) : new Blob([str]).stream().pipeThrough(new DecompressionStream('deflate-raw')); return new Uint8Array(await new Response(st).arrayBuffer()); }
-const BUILD = 'v143';
+const BUILD = 'v144';
 const BOT = 'PotuzhneMisto_bot', PAGE = 'https://stasiya408-dev.github.io/tg-miniapp/';
 async function saveExport() {
   const o = Object.assign({}, S, { mail: [] }), t = b64u(await zip(JSON.stringify(o), 'c'));
