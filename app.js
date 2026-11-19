@@ -2453,9 +2453,9 @@ function fitLoc(e, keyOv) {
   const vx = e.clientX - rc.left - cx, vy = e.clientY - rc.top - cy, an = -f.r * Math.PI / 180, rx = vx * Math.cos(an) - vy * Math.sin(an), ry = vx * Math.sin(an) + vy * Math.cos(an);
   return { u: (rx / f.s + w / 2) / w, v: (ry / f.s + h / 2) / h, w, h, cx, cy, f };
 }
-function fitPick(e) {
+function fitPick(e, only) {
   const d = $('fitBox').querySelector('.doll'); if (!d) return null;
-  const els = [...d.querySelectorAll('img[data-k]')].reverse();
+  const els = [...d.querySelectorAll('img[data-k]')].reverse().filter(el => !only || el.dataset.k === only);
   for (const el of els) {
     const L = fitLoc(e, el.dataset.k); if (!L || L.u < 0 || L.u > 1 || L.v < 0 || L.v > 1) continue;
     let hit = true;
@@ -2505,16 +2505,16 @@ SCREENS.fit = p => {
   if ((p.tool || 'move') !== 'move') fitEnt(g, key).pad = true;
   after.push(() => {
     const wrap = $('fitWrap'); if (!wrap) return; fitOverlay();
-    const view = $('fitView'); view.onwheel = e => { if (e.ctrlKey && e.altKey) { e.preventDefault(); const r = view.getBoundingClientRect(); fitZoom(e.deltaY < 0 ? 1.15 : 1 / 1.15, e.clientX - r.left, e.clientY - r.top); } };
+    const view = $('fitView'); if (cur().p.vsc) { view.scrollLeft = cur().p.vsc[0]; view.scrollTop = cur().p.vsc[1]; } view.onscroll = () => { cur().p.vsc = [view.scrollLeft, view.scrollTop]; }; view.onwheel = e => { if (e.ctrlKey && e.altKey) { e.preventDefault(); const r = view.getBoundingClientRect(); fitZoom(e.deltaY < 0 ? 1.15 : 1 / 1.15, e.clientX - r.left, e.clientY - r.top); } };
     let drag = null;
     wrap.onpointerdown = e => {
-      const P0 = cur().p; if ((P0.tool || 'move') === 'move') { const k = fitPick(e); if (k && k !== fitSel()) { P0.key = k; const wid = k.split(':')[0]; if (WEAR[wid]) P0.id = wid; P0.pickChanged = true; } }
-      const L = fitLoc(e); if (!L) return; const P = cur().p, tool = P.tool || 'move', key = fitSel(), ent = fitEnt(g, key); ent.ops = ent.ops || [];
+      const P0 = cur().p; { const tm = (P0.tool || 'move') !== 'move', k = tm && fitPick(e, fitSel()) ? fitSel() : fitPick(e); if (k && k !== fitSel()) { P0.key = k; const wid = k.split(':')[0]; if (WEAR[wid]) P0.id = wid; if ((P0.tool || 'move') !== 'move') { render(); return; } P0.pickChanged = true; } }
+      const L = fitLoc(e); if (!L) return; if ((P0.tool || 'move') !== 'move' && (L.u < -0.05 || L.u > 1.05 || L.v < -0.05 || L.v > 1.05)) return; const P = cur().p, tool = P.tool || 'move', key = fitSel(), ent = fitEnt(g, key); ent.ops = ent.ops || [];
       wrap.setPointerCapture(e.pointerId);
       if (tool === 'mesh') {
         const n = MESHN; ent.mesh = ent.mesh || { d: Array.from({ length: (n + 1) * (n + 1) }, () => [0, 0]) }; let best = 0, bd = 9;
         for (let j = 0; j <= n; j++) for (let i = 0; i <= n; i++) { const q = ent.mesh.d[j * (n + 1) + i]; const dd = Math.hypot(meshG(i) + q[0] - L.u, meshG(j) + q[1] - L.v); if (dd < bd) { bd = dd; best = j * (n + 1) + i; } }
-        drag = { mesh: ent.mesh, gi: best % (n + 1), gj: Math.floor(best / (n + 1)), u0: L.u, v0: L.v, base: ent.mesh.d.map(q => q.slice()) };
+        drag = { x0: e.clientX, y0: e.clientY, mesh: ent.mesh, gi: best % (n + 1), gj: Math.floor(best / (n + 1)), u0: L.u, v0: L.v, base: ent.mesh.d.map(q => q.slice()) };
       } else if (tool === 'erase') { const op = { t: 'erase', r: (P.brush || 10) / 300, pts: [[+L.u.toFixed(4), +L.v.toFixed(4)]] }; ent.ops.push(op); drag = { op }; fitRefresh(); }
       else if (tool === 'lasso') {
         if (P.sel && P.sel.key === key && inPoly(L.u, L.v, P.sel.poly)) { const op = { t: 'move', poly: P.sel.poly.map(q => q.slice()), dx: 0, dy: 0 }; ent.ops.push(op); drag = { mv: op, u0: L.u, v0: L.v, poly0: P.sel.poly.map(q => q.slice()) }; }
@@ -2525,6 +2525,7 @@ SCREENS.fit = p => {
       { const P1 = cur().p, d1 = $('fitBox').querySelector('.doll'); if (P1.tool === 'erase' && d1) { const rc = d1.getBoundingClientRect(); P1.cur = { x: e.clientX - rc.left, y: e.clientY - rc.top }; fitOverlay(); } }
       if (!drag) return; const P = cur().p, L = fitLoc(e); if (!L) return;
       if (drag.mesh) {
+        if (!drag.live) { if (Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) < 6) return; drag.live = true; drag.u0 = L.u; drag.v0 = L.v; }
         const n = MESHN, rad = P.rad || 1.6, du = L.u - drag.u0, dv = L.v - drag.v0;
         for (let j = 0; j <= n; j++) for (let i = 0; i <= n; i++) { const dist = Math.hypot(i - drag.gi, j - drag.gj), w0 = Math.max(0, 1 - dist / rad), w = w0 * w0 * (3 - 2 * w0), q = drag.base[j * (n + 1) + i]; drag.mesh.d[j * (n + 1) + i] = [q[0] + du * w, q[1] + dv * w]; }
         fitRefresh();
@@ -2602,7 +2603,7 @@ SCREENS.settings = p => {
 const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 8192) s += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
 const unb64u = t => { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; const s = atob(t), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
 async function zip(str, mode) { const st = mode === 'c' ? new Blob([str]).stream().pipeThrough(new CompressionStream('deflate-raw')) : new Blob([str]).stream().pipeThrough(new DecompressionStream('deflate-raw')); return new Uint8Array(await new Response(st).arrayBuffer()); }
-const BUILD = 'v118';
+const BUILD = 'v119';
 const BOT = 'PotuzhneMisto_bot', PAGE = 'https://stasiya408-dev.github.io/tg-miniapp/';
 async function saveExport() {
   const o = Object.assign({}, S, { mail: [] }), t = b64u(await zip(JSON.stringify(o), 'c'));
