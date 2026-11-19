@@ -2655,13 +2655,13 @@ SCREENS.fit = p => {
   const row = (k, label, min, max, step, val, disp) => `<div class="row" style="gap:4px"><div style="width:62px">${label}</div>
     <button onclick="fitNudge('${k}',${-step})">−</button><input id="fs_${k}" type="range" min="${min}" max="${max}" step="${step}" value="${val}" style="flex:1" oninput="fitUpd('${k}',this.value,true)"><button onclick="fitNudge('${k}',${step})">+</button><b id="fv_${k}" style="width:44px;text-align:right">${disp}</b></div>`;
   const vh = Math.max(430, $('app').clientHeight - 150), tl = p.tool || 'move';
-  if (!p.zoom) p.zoom = +Math.min(1.8, (vh - 14) / 470).toFixed(2);
+  if (!p.zoom) p.zoom = +Math.min(1.5, (vh - 14) * 0.78 / 470).toFixed(2);
   const sb = (cls, oc, txt, ttl) => `<button class="${cls}" ${ttl ? `title="${ttl}"` : ''} onclick="${oc}">${txt}</button>`;
   return `<div class="bar" style="justify-content:center;gap:4px;margin:0"><b>👔</b><button class="${g === 'm' ? 'sel' : ''}" onclick="setP('g','m')">♂</button><button class="${g === 'f' ? 'sel' : ''}" onclick="setP('g','f')">♀</button>
   <button class="${p.all ? 'sel' : ''}" onclick="setP('all',!cur().p.all)">+ весь одяг</button>${keys.length > 1 ? keys.map(k => `<button class="${k === key ? 'sel' : ''}" onclick="setP('key','${k}')">${k.endsWith('L') ? 'Лівий' : 'Правий'}</button>`).join('') + `<button class="${p.link ? 'sel' : ''}" onclick="setP('link',!cur().p.link)">🔗 обидві разом</button>` : ''}</div>
   <div style="display:flex;gap:4px;margin-top:4px;height:${vh}px">
     <div class="fside">${Object.keys(WEAR).map(w => `<button class="${w === id ? 'y' : ''}" title="${WEAR[w].name}" onclick="cur().p.id='${w}';cur().p.key=null;render()">${wearIcon(w, 'fico')}<span>${WEAR[w].name.split(' ')[0]}</span></button>`).join('')}</div>
-    <div id="fitView" style="flex:1;touch-action:none;background:rgba(0,0,0,.08);border-radius:6px;padding:4px;overflow:auto;height:100%"><div id="fitWrap" style="user-select:none;-webkit-user-select:none;position:relative;display:table;margin:0 auto;touch-action:none"><div id="fitBox">${fitDoll()}</div><svg id="fitOv" style="position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:200"></svg></div></div>
+    <div id="fitView" style="flex:1;touch-action:none;background:rgba(0,0,0,.08);border-radius:6px;padding:${Math.round(vh * 0.11)}px 4px ${Math.round(vh * 0.08)}px;overflow:auto;height:100%"><div id="fitWrap" style="user-select:none;-webkit-user-select:none;position:relative;display:table;margin:0 auto;touch-action:none"><div id="fitBox">${fitDoll()}</div><svg id="fitOv" style="position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:200"></svg></div></div>
     <div class="fside">
       ${sb(tl === 'move' ? 'sel' : '', "setP('tool','move')", '✋<span>Рух</span>')}
       <label class="${tl === 'mesh' ? 'selL' : ''}"><input type="checkbox" ${tl === 'mesh' ? 'checked' : ''} onchange="setP('tool',this.checked?'mesh':'move')">🕸<span>Сітка</span></label>
@@ -2715,7 +2715,7 @@ SCREENS.settings = p => {
 const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 8192) s += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
 const unb64u = t => { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; const s = atob(t), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
 async function zip(str, mode) { const st = mode === 'c' ? new Blob([str]).stream().pipeThrough(new CompressionStream('deflate-raw')) : new Blob([str]).stream().pipeThrough(new DecompressionStream('deflate-raw')); return new Uint8Array(await new Response(st).arrayBuffer()); }
-const BUILD = 'v130';
+const BUILD = 'v131';
 const BOT = 'PotuzhneMisto_bot', PAGE = 'https://stasiya408-dev.github.io/tg-miniapp/';
 async function saveExport() {
   const o = Object.assign({}, S, { mail: [] }), t = b64u(await zip(JSON.stringify(o), 'c'));
