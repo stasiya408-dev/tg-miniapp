@@ -127,6 +127,36 @@ button .ico{display:block;margin:0 auto 2px;float:none}
 #app .bvbig .bigico img,#app .bvbig .bigico span{width:150px!important;height:140px!important;font-size:100px!important;line-height:140px!important}
 #app .hside{justify-content:flex-start;gap:6px!important}
 #app .hside button{flex:1 1 0;min-height:0!important;max-height:64px;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.1}
+
+/* v136: головний екран за макетом */
+.top{align-items:center!important}
+.tbAva{flex:0 0 auto;width:34px;height:34px;border:2px solid #e8b93a;border-radius:9px;background:linear-gradient(#2a2230,#0c0a10);display:flex;align-items:center;justify-content:center;font-size:16px;position:relative;box-shadow:0 1px 4px #000}
+.tbAva b{position:absolute;right:-4px;bottom:-5px;background:#e8b93a;color:#1a1200;font-size:9px;border-radius:7px;padding:0 3px;line-height:13px}
+.tbLvl{flex:0 0 auto;display:flex;flex-direction:column;gap:3px;color:#ffc93a;font-size:11px;padding:0 2px}
+.tbLvl i{display:block;width:38px;height:6px;border:1.5px solid #e8b93a;border-radius:4px;overflow:hidden;background:#120e16}
+.tbLvl u{display:block;height:100%;background:linear-gradient(90deg,#ffd84d,#f0a91a)}
+.top .cur{display:flex!important;align-items:center;gap:2px;padding:2px 2px 2px 4px!important;border-color:#e8b93a!important;border-radius:9px!important;min-height:26px}
+.top .cur .ci{flex:0 0 auto;font-size:13px}
+.top .cur .cv{flex:1 1 auto;font-size:12px;letter-spacing:-.3px;min-width:0;overflow:hidden;text-overflow:ellipsis;text-align:center}
+.top .cur .cp{flex:0 0 auto;width:16px;height:16px;border-radius:50%;background:linear-gradient(#ffd84d,#e09a10);color:#1a1200;font-weight:900;font-size:14px;line-height:16px;text-align:center;border:1px solid #fff2b0}
+#app .hside button{border:2px solid #e8b93a!important;border-radius:11px!important;background:linear-gradient(rgba(40,30,44,.92),rgba(12,9,16,.92))!important;box-shadow:0 3px 6px rgba(0,0,0,.65),inset 0 1px 0 rgba(255,230,150,.25)!important;color:#fff;padding:2px 3px!important}
+#app .hside .hi{filter:sepia(1) saturate(5) hue-rotate(-12deg) brightness(1.05);line-height:1}
+#app .hside button.fx{width:64px!important;flex-direction:column;gap:2px;font-size:11.5px!important}
+#app .hside button.fx .hi{font-size:20px}
+#app .hside button.qa,#app .hside button.y{width:80px!important;flex-direction:row;gap:3px;justify-content:flex-start!important;text-align:left!important;font-size:10px!important;letter-spacing:-.2px}
+#app .hside button.qa .hi{font-size:15px;flex:0 0 auto}
+#app .hside button.qa .ht,#app .hside button.y .ht{flex:1 1 auto;min-width:0;line-height:1.1;overflow-wrap:normal;word-break:normal;hyphens:manual}
+#app .hside button.y{background:linear-gradient(#ffdc55,#f0a91a)!important;color:#1a1200!important;border-color:#fff2b0!important}
+#app .hside button.y .hi{filter:brightness(.2);font-size:16px}
+#sideR{align-items:flex-end}
+.pathS{cursor:pointer;background:linear-gradient(rgba(30,22,34,.94),rgba(10,7,14,.94));border:2px solid #e8b93a;border-radius:12px;padding:5px 10px;color:#fff;font-size:11.5px;line-height:1.35;box-shadow:0 3px 8px rgba(0,0,0,.6)}
+#homeBox button.play{font-size:30px!important;padding:8px 14px!important;border-radius:22px!important;letter-spacing:2px;display:flex;align-items:center;justify-content:center;gap:16px;border:2.5px solid #fff2b0!important;box-shadow:0 5px 0 #a8650c,0 8px 14px rgba(0,0,0,.6)!important;left:30px!important;right:30px!important}
+#homeBox button.play .pl{font-size:26px;color:#1a1200}
+.navb button{background:linear-gradient(#2d2530,#0f0b14)!important;color:#fff!important;border:2px solid #e8b93a!important;border-radius:11px!important;font-size:12px!important}
+.navb button .ic{filter:sepia(1) saturate(5) hue-rotate(-12deg) brightness(1.05)}
+.navb button.sel{background:linear-gradient(#4a3a1a,#1a1206)!important;box-shadow:inset 0 0 0 1px #ffd84d}
+.top:not(.tHome) .cur .cp{display:none}.top:not(.tHome) .cur{padding:2px 4px!important}
+.top>button:last-child{margin-right:6px;flex:0 0 auto}
 </style>
 <div id="phone">
   <div id="topbar"></div>
@@ -135,4 +165,4 @@ button .ico{display:block;margin:0 auto 2px;float:none}
   <div id="toast"></div>
   <div id="modal"><div class="in" id="modalIn"></div></div>
 </div>
-<script src="app.js?v=1795073505"></script>
+<script src="app.js?v=1795074734"></script>

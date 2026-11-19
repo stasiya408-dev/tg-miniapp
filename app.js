@@ -599,11 +599,11 @@ function nextUnl() {
 }
 function pathStrip() {
   const s = pathSt(), P = PATH[s], N = PATH[s + 1];
-  const g = N ? N.goals.map(x => `${goalOk(x) ? '✅' : '▫️'}${x[0].replace('Переможи боса ', '⚔ ').replace('Рівень ', 'рів.')}${x[2] > 1 && !x[0].startsWith('Рівень') ? ' ' + x[1]() + '/' + x[2] : ''}`).join(' · ') : 'Ти на вершині міста';
+  const g = N ? N.goals.map(x => `${goalOk(x) ? '✅' : '▫️'}${x[0].replace('Переможи боса ', '⚔ ').replace('Рівень ', 'рів.')}${x[2] > 1 && !x[0].startsWith('Рівень') ? ' ' + x[1]() + '/' + x[2] : ''}`).join('<span style="opacity:.5"> &nbsp;|&nbsp; </span>') : 'Ти на вершині міста';
   const nu = nextUnl();
-  return `<div onclick="showPath()" style="cursor:pointer;background:rgba(10,4,24,.78);border:2px solid ${P.col};border-radius:12px;padding:4px 8px;color:#fff;font-size:11px;line-height:1.35">
-  <div style="display:flex;justify-content:space-between;gap:6px"><b style="color:${P.col}">${P.ic} ${P.t}</b>${N ? `<span>далі: <b style="color:${N.col}">${N.ic} ${N.t}</b> ▸</span>` : '<b>👑 MAX</b>'}</div>
-  <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">🎯 ${g}</div>${nu ? `<div style="opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">🔓 Наступне: ${nu}</div>` : ''}</div>`;
+  return `<div class="pathS" onclick="showPath()">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:6px"><b style="color:#5fe04a;font-size:14px">🛡️ ${P.t}</b>${N ? `<span style="white-space:nowrap">Далі: <b style="color:#ffc93a">👑 ${N.t}</b></span>` : '<b style="color:#ffc93a">👑 MAX</b>'}</div>
+  <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px">${N ? g : g}</div></div>`;
 }
 function showPath() {
   const s = pathSt();
@@ -634,7 +634,7 @@ const NAVS = ['profile', 'inventory', 'wardrobe', 'garage'];
 // --- ВАЛЮТИ ЗВЕРХУ: 2 слоти (завжди 💵 і 💎 при вході), по натисканню можна показати іншу валюту
 const HUD_C = { money: ['💵', 'Гроші'], crystals: ['💎', 'Кристали'], gold: ['🟡', 'Золоті прикраси'], chips: ['🎟', 'Жетони клубу'] };
 let HUD = ['money', 'crystals', 'gold'];
-const hudChip = i => `<span class="cur" onclick="hudPick(${i})">${HUD_C[HUD[i]][0]}${fmtS(S[HUD[i]] || 0)}${cur() && cur().name === 'home' ? '<small style="opacity:.7">▾</small>' : ''}</span>`;
+const hudChip = i => `<span class="cur" onclick="hudPick(${i})"><span class="ci">${HUD_C[HUD[i]][0]}</span><span class="cv">${String(fmtS(S[HUD[i]] || 0)).replace(/\s/g, '\u2009')}</span><span class="cp" onclick="event.stopPropagation();go('shop',{tab:'cur'})">+</span></span>`;
 const fmtS = v => { const a = Math.abs(v); return a >= 1e9 ? +(v / 1e9).toFixed(a >= 1e10 ? 0 : 1) + 'B' : a >= 1e6 ? +(v / 1e6).toFixed(a >= 1e7 ? 0 : 1) + 'M' : a >= 1e4 ? +(v / 1e3).toFixed(a >= 1e5 ? 0 : 1) + 'K' : fmt(v); };
 function hudPick(i) {
   modal(`<h3>Показати валюту</h3><div class="small">Обери, що показувати в цьому місці. При новому вході знову 💵 💎 🟡.</div>
@@ -643,10 +643,11 @@ function hudPick(i) {
 }
 function hudSet(i, k) { const o = HUD.indexOf(k); if (o >= 0 && o !== i) HUD[o] = HUD[i]; HUD[i] = k; closeModal(); render(); }
 function topbar(name) {
-  return `<div class="top">
+  return `<div class="top${name === 'home' ? ' tHome' : ''}">
     ${name !== 'home' ? '<button onclick="back()">◀</button>' : ''}
-    <span class="cur" style="flex:0 0 auto!important" onclick="go('profile')">👤${S.lvl}</span>
-    <span class="cur" onclick="go('district',{tab:'shop'})">⚡${S.energy}${S.energy <= EN_CAP ? '/' + EN_CAP : ''}</span>
+    <span class="tbAva" onclick="go('profile')">👤<b>${S.lvl}</b></span>
+    ${name === 'home' ? `<span class="tbLvl" onclick="go('profile')"><b>Рів. ${S.lvl}</b><i><u style="width:${Math.min(100, S.xp / xpNeed(S.lvl) * 100)}%"></u></i></span>` : ''}
+    <span class="cur" onclick="go('district',{tab:'shop'})"><span class="ci">⚡</span><span class="cv">${S.energy}</span><span class="cp">+</span></span>
     ${HUD.map((k, i) => hudChip(i)).join('')}
     ${name !== 'home' ? `<button style="position:relative" onclick="home()">⌂${dot(N.any())}</button>` : ''}
   </div>`;
@@ -817,34 +818,37 @@ function hpOverlay() {
     <div style="position:absolute;right:6px;bottom:128px;z-index:7;display:grid;gap:3px">
       ${b('＋', 's', 1)}<div style="color:#fff;font-size:10px;text-align:center;text-shadow:0 1px 2px #000">ближче<br>далі</div>${b('－', 's', -1)}</div>`;
 }
+const hbFix = (on, ic, t, extra) => `<button class="fx" onclick="${on}"><span class="hi">${ic}</span><span class="ht">${t}</span>${extra}</button>`;
+const hbQaHead = side => `<button class="y" onclick="qaPick('${side}')"><span class="hi">⚡</span><span class="ht">Швидкий доступ</span></button>`;
+const hbQa = k => { const l = QA[k][0], i = l.indexOf(' '); return `<button class="qa" onclick="qaGo('${k}')"><span class="hi">${lockOf(QA[k][1]) ? '🔒' : l.slice(0, i)}</span><span class="ht">${l.slice(i + 1)}</span></button>`; };
 SCREENS.home = () => {
   const unread = S.mail.filter(m => m.box === 'in' && (!m.read || m.gift)).length, cu = chTotal();
   after.push(() => {
     if (!S.tut) setTimeout(showTut, 500);
     const box = $('homeBox'); if (!box) return;
-    const Hh = Math.max(300, $('app').clientHeight - 14), oc = cur().p.chat; box.style.height = (Hh + 12) + 'px'; { const pb = $('pathBox'); if (pb) { const bt = 70 + pb.offsetHeight + 8; ['sideL', 'sideR'].forEach(id => { const e = $(id); if (!e) return; e.style.bottom = bt + 'px'; const sh = Math.floor((e.clientHeight - 9 * 6) / 10); e.querySelectorAll('button').forEach(b => { b.style.height = sh + 'px'; b.style.maxHeight = 'none'; b.style.flex = 'none'; }); }); } }
+    const Hh = Math.max(300, $('app').clientHeight - 14), oc = cur().p.chat; box.style.height = (Hh + 12) + 'px'; { const pb = $('pathBox'); if (pb) { const bt = 70 + pb.offsetHeight + 8; ['sideL', 'sideR'].forEach(id => { const e = $(id); if (!e) return; e.style.bottom = bt + 'px'; const u = (e.clientHeight - 9 * 6) / 10.8; e.querySelectorAll('button').forEach(b => { b.style.height = Math.floor(u * (b.classList.contains('fx') ? 1.25 : b.classList.contains('y') ? 1.05 : 1)) + 'px'; b.style.maxHeight = 'none'; b.style.flex = 'none'; }); }); } }
     const HPv = hpGet(), hh = Math.round((Hh - 130) * 0.9 * HPv.s), Pc = PATH[pathSt()].col; $('homeDoll').innerHTML = `<div style="position:relative;display:inline-block"><div style="position:absolute;left:6%;right:6%;bottom:-6px;height:${Math.round(hh * 0.035)}px;background:radial-gradient(ellipse,rgba(10,0,20,.85),rgba(0,0,0,0) 70%);filter:blur(2px)"></div><div style="position:relative;">${doll(hh)}</div></div>`; $('homeDoll').style.top = (oc ? 8 : Math.round(Hh - 104 - hh * 0.97 + Hh * HPv.y / 100)) + 'px'; $('homeDoll').style.transform = `translateX(${HPv.x}%)`;
   });
   return `<div id="homeBox" style="position:relative;background:url(img/home_bg.jpg) center bottom/cover no-repeat;border-radius:0;overflow:hidden;margin:-6px -6px 0">
     <div class="side hside" id="sideL" style="position:absolute;left:8px;top:12px;bottom:140px;z-index:3">
-      <button onclick="go('mail')">✉️ Пошта${unread ? `<span class="badge">${unread}</span>` : ''}</button>
-      <button onclick="go('tasks')">☑ Завдання${dot(N.tasks())}</button>
-      <button onclick="go('events')">🏆 Події</button>
-      <button class="y" onclick="qaPick('L')" style="font-size:11px"><span style="filter:brightness(.25)">⚡</span> Швидкий доступ</button>
-      ${qaList('L').map(k => `<button onclick="qaGo('${k}')">${lockOf(QA[k][1]) ? '🔒 ' : ''}${QA[k][0]}</button>`).join('')}
+      ${hbFix("go('mail')", '✉️', 'Пошта', unread ? `<span class="badge">${unread}</span>` : '')}
+      ${hbFix("go('tasks')", '📋', 'Завдання', dot(N.tasks()))}
+      ${hbFix("go('events')", '📅', 'Події', '')}
+      ${hbQaHead('L')}
+      ${qaList('L').map(hbQa).join('')}
     </div>
     <div style="position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse 85% 75% at 50% 50%,rgba(0,0,0,0) 55%,rgba(8,0,16,.55) 100%)"></div>
     <div id="homeDoll" style="position:absolute;left:0;right:0;top:0;text-align:center;z-index:2"></div>
     <div class="side hside" id="sideR" style="position:absolute;right:8px;top:12px;bottom:140px;z-index:3">
-      <button onclick="go('settings')">⚙ Налашт.</button>
-      <button onclick="go('rewards')">🎁 Нагороди${dot(N.login())}</button>
-      <button onclick="chatGo()">${lockOf('chat') ? '🔒' : '💬'} Чат${cu ? `<span class="badge">${cu}</span>` : ''}</button>
-      <button class="y" onclick="qaPick('R')" style="font-size:11px"><span style="filter:brightness(.25)">⚡</span> Швидкий доступ</button>
-      ${qaList('R').map(k => `<button onclick="qaGo('${k}')">${lockOf(QA[k][1]) ? '🔒 ' : ''}${QA[k][0]}</button>`).join('')}
+      ${hbFix("go('settings')", '⚙️', 'Налашт.', '')}
+      ${hbFix("go('rewards')", '🎁', 'Нагороди', dot(N.login()))}
+      ${hbFix('chatGo()', lockOf('chat') ? '🔒' : '💬', 'Чат', cu ? `<span class="badge">${cu}</span>` : '')}
+      ${hbQaHead('R')}
+      ${qaList('R').map(hbQa).join('')}
     </div>
     <div id="pathBox" style="position:absolute;left:10px;right:10px;bottom:70px;z-index:3">${pathStrip()}</div>
     ${window.hpEd ? hpOverlay() : ''}
-    ${false ? '' : `<button class="play" style="position:absolute;left:12px;right:12px;bottom:12px;padding:14px;font-size:22px;z-index:3" onclick="go('play')">ГРАТИ ▶${dot(N.bonus())}</button>`}
+    ${false ? '' : `<button class="play" style="position:absolute;left:12px;right:12px;bottom:12px;padding:14px;font-size:22px;z-index:3" onclick="go('play')"><span class="pl">▶</span>ГРАТИ${dot(N.bonus())}</button>`}
   ${cur().p.chat ? `<div style="position:absolute;left:0;right:0;bottom:0;height:62%;z-index:6;display:flex;flex-direction:column;background:#f4efe6;border-top:3px solid #d8b25a;padding:6px;color:#111;font-size:14px">${chatPanel(cur().p, true)}</div>` : ''}</div>`;
 };
 
@@ -2718,7 +2722,7 @@ SCREENS.settings = p => {
 const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 8192) s += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
 const unb64u = t => { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; const s = atob(t), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
 async function zip(str, mode) { const st = mode === 'c' ? new Blob([str]).stream().pipeThrough(new CompressionStream('deflate-raw')) : new Blob([str]).stream().pipeThrough(new DecompressionStream('deflate-raw')); return new Uint8Array(await new Response(st).arrayBuffer()); }
-const BUILD = 'v135';
+const BUILD = 'v136';
 const BOT = 'PotuzhneMisto_bot', PAGE = 'https://stasiya408-dev.github.io/tg-miniapp/';
 async function saveExport() {
   const o = Object.assign({}, S, { mail: [] }), t = b64u(await zip(JSON.stringify(o), 'c'));
