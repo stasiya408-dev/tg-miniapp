@@ -739,14 +739,20 @@ const SCREENS = {};
 
 SCREENS.create = p => {
   const g = p.g || 'm';
-  return `<h2>ОБЕРИ СТАТЬ ТА ІМ'Я</h2><div class="small" style="text-align:center">Почни свою історію на тропічному узбережжі</div>
-  <div class="bar" style="justify-content:center;margin:8px 0">
-    <div style="opacity:${g === 'm' ? 1 : .4}" onclick="setP('g','m')">${doll(260, 'm', {})}</div>
-    <div style="opacity:${g === 'f' ? 1 : .4}" onclick="setP('g','f')">${doll(260, 'f', {})}</div>
-  </div>
-  <div class="bar" style="justify-content:center"><button class="${g === 'm' ? 'sel' : ''}" onclick="setP('g','m')">♂ ЧОЛОВІК</button><button class="${g === 'f' ? 'sel' : ''}" onclick="setP('g','f')">♀ ЖІНКА</button></div>
-  <div class="box"><div>Введи своє ім'я</div><input id="nm" placeholder="Наприклад: Максим" style="width:100%" value="${p.n || ''}"></div>
-  <button class="y" style="width:100%;padding:12px" onclick="createHero('${g}')">ПРОДОВЖИТИ ▶</button>`;
+  after.push(() => { const a = $('app'), b = $('crBox'); if (!b) return; const aw = a.clientWidth, ah = a.clientHeight, k = Math.max(aw / 941, ah / 1671); b.style.flex = 'none'; b.style.width = Math.round(941 * k) + 'px'; b.style.height = Math.round(1671 * k) + 'px'; b.style.fontSize = Math.round(30 * k * 2.2) / 2 + 'px'; });
+  const hs = (st, on, extra) => `<div onclick="${on}" style="position:absolute;${st};cursor:pointer;${extra || ''}"></div>`;
+  const sel = (st, col) => `<div style="position:absolute;${st};border-radius:12px;box-shadow:0 0 0 3px ${col},0 0 22px 6px ${col};pointer-events:none;animation:pulse 1s infinite alternate"></div>`;
+  const dim = st => `<div style="position:absolute;${st};pointer-events:none;background:radial-gradient(ellipse at 50% 50%,rgba(20,10,30,.55) 40%,rgba(20,10,30,0) 72%)"></div>`;
+  return `<div style="position:absolute;inset:0;background:#2a1830 url(img/create_bg.jpg) center/cover;filter:blur(14px) brightness(.6)"></div>
+  <div style="position:absolute;inset:0;overflow:hidden;display:flex;align-items:center;justify-content:center"><div id="crBox" style="position:relative;width:100%;aspect-ratio:941/1671;background:url(img/create_bg.jpg) center/100% 100% no-repeat">
+    ${g === 'm' ? dim('left:51.01%;top:17.95%;width:42.51%;height:43.09%') : dim('left:3.19%;top:17.35%;width:46.76%;height:43.69%')}
+    ${hs('left:4.25%;top:17.95%;width:45.70%;height:42.79%', "setP('g','m')")}${hs('left:52.07%;top:19.15%;width:40.38%;height:41.59%', "setP('g','f')")}
+    ${g === 'm' ? sel('left:8.50%;top:61.34%;width:38.79%;height:6.88%', '#4aa8ff') : sel('left:53.35%;top:61.34%;width:38.89%;height:7.06%', '#ff5fd8')}
+    ${hs('left:7.44%;top:61.04%;width:40.38%;height:7.48%', "setP('g','m')")}${hs('left:52.60%;top:61.04%;width:40.38%;height:7.66%', "setP('g','f')")}
+    <input id="nm" maxlength="16" placeholder="Наприклад: Максим" value="${p.n || ''}" oninput="cur().p.n=this.value" style="position:absolute;left:14.88%;top:76.06%;width:62.06%;height:4.25%;background:#1a1720;border-radius:6px;border:none;outline:none;color:#fff;font-size:1em;padding:0 3%;font-weight:600">
+    ${hs('left:78.85%;top:75.88%;width:8.50%;height:4.67%', "$('nm').focus()")}
+    ${hs('left:19.13%;top:85.28%;width:61.85%;height:7.60%', "createHero('" + g + "')", 'border-radius:20px')}
+  </div></div>`;
 };
 function createHero(g) {
   const n = $('nm').value.trim(); if (n.length < 2) return toast('Введи ім\'я (мін. 2 літери)');
@@ -2705,7 +2711,7 @@ SCREENS.settings = p => {
 const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 8192) s += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
 const unb64u = t => { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; const s = atob(t), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
 async function zip(str, mode) { const st = mode === 'c' ? new Blob([str]).stream().pipeThrough(new CompressionStream('deflate-raw')) : new Blob([str]).stream().pipeThrough(new DecompressionStream('deflate-raw')); return new Uint8Array(await new Response(st).arrayBuffer()); }
-const BUILD = 'v126';
+const BUILD = 'v127';
 const BOT = 'PotuzhneMisto_bot', PAGE = 'https://stasiya408-dev.github.io/tg-miniapp/';
 async function saveExport() {
   const o = Object.assign({}, S, { mail: [] }), t = b64u(await zip(JSON.stringify(o), 'c'));
