@@ -1126,10 +1126,11 @@ function buyWear(k, curr) {
 // --- ПРОФІЛЬ
 SCREENS.profile = () => {
   const s = stats(), P = PATH[pathSt()], H = Math.round(Math.max(260, Math.min(($('app').clientHeight || 700) * 0.46, 460)));
+  after.push(() => { const d = $('profDoll'); if (!d) return; const bx = d.parentElement, h = bx.clientHeight - 12, w = bx.clientWidth; const hh = Math.min(h, Math.round(w / (ANCH[S.gender].W / 900) * 1.0)); if (Math.abs(hh - (H - 16)) > 4) d.innerHTML = doll(hh); });
   const st = (ic, n, v) => `<div class="cell" style="padding:8px 4px;text-align:left"><div class="small">${ic} ${n}</div><b style="font-size:15px">${v}</b></div>`;
   return `<div style="display:flex;flex-direction:column;gap:6px;min-height:100%">
   <div style="position:relative;border-radius:14px;overflow:hidden;border:2px solid ${cosFrame() || '#c9a24a'};background:radial-gradient(ellipse at 50% 55%,#fff 0%,#e9e4da 65%,#cfc6b4 100%);display:flex;justify-content:center;padding-top:8px;flex:1 1 auto;min-height:${H}px">
-    <div style="filter:drop-shadow(0 0 ${2 + pathSt() * 2}px #ffcc44aa)">${doll(H - 16)}</div>
+    <div id="profDoll" style="filter:drop-shadow(0 0 ${2 + pathSt() * 2}px #ffcc44aa)">${doll(H - 16)}</div>
     <div style="position:absolute;left:10px;top:8px;max-width:48%">
       <b style="font-size:18px;${nickSt(subTier())}">${S.name}</b>${cosTitle() ? '<div class="small">«' + cosTitle() + '»</div>' : ''}
       <div onclick="showPath()" style="cursor:pointer;color:${P.col};font-weight:800;font-size:13px;text-shadow:0 1px 1px #000">${P.ic} ${P.t} ▸</div>
@@ -2714,7 +2715,7 @@ SCREENS.settings = p => {
 const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 8192) s += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
 const unb64u = t => { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; const s = atob(t), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
 async function zip(str, mode) { const st = mode === 'c' ? new Blob([str]).stream().pipeThrough(new CompressionStream('deflate-raw')) : new Blob([str]).stream().pipeThrough(new DecompressionStream('deflate-raw')); return new Uint8Array(await new Response(st).arrayBuffer()); }
-const BUILD = 'v129';
+const BUILD = 'v130';
 const BOT = 'PotuzhneMisto_bot', PAGE = 'https://stasiya408-dev.github.io/tg-miniapp/';
 async function saveExport() {
   const o = Object.assign({}, S, { mail: [] }), t = b64u(await zip(JSON.stringify(o), 'c'));
