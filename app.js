@@ -604,20 +604,21 @@ function render() {
 const NAVS = ['profile', 'inventory', 'wardrobe', 'garage'];
 // --- ВАЛЮТИ ЗВЕРХУ: 2 слоти (завжди 💵 і 💎 при вході), по натисканню можна показати іншу валюту
 const HUD_C = { money: ['💵', 'Гроші'], crystals: ['💎', 'Кристали'], gold: ['🟡', 'Золоті прикраси'], chips: ['🎟', 'Жетони клубу'] };
-let HUD = ['money', 'crystals'];
-const hudChip = i => `<span class="cur" onclick="hudPick(${i})">${HUD_C[HUD[i]][0]} ${fmt(S[HUD[i]] || 0)} ▾</span>`;
+let HUD = ['money', 'crystals', 'gold'];
+const hudChip = i => `<span class="cur" onclick="hudPick(${i})">${HUD_C[HUD[i]][0]}${fmtS(S[HUD[i]] || 0)}${cur() && cur().name === 'home' ? '<small style="opacity:.7">▾</small>' : ''}</span>`;
+const fmtS = v => { const a = Math.abs(v); return a >= 1e9 ? +(v / 1e9).toFixed(a >= 1e10 ? 0 : 1) + 'B' : a >= 1e6 ? +(v / 1e6).toFixed(a >= 1e7 ? 0 : 1) + 'M' : a >= 1e4 ? +(v / 1e3).toFixed(a >= 1e5 ? 0 : 1) + 'K' : fmt(v); };
 function hudPick(i) {
-  modal(`<h3>Показати валюту</h3><div class="small">Обери, що показувати в цьому місці. При новому вході знову 💵 і 💎.</div>
+  modal(`<h3>Показати валюту</h3><div class="small">Обери, що показувати в цьому місці. При новому вході знову 💵 💎 🟡.</div>
   ${Object.keys(HUD_C).map(k => `<div class="row"><div class="f">${HUD_C[k][0]} ${HUD_C[k][1]}<div class="small">${fmt(S[k] || 0)}</div></div><button class="${HUD[i] === k ? 'g' : 'y'}" onclick="hudSet(${i},'${k}')">${HUD[i] === k ? '✓' : 'Показати'}</button></div>`).join('')}
   <button style="width:100%;margin-top:6px" onclick="closeModal();go('shop',{tab:'cur'})">🛒 Поповнити в магазині</button>`);
 }
-function hudSet(i, k) { const o = 1 - i; if (HUD[o] === k) HUD[o] = HUD[i]; HUD[i] = k; closeModal(); render(); }
+function hudSet(i, k) { const o = HUD.indexOf(k); if (o >= 0 && o !== i) HUD[o] = HUD[i]; HUD[i] = k; closeModal(); render(); }
 function topbar(name) {
   return `<div class="top">
     ${name !== 'home' ? '<button onclick="back()">◀</button>' : ''}
-    <span class="cur" onclick="go('profile')">👤 ${S.lvl} · <span class="nm">${S.name}</span></span>
-    <span class="cur" onclick="go('district',{tab:'shop'})">⚡ ${S.energy}${S.energy <= EN_CAP ? '/' + EN_CAP : ''} +</span>
-    ${['money','crystals','gold'].map(k => `<span class="cur" onclick="go('shop',{tab:'cur'})">${HUD_C[k][0]} ${fmt(S[k] || 0)}</span>`).join('')}
+    <span class="cur" style="flex:0 0 auto!important" onclick="go('profile')">👤${S.lvl}</span>
+    <span class="cur" onclick="go('district',{tab:'shop'})">⚡${S.energy}${S.energy <= EN_CAP ? '/' + EN_CAP : ''}</span>
+    ${HUD.map((k, i) => hudChip(i)).join('')}
     ${name !== 'home' ? `<button style="position:relative" onclick="home()">⌂${dot(N.any())}</button>` : ''}
   </div>`;
 }
@@ -2603,7 +2604,7 @@ SCREENS.settings = p => {
 const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 8192) s += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
 const unb64u = t => { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; const s = atob(t), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
 async function zip(str, mode) { const st = mode === 'c' ? new Blob([str]).stream().pipeThrough(new CompressionStream('deflate-raw')) : new Blob([str]).stream().pipeThrough(new DecompressionStream('deflate-raw')); return new Uint8Array(await new Response(st).arrayBuffer()); }
-const BUILD = 'v120';
+const BUILD = 'v121';
 const BOT = 'PotuzhneMisto_bot', PAGE = 'https://stasiya408-dev.github.io/tg-miniapp/';
 async function saveExport() {
   const o = Object.assign({}, S, { mail: [] }), t = b64u(await zip(JSON.stringify(o), 'c'));
