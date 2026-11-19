@@ -1172,24 +1172,34 @@ function bvDo(src) {
 }
 
 // --- ГАРДЕРОБ
+// Категорії гардероба (ячейки на героє + рядок вибору)
+const WCAT = [['head', '🧢', 'Шапка', ['head']], ['eyes', '🕶', 'Очі', ['eyes']], ['neck', '📿', 'Шия', ['neck']], ['top', '👕', 'Корпус', ['top']], ['outer', '🧥', 'Верхній', ['outer']],
+  ['wrist', '⌚', 'Кисті рук', ['wristR', 'wristL']], ['legs', '👖', 'Штани', ['legs']], ['feet', '👟', 'Взуття', ['feet']]];
+const WSIDE = [['head', 'eyes', 'neck', 'top', 'outer'], ['wristR', 'wristL', 'legs', 'feet']];
+const SLOT_EMO = { head: '🧢', eyes: '🕶', neck: '📿', top: '👕', outer: '🧥', wristR: '⌚', wristL: '📿', legs: '👖', feet: '👟' };
+const slotCat = sl => (WCAT.find(c => c[3].includes(sl)) || WCAT[0])[0];
+function wSlotCell(sl, cat) {
+  const id = S.equipped[sl], on = slotCat(sl) === cat;
+  return `<div onclick="setP('cat','${slotCat(sl)}')" title="${SLOT_NAME[sl]}" style="position:relative;width:50px;height:50px;border-radius:10px;background:${id ? 'rgba(255,255,255,.92)' : 'rgba(255,255,255,.45)'};border:2px solid ${on ? '#f0a91a' : id ? '#c9a24a' : 'rgba(0,0,0,.25)'};display:flex;align-items:center;justify-content:center;cursor:pointer;${on ? 'box-shadow:0 0 0 2px #ffd84d' : ''}">
+    ${id ? `<img src="${cropURL(WEAR[id].img)}" style="max-width:42px;max-height:42px;object-fit:contain">` : `<span style="font-size:22px;opacity:.45">${SLOT_EMO[sl]}</span>`}
+    ${id ? `<span onclick="event.stopPropagation();unequip('${sl}')" style="position:absolute;top:-6px;right:-6px;background:#c33;color:#fff;border-radius:50%;width:17px;height:17px;font-size:11px;line-height:17px;text-align:center">✕</span>` : ''}
+    <span style="position:absolute;left:0;right:0;bottom:-13px;font-size:9px;text-align:center;white-space:nowrap;color:#333">${SLOT_NAME[sl].replace('Тулуб (верх)', 'Корпус').replace('Верхній одяг', 'Верхній').replace("Зап'ястя", 'Кисть')}</span></div>`;
+}
 SCREENS.wardrobe = p => {
-  const t = p.tab || 'wear', f = p.f || 'all', sel = p.sel;
-  const H = Math.min(window.innerHeight * 0.42, 360);
-  let h = `<h2>👕 Гардероб</h2>${tabs([['wear', 'Одяг'], ['acc', 'Аксесуари'], ['skin', 'Скіни'], ['sets', 'Набори']], t)}
-  <div class="bar" style="align-items:flex-start;flex-wrap:nowrap">
-    <div style="flex:0 0 auto">${doll(H)}</div>
-    <div style="flex:1;min-width:0;font-size:11px">${Object.keys(SLOT_NAME).map(sl => `<div class="row" style="padding:2px 4px;margin:2px 0">${SLOT_NAME[sl]}: <b class="f">${S.equipped[sl] ? WEAR[S.equipped[sl]].name : '—'}</b>${S.equipped[sl] ? `<button style="padding:1px 4px" onclick="unequip('${sl}')">✕</button>` : ''}</div>`).join('')}</div>
-  </div>`;
-  if (t === 'wear' || t === 'acc') {
-    const items = Object.entries(WEAR).filter(([k, w]) => w.tab === t && (f === 'all' || (f === 'my' ? S.owned.includes(k) : !S.owned.includes(k))));
-    h += tabs([['all', 'Усі'], ['my', 'Мої'], ['av', 'Доступні']], f, 'f');
-    h += `<div class="grid g4">${items.map(([k, w]) => `<div class="cell r${w.rar}" onclick="setP('sel','${k}')" style="${sel === k ? 'outline:3px solid #000' : ''}">${wearIcon(k)}${w.name}${S.owned.includes(k) ? '<br>' + gB(wgOf(k)) : '<br>🔒'}${Object.values(S.equipped).includes(k) ? '<br>✓' : ''}</div>`).join('') || '<div class="small">Немає</div>'}</div>`;
-    if (sel && WEAR[sel]) {
-      const w = WEAR[sel], own = S.owned.includes(sel), on = S.equipped[w.slot] === sel;
-      h += `<div class="box"><b>${w.name}</b> ${own ? gB(wgOf(sel)) : ''} ${rarBadge(w.rar)}<div class="small">Слот: ${SLOT_NAME[w.slot]} · ${Object.entries(w.stat).map(([k, v]) => ({ luck: 'Удача', dmg: 'Шкода по босах %', crit: 'Крит %' }[k]) + ' +' + (Math.round(v * GM_ST[own ? wgOf(sel) : 1] * 10) / 10)).join(', ')}</div>
-      ${own ? `<button onclick="go('bv',{src:'w:${sel}'})">🧵 До баби Валі</button> <button onclick="fromWardrobe('${sel}')">У інвентар (для продажу)</button>` : ''}
-      ${own ? (on ? `<button class="g" onclick="unequip('${w.slot}')">✓ Екіпіровано (зняти)</button>` : `<button class="y" onclick="equip('${sel}')">Екіпірувати</button>`) : `<button class="y" onclick="buyWear('${sel}','money')">Купити ${fmt(w.price)} 💵</button> <span class="small">або знайди в секонд-хенді</span>`}</div>`;
-    }
+  const t = p.tab === 'acc' ? 'wear' : p.tab || 'wear', f = p.f || 'all', cat = p.cat || 'feet';
+  let h = `${tabs([['wear', '👕 Речі'], ['skin', 'Скіни'], ['sets', 'Набори']], t)}`;
+  if (t === 'wear') {
+    const H = Math.round(Math.max(300, Math.min(($('app').clientHeight || 700) * 0.55, 560)));
+    h += `<div style="display:flex;align-items:center;justify-content:space-between;gap:2px;background:radial-gradient(ellipse at 50% 60%,#fff 0%,#e9e4da 70%);border-radius:12px;padding:6px 4px">
+      <div style="display:flex;flex-direction:column;gap:17px">${WSIDE[0].map(sl => wSlotCell(sl, cat)).join('')}</div>
+      <div style="flex:1;display:flex;justify-content:center;min-width:0;overflow:hidden">${doll(H)}</div>
+      <div style="display:flex;flex-direction:column;gap:17px">${WSIDE[1].map(sl => wSlotCell(sl, cat)).join('')}</div></div>`;
+    h += `<div class="grid g4" style="padding:6px 0 4px;gap:4px">${WCAT.map(([k, e, n]) => `<button class="${k === cat ? 'y' : ''}" style="padding:4px 2px;border-radius:10px;font-size:11px;line-height:1.1" onclick="setP('cat','${k}')"><span style="font-size:18px;display:block">${e}</span>${n}</button>`).join('')}</div>`;
+    const sls = (WCAT.find(c => c[0] === cat) || WCAT[0])[3];
+    const items = Object.entries(WEAR).filter(([k, w]) => sls.includes(w.slot) && (f === 'all' || (f === 'my' ? S.owned.includes(k) : !S.owned.includes(k))))
+      .sort((x, y) => (S.owned.includes(y[0]) - S.owned.includes(x[0])) || x[1].rar - y[1].rar);
+    h += `<div class="bar" style="gap:4px;margin-bottom:4px">${[['all', 'Усі'], ['my', 'Мої'], ['av', 'Доступні']].map(([k, n]) => `<button class="${f === k ? 'sel' : ''}" style="padding:3px 10px;font-size:11px;border-radius:12px" onclick="setP('f','${k}')">${n}</button>`).join('')}<span class="small" style="margin-left:auto">${items.length} шт.</span></div>`;
+    h += `<div class="grid g4">${items.map(([k, w]) => { const own = S.owned.includes(k), on = Object.values(S.equipped).includes(k); return `<div class="cell r${w.rar}" onclick="wPick('${k}')" style="${on ? 'background:#fff6cc;' : ''}padding:3px"><img src="${cropURL(w.img)}" style="width:100%;height:62px;object-fit:contain;${own ? '' : 'opacity:.55'}"><div style="font-size:10px;line-height:1.15;height:23px;overflow:hidden">${w.name.replace('Кросівки ', '')}</div>${own ? gB(wgOf(k)) : '🔒'}${on ? ' ✓' : ''}</div>`; }).join('') || '<div class="small">Немає речей у цій категорії</div>'}</div>`;
   } else if (t === 'skin') {
     h += `<div class="box">Скін героя (стать):<div class="bar"><button class="${S.gender === 'm' ? 'sel' : ''}" onclick="S.gender='m';render()">Чоловік</button><button class="${S.gender === 'f' ? 'sel' : ''}" onclick="S.gender='f';render()">Жінка</button></div>
     <div class="note">Інші скіни: з'являться пізніше (заглушка).</div></div>`;
@@ -1205,6 +1215,14 @@ SCREENS.wardrobe = p => {
   <button onclick="S.equipped={};render()">Зняти все</button>`;
   return h;
 };
+function wPick(k) {
+  const w = WEAR[k], own = S.owned.includes(k), on = S.equipped[w.slot] === k;
+  modal(`<div style="text-align:center"><img src="${cropURL(w.img)}" style="max-width:150px;max-height:130px;object-fit:contain"></div><h3>${w.name} ${own ? gB(wgOf(k)) : ''} ${rarBadge(w.rar)}</h3>
+  <div class="small">Слот: ${SLOT_NAME[w.slot]} · ${Object.entries(w.stat).map(([q, v]) => ({ luck: 'Удача', dmg: 'Шкода по босах %', crit: 'Крит %' }[q]) + ' +' + (Math.round(v * GM_ST[own ? wgOf(k) : 1] * 10) / 10)).join(', ')}</div>
+  <div class="grid" style="margin-top:8px;gap:6px">
+  ${own ? (on ? `<button class="g" style="padding:10px" onclick="closeModal();unequip('${w.slot}')">✓ Одягнено (зняти)</button>` : `<button class="y" style="padding:10px" onclick="closeModal();equip('${k}')">Одягнути</button>`) : `<button class="y" style="padding:10px" onclick="closeModal();buyWear('${k}','money')">Купити ${fmt(w.price)} 💵</button><div class="small">або знайди в секонд-хенді</div>`}
+  ${own ? `<button onclick="closeModal();go('bv',{src:'w:${k}'})">🧵 До баби Валі</button><button onclick="closeModal();fromWardrobe('${k}')">У інвентар (для продажу)</button>` : ''}</div>`);
+}
 function fromWardrobe(k) { const it = ITEMS.find(x => x.wear === k); if (!it) return; if (S.equipped[WEAR[k].slot] === k) delete S.equipped[WEAR[k].slot]; addItem(it.id, wgOf(k)); S.owned = S.owned.filter(x => x !== k); delete wg()[k]; toast('Річ в інвентарі'); render(); }
 function equip(k) { S.equipped[WEAR[k].slot] = k; bump('outfits'); render(); }
 function unequip(sl) { delete S.equipped[sl]; render(); }
@@ -2604,7 +2622,7 @@ SCREENS.settings = p => {
 const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 8192) s += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
 const unb64u = t => { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; const s = atob(t), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
 async function zip(str, mode) { const st = mode === 'c' ? new Blob([str]).stream().pipeThrough(new CompressionStream('deflate-raw')) : new Blob([str]).stream().pipeThrough(new DecompressionStream('deflate-raw')); return new Uint8Array(await new Response(st).arrayBuffer()); }
-const BUILD = 'v121';
+const BUILD = 'v122';
 const BOT = 'PotuzhneMisto_bot', PAGE = 'https://stasiya408-dev.github.io/tg-miniapp/';
 async function saveExport() {
   const o = Object.assign({}, S, { mail: [] }), t = b64u(await zip(JSON.stringify(o), 'c'));
