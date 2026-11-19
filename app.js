@@ -1328,11 +1328,10 @@ const CAR_HUE = { 'Червоний': 0, 'Чорний': 0, 'Жовтий': 45, 
 const CAR_STK = { 'Полум\'я': '🔥', 'Пальми': '🌴', 'Смуги': '〰️', 'Череп': '💀' };
 function carView(d) { const i = CAR_VIEWS.indexOf(S.car.view); S.car.view = CAR_VIEWS[((i < 0 ? 0 : i) + d + 4) % 4]; render(); }
 const CAR_VIMG = { 'Спереду': 'front', 'Ззаду': 'back', 'Збоку (ліва)': 'left', 'Збоку (права)': 'right' };
-const CAR_VFILE = { 'Ззаду': 'back', 'Збоку (ліва)': 'left', 'Збоку (права)': 'right' }, CAR_BOX = { front: [223, 258, 497, 294], left: [8, 307, 925, 249], right: [8, 307, 925, 249], back: [217, 205, 505, 351] };
+const CAR_VFILE = { 'Ззаду': 'back', 'Збоку (ліва)': 'left', 'Збоку (права)': 'right' }, CAR_BOX = { front: [223, 258, 497, 294], left: [24, 313, 893, 247], right: [24, 313, 893, 247], back: [243, 232, 455, 320] };
 const CAR_IMG = { 'Чорний': 'black', 'Білий': 'white', 'Жовтий': 'yellow' }, CAR_COLS = ['Червоний', 'Чорний', 'Білий', 'Жовтий'], CAR_COL_HEX = { 'Червоний': '#d22', 'Чорний': '#222', 'Білий': '#eee', 'Жовтий': '#f4c20d' };
 const carOwned = () => { const c = S.car; if (!c.owned) c.owned = ['Червоний']; if (!CAR_COLS.includes(c.color)) c.color = 'Червоний'; if (!c.owned.includes(c.color)) c.owned.push(c.color); return c.owned; };
-function garCarPlace() { const im = $('garCar'), sh = im && im.parentElement; if (!sh) return; const w = sh.clientWidth, h = sh.clientHeight, k = Math.max(w / 941, h / 576), W = 941 * k, H = 576 * k, ox = (w - W) / 2, oy = (h - H) * 0.75; const [bx, bt, bw, bh] = CAR_BOX[im.dataset.v], sd = $('garShd'); Object.assign(im.style, { left: ox + bx * k + 'px', width: bw * k + 'px', top: oy + bt * k + 'px', height: bh * k + 'px' }); if (sd) Object.assign(sd.style, { left: ox + (bx + bw * 0.03) * k + 'px', width: bw * 0.94 * k + 'px', top: oy + (bt + bh - 14) * k + 'px', height: 26 * k + 'px', opacity: im.dataset.v === 'front' ? 0 : 1 }); }
-function carShow() {
+function garCarPlace() { const im = $('garCar'), sh = im && im.parentElement; if (!sh) return; const w = sh.clientWidth, h = sh.clientHeight, k = Math.max(w / 941, h / 576), W = 941 * k, H = 576 * k, ox = (w - W) / 2, oy = (h - H) * 0.75; const [bx, bt, bw, bh] = CAR_BOX[im.dataset.v], sd = $('garShd'), side = im.dataset.v === 'left' || im.dataset.v === 'right'; let L = ox + bx * k, Wc = bw * k, Hc = bh * k, T = oy + bt * k; if (side) { Wc = Math.min(Wc, w * 0.94); Hc = Wc * bh / bw; L = (w - Wc) / 2; T = oy + (bt + bh) * k - Hc; if (T + Hc > h - 8) T = h - 8 - Hc; } Object.assign(im.style, { left: L + 'px', width: Wc + 'px', top: T + 'px', height: Hc + 'px' }); if (sd) Object.assign(sd.style, { left: L + Wc * 0.03 + 'px', width: Wc * 0.94 + 'px', top: T + Hc - 12 * k + 'px', height: 26 * k + 'px', opacity: im.dataset.v === 'front' ? 0 : 1 }); }function carShow() {
   const c = S.car, v = c.view || 'Спереду', front = v === 'Спереду', cc = Math.round(carCond()); carOwned(); after.push(garCarPlace);
   const file = front ? (CAR_IMG[c.color] ? 'car_' + CAR_IMG[c.color] : '') : 'car_' + (CAR_IMG[c.color] || 'red') + '_' + CAR_VFILE[v];
   return `<div class="garShow" style="${front ? '' : 'background-image:url(img/gar/bg_empty.jpg)'}">
@@ -2741,7 +2740,7 @@ SCREENS.settings = p => {
 const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 8192) s += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
 const unb64u = t => { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; const s = atob(t), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
 async function zip(str, mode) { const st = mode === 'c' ? new Blob([str]).stream().pipeThrough(new CompressionStream('deflate-raw')) : new Blob([str]).stream().pipeThrough(new DecompressionStream('deflate-raw')); return new Uint8Array(await new Response(st).arrayBuffer()); }
-const BUILD = 'v146';
+const BUILD = 'v147';
 const BOT = 'PotuzhneMisto_bot', PAGE = 'https://stasiya408-dev.github.io/tg-miniapp/';
 async function saveExport() {
   const o = Object.assign({}, S, { mail: [] }), t = b64u(await zip(JSON.stringify(o), 'c'));
