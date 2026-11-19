@@ -216,6 +216,19 @@ button .ico{display:block;margin:0 auto 2px;float:none}
 .garOpts button{position:relative}.garOpts .sw{position:absolute;left:10px;top:50%;width:20px;height:20px;margin-top:-10px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #000}
 .garOpts .ok{color:#5fe04a;font-size:20px;line-height:1}.garOpts small.own{color:#bbb}
 .garOpts button.sel{border-color:#5fe04a!important;color:#fff!important}
+
+/* v145: мерехтіння лише коли JS додає .lampFl (раз на 15-25 с) */
+#lampGlow,#lampDim,.lampShd,.lampPool,.lampHero{animation:none!important}
+.lampFl #lampGlow{animation:lfGlow .7s!important}
+.lampFl #lampDim{animation:lfDim .7s!important}
+.lampFl .lampShd{animation:lfShd .7s!important}
+.lampFl .lampPool{animation:lfPool .7s!important}
+.lampFl .lampHero{animation:lfHero .7s!important}
+@keyframes lfGlow{0%{opacity:.6}12%{opacity:0}38%{opacity:.6}55%{opacity:.05}80%,100%{opacity:.6}}
+@keyframes lfDim{0%{opacity:0}12%{opacity:1}38%{opacity:0}55%{opacity:.9}80%,100%{opacity:0}}
+@keyframes lfShd{0%{opacity:.55}12%{opacity:0}38%{opacity:.55}55%{opacity:.04}80%,100%{opacity:.55}}
+@keyframes lfPool{0%{opacity:1}12%{opacity:0}38%{opacity:1}55%{opacity:.08}80%,100%{opacity:1}}
+@keyframes lfHero{0%{filter:brightness(1)}12%{filter:brightness(.68)}38%{filter:brightness(1)}55%{filter:brightness(.7)}80%,100%{filter:brightness(1)}}
 </style>
 <div id="phone">
   <div id="topbar"></div>
@@ -224,4 +237,4 @@ button .ico{display:block;margin:0 auto 2px;float:none}
   <div id="toast"></div>
   <div id="modal"><div class="in" id="modalIn"></div></div>
 </div>
-<script src="app.js?v=1795076744"></script>
+<script src="app.js?v=1795076887"></script>
