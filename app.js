@@ -1325,35 +1325,36 @@ const CAR_VIEWS = ['Збоку (ліва)', 'Спереду', 'Збоку (пр�
 const CAR_HUE = { 'Червоний': 0, 'Чорний': 0, 'Жовтий': 45, 'Білий': 0, 'Фіолетовий неон': 270 };
 const CAR_STK = { 'Полум\'я': '🔥', 'Пальми': '🌴', 'Смуги': '〰️', 'Череп': '💀' };
 function carView(d) { const i = CAR_VIEWS.indexOf(S.car.view); S.car.view = CAR_VIEWS[((i < 0 ? 0 : i) + d + 4) % 4]; render(); }
+const CAR_VIMG = { 'Спереду': 'front', 'Ззаду': 'back', 'Збоку (ліва)': 'left', 'Збоку (права)': 'right' };
 function carShow() {
-  const c = S.car, v = c.view, side = v.startsWith('Збоку'), flip = v === 'Збоку (права)', col = c.color;
-  const flt = col === 'Чорний' ? 'brightness(.35) saturate(.3)' : col === 'Білий' ? 'grayscale(1) brightness(1.7)' : col === 'Фіолетовий неон' ? 'hue-rotate(270deg) saturate(1.6) drop-shadow(0 0 12px #c4f)' : `hue-rotate(${CAR_HUE[col] || 0}deg)`;
-  return `<div style="flex:1 1 auto;min-height:38vh;position:relative;border-radius:14px;overflow:hidden;background:linear-gradient(#1b1320 0%,#3a2a48 55%,#5b5160 56%,#2a2430 100%);border:2px solid #c9a24a;display:flex;align-items:center;justify-content:center">
-    <div style="position:absolute;left:10px;top:8px;color:#fff;font-weight:bold;font-size:16px;text-shadow:0 1px 3px #000">${c.name}<div style="color:#ffd84d;font-size:15px">${'★'.repeat(c.stars)}${'☆'.repeat(5 - c.stars)}</div></div>
-    <div style="position:absolute;right:10px;top:8px;color:#fff;text-align:right;text-shadow:0 1px 3px #000">⚙️ <b style="font-size:18px">${carPower()}</b><div style="font-size:12px">сила авто</div></div>
-    <div style="position:relative;font-size:min(34vw,150px);line-height:1;filter:${flt};transform:${flip ? 'scaleX(-1)' : ''} ${side ? '' : 'scale(.85)'};margin-top:30px">${side ? '🚗' : '🚘'}${CAR_STK[c.sticker] ? `<span style="position:absolute;left:30%;top:42%;font-size:.22em;filter:none">${CAR_STK[c.sticker]}</span>` : ''}</div>
-    <div style="position:absolute;left:12%;right:12%;bottom:16%;height:14px;background:radial-gradient(ellipse,rgba(0,0,0,.6),transparent 70%)"></div>
-    <button onclick="carView(-1)" style="position:absolute;left:6px;top:50%;transform:translateY(-50%);width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.5);font-size:20px">⟲</button>
-    <button onclick="carView(1)" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.5);font-size:20px">⟳</button>
-    <div style="position:absolute;left:10px;right:10px;bottom:8px;color:#fff;font-size:12px;text-shadow:0 1px 2px #000"><div style="display:flex;justify-content:space-between"><span>${v}</span><span>Стан: <b style="color:${carCond() < 40 ? '#f66' : '#7f7'}">${Math.round(carCond())}%</b></span></div>
-      <div style="height:6px;background:rgba(255,255,255,.25);border-radius:3px;margin-top:3px"><div style="height:100%;width:${carCond()}%;background:${carCond() < 40 ? '#e33' : '#4c4'};border-radius:3px"></div></div></div></div>`;
+  const c = S.car, v = c.view || 'Спереду', ready = v === 'Спереду', cc = Math.round(carCond());
+  return `<div class="garShow" style="${ready ? '' : 'filter:brightness(.55)'}">
+    <div class="garHot" style="left:1.5%" onclick="back()"></div><div class="garHot" style="right:1.5%" onclick="carInfo()"></div>
+    ${ready ? '' : `<div style="position:absolute;left:10%;right:10%;top:45%;text-align:center;color:#fff;font-weight:bold;text-shadow:0 2px 4px #000;filter:brightness(1.8)">Ракурс «${v}»: малюнок авто ще не готовий</div>`}
+    <div class="garCond"><span>Стан ${cc}%</span><i><u style="width:${cc}%;background:${cc < 40 ? '#e33' : '#4c4'}"></u></i></div></div>`;
 }
+function carInfo() { modal(`<h3>🔧 Гараж</h3><div class="small">Покращуй деталі, щоб авто швидше їхало в гонках. Кожен рівень деталі додає +10 до її характеристики. Зірки ростуть разом із сумою рівнів.</div><div class="box">⚙️ Сила авто: <b>${carPower()}</b><br>🛠 Стан: <b>${Math.round(carCond())}%</b> (падає після гонок, знижує силу)</div><button style="width:100%" onclick="closeModal()">Зрозуміло</button>`); }
+function carRename() { modal(`<h3>✏ Назва авто</h3><input id="carNm" maxlength="18" value="${S.car.name.replace(/"/g, '')}" style="width:100%;font-size:16px;padding:8px;box-sizing:border-box"><button class="y" style="width:100%;margin-top:8px;min-height:46px" onclick="const v=$('carNm').value.trim();if(v){S.car.name=v;closeModal();render()}">Зберегти</button>`); }
 SCREENS.garage = p => {
-  const t = p.tab || 'tune', part = p.part || 'engine', c = S.car, s = carStats(), B = 'min-height:48px;font-size:15px;border-radius:10px';
-  let h = `<div style="display:flex;flex-direction:column;gap:6px;min-height:100%">${carShow()}
-  <div class="grid g4">${[['Потужність', s.pow], ['Швидкість', s.spd], ['Міцність', s.dur], ['Керування', s.hand]].map(([n, v]) => `<div class="cell" style="padding:6px 2px">${n}<br><b style="font-size:16px">${v}</b></div>`).join('')}</div>
-  ${carCond() < 100 ? `<button class="g" style="width:100%;${B}" onclick="repairCar()">🛠 Ремонт — ${fmt(repairCost())} 💵</button>` : ''}
-  <div class="tabs" style="margin:0">${[['tune', '🔧 Тюнінг'], ['style', '✨ Стиль'], ['paint', '🎨 Фарба'], ['stick', '🔥 Наліпки']].map(([k, n]) => `<button class="${t === k ? 'y' : ''}" style="min-height:48px;font-size:13px" onclick="setP('tab','${k}')">${n}</button>`).join('')}</div>`;
+  const t = p.tab || 'tune', part = p.part || 'engine', c = S.car, s = carStats(), v = c.view || 'Спереду';
+  const bon = { pow: 0, spd: 0, dur: 0, hand: 0 }; PARTS.forEach(([k, , st]) => bon[st] += c.parts[k] * 10);
+  const seg = n => `<div class="garSeg">${[0, 1, 2, 3, 4, 5].map(i => `<i class="${i < n ? 'on' : ''}"></i>`).join('')}</div>`;
+  let h = `<div class="garWrap">${carShow()}
+  <div class="garViews">${[['Спереду', 'front', 'Спереду'], ['Ззаду', 'back', 'Ззаду'], ['Збоку (ліва)', 'left', 'Збоку (ліва)'], ['Збоку (права)', 'right', 'Збоку (права)']].map(([k, im, n]) => `<button class="${v === k ? 'sel' : ''}" onclick="S.car.view='${k}';render()"><img src="img/gar/v_${im}.png"><span>${n}</span></button>`).join('')}</div>
+  <div class="garName"><b>${c.name}</b><span class="pen" onclick="carRename()">✏️</span><span class="st">${'★'.repeat(c.stars)}<s>${'★'.repeat(5 - c.stars)}</s></span></div>
+  <div class="garStats">${[['pow', 'Потужність'], ['spd', 'Швидкість'], ['dur', 'Міцність'], ['hand', 'Керування']].map(([k, n]) => `<div><img src="img/gar/s_${k}.png"><span><small>${n}</small><b>${s[k]}${bon[k] ? `<em>+${bon[k]}</em>` : ''}</b></span></div>`).join('')}</div>
+  ${carCond() < 100 ? `<button class="g" style="width:100%;min-height:44px;font-size:15px;border-radius:10px" onclick="repairCar()">🛠 Ремонт — ${fmt(repairCost())} 💵</button>` : ''}
+  <div class="garTabs">${[['tune', '🔧', 'Тюнінг'], ['style', '🧴', 'Стиль'], ['paint', '🎨', 'Фарбування'], ['stick', '⭐', 'Наліпки']].map(([k, ic, n]) => `<button class="${t === k ? 'sel' : ''}" onclick="setP('tab','${k}')"><span class="ti">${ic}</span>${n}</button>`).join('')}</div>`;
   if (t === 'tune') {
-    h += `<div class="grid g3">${PARTS.map(([k, n]) => `<div class="cell" onclick="setP('part','${k}')" style="padding:8px 2px;font-size:13px;${part === k ? 'outline:3px solid #f0a91a;background:#fff6cc' : ''}">${n}<br><span style="letter-spacing:1px">${'■'.repeat(c.parts[k])}${'□'.repeat(6 - c.parts[k])}</span></div>`).join('')}</div>`;
-    const lv = c.parts[part], cost = 8000 * (lv + 1) * (lv + 1);
-    h += lv >= 6 ? `<div class="box" style="text-align:center;padding:12px">✅ ${PARTS.find(x => x[0] === part)[1]}: максимальний рівень</div>` : `<button class="g" style="width:100%;${B}" onclick="upPart('${part}',${cost})">🔧 Покращити ${PARTS.find(x => x[0] === part)[1]} — ${fmt(cost)} 💵</button>`;
+    h += `<div class="garParts">${PARTS.map(([k, n]) => `<div class="${part === k ? 'sel' : ''}" onclick="setP('part','${k}')"><img src="img/gar/p_${k}.png"><b>${n}</b>${seg(c.parts[k])}</div>`).join('')}</div>`;
+    const lv = c.parts[part], cost = 8000 * (lv + 1) * (lv + 1), pn = PARTS.find(x => x[0] === part)[1];
+    h += lv >= 6 ? `<button class="garUp dis" disabled>✅ ${pn}: максимум</button>` : `<button class="garUp" onclick="upPart('${part}',${cost})"><span class="ui">🔧</span><span>Покращити<small>${pn} · ${fmt(cost)} 💵</small></span></button>`;
   } else if (t === 'paint') {
-    h += `<div class="grid g2">${['Червоний', 'Чорний', 'Жовтий', 'Білий', 'Фіолетовий неон'].map(col => `<button class="${c.color === col ? 'y' : ''}" style="${B}" onclick="paint('${col}')">${col}${c.color === col ? ' ✓' : '<br><small>5 000 💵</small>'}</button>`).join('')}</div>`;
+    h += `<div class="garOpts">${['Червоний', 'Чорний', 'Жовтий', 'Білий', 'Фіолетовий неон'].map(col => `<button class="${c.color === col ? 'sel' : ''}" onclick="paint('${col}')">${col}${c.color === col ? ' ✓' : '<small>5 000 💵</small>'}</button>`).join('')}</div>`;
   } else if (t === 'stick') {
-    h += `<div class="grid g3">${['Немає', 'Полум\'я', 'Пальми', 'Смуги', 'Череп'].map(x => `<button class="${c.sticker === x ? 'y' : ''}" style="${B}" onclick="S.car.sticker='${x.replace("'", "\\'")}';render()">${CAR_STK[x] || '⛔'} ${x}</button>`).join('')}</div>`;
-  } else h += `<div class="box small" style="text-align:center;padding:14px">Стиль: диски, спойлер, обвіс (скоро)</div>`;
-  return h + `<button class="play" style="width:100%;min-height:54px;font-size:18px;margin-top:auto" onclick="go('races')">🏁 До гонок</button></div>`;
+    h += `<div class="garOpts">${['Немає', 'Полум\'я', 'Пальми', 'Смуги', 'Череп'].map(x => `<button class="${c.sticker === x ? 'sel' : ''}" onclick="S.car.sticker='${x.replace("'", "\\'")}';render()">${CAR_STK[x] || '⛔'} ${x}</button>`).join('')}</div>`;
+  } else h += `<div class="garOpts"><div style="grid-column:1/-1;text-align:center;padding:16px;color:#ccc">Диски, спойлер, обвіс (скоро)</div></div>`;
+  return h + `</div>`;
 };
 function upPart(k, cost) { if (!pay('money', cost)) return; S.car.parts[k]++; bump('partUp'); const tot = Object.values(S.car.parts).reduce((a, b) => a + b, 0); S.car.stars = Math.min(5, 1 + Math.floor(tot / 8)); toast('Покращено!'); render(); }
 function paint(col) { if (!pay('money', 5000)) return; S.car.color = col; render(); }
@@ -2732,7 +2733,7 @@ SCREENS.settings = p => {
 const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 8192) s += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
 const unb64u = t => { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; const s = atob(t), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
 async function zip(str, mode) { const st = mode === 'c' ? new Blob([str]).stream().pipeThrough(new CompressionStream('deflate-raw')) : new Blob([str]).stream().pipeThrough(new DecompressionStream('deflate-raw')); return new Uint8Array(await new Response(st).arrayBuffer()); }
-const BUILD = 'v141';
+const BUILD = 'v142';
 const BOT = 'PotuzhneMisto_bot', PAGE = 'https://stasiya408-dev.github.io/tg-miniapp/';
 async function saveExport() {
   const o = Object.assign({}, S, { mail: [] }), t = b64u(await zip(JSON.stringify(o), 'c'));

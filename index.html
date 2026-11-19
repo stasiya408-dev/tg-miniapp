@@ -175,6 +175,41 @@ button .ico{display:block;margin:0 auto 2px;float:none}
 /* v141: герой темнішає, коли лампа гасне */
 .lampHero{animation:lampHero 7s infinite}
 @keyframes lampHero{0%,82%{filter:brightness(1)}83%{filter:brightness(.68)}85%{filter:brightness(1)}86.5%{filter:brightness(.7)}88%{filter:brightness(1)}100%{filter:brightness(1)}}
+
+/* v142: гараж за макетом */
+.garWrap{display:flex;flex-direction:column;gap:7px;min-height:calc(100% + 12px);margin-bottom:-8px!important;margin:-6px -6px 0;padding:0 6px 8px;background:linear-gradient(#2a1f30,#17131c 40%,#120f16)}
+.garShow{position:relative;flex:1 1 auto;min-height:230px;margin:0 -6px;background:url(img/gar/show_front.jpg) center 75%/cover no-repeat;aspect-ratio:auto}
+.garHot{position:absolute;top:6%;width:10%;height:15%;border-radius:50%;cursor:pointer}
+.garCond{position:absolute;left:12px;right:12px;bottom:6px;display:flex;align-items:center;gap:6px;color:#fff;font-size:11px;text-shadow:0 1px 2px #000}
+.garCond i{flex:1;height:5px;background:rgba(255,255,255,.25);border-radius:3px;overflow:hidden}.garCond u{display:block;height:100%}
+.garViews{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.garViews button,.garTabs button{background:linear-gradient(#34303a,#1c1a20)!important;border:2px solid #57525e!important;border-radius:12px!important;color:#fff!important;font-weight:bold;box-shadow:0 2px 4px rgba(0,0,0,.6)}
+.garViews button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 2px!important;font-size:11px!important;min-height:58px}
+.garViews img{height:24px;max-width:90%;object-fit:contain}
+.garViews button.sel,.garTabs button.sel{background:linear-gradient(#ffcf3a,#e99a0e)!important;border-color:#fff0a0!important;color:#2a1600!important}
+.garViews button.sel img{filter:brightness(.9) sepia(.3)}
+.garName{display:flex;align-items:center;gap:10px;margin:0 22px;padding:6px 14px;background:linear-gradient(#2c2832,#141218);border:2px solid #57525e;border-radius:12px;color:#fff}
+.garName b{font-size:19px;font-style:italic;letter-spacing:.5px}.garName .pen{cursor:pointer;font-size:15px;filter:grayscale(1) brightness(1.6)}
+.garName .st{margin-left:auto;color:#ffc61a;font-size:19px;letter-spacing:1px}.garName .st s{text-decoration:none;color:transparent;-webkit-text-stroke:1px #8a8590}
+.garStats{display:grid;grid-template-columns:repeat(4,1fr);background:linear-gradient(#2c2832,#141218);border:2px solid #57525e;border-radius:12px;overflow:hidden}
+.garStats>div{display:flex;align-items:center;gap:3px;padding:6px 3px;border-right:1px solid #3d3944;color:#fff}.garStats>div:last-child{border-right:0}
+.garStats img{width:24px;height:24px;object-fit:contain;flex:0 0 auto}
+.garStats span{display:flex;flex-direction:column;min-width:0}.garStats small{font-size:9px;color:#ccc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.garStats b{font-size:14px;white-space:nowrap}.garStats em{font-style:normal;color:#5fe04a;font-size:12px;margin-left:3px}
+.garTabs{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.garTabs button{min-height:46px;font-size:12px!important;padding:4px 2px!important;display:flex;align-items:center;justify-content:center;gap:3px}
+.garTabs .ti{font-size:16px}
+.garParts{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.garParts>div{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 4px 8px;background:radial-gradient(ellipse at 50% 35%,#34313a,#1d1b22 75%);border:2px solid #4a4652;border-radius:12px;color:#fff;cursor:pointer;box-shadow:0 2px 5px rgba(0,0,0,.6)}
+.garParts>div.sel{border-color:#ffc61a;box-shadow:0 0 0 2px rgba(255,198,26,.35),0 2px 5px rgba(0,0,0,.6)}
+.garParts img{height:56px;max-width:100%;object-fit:contain}.garParts b{font-size:14px}
+.garSeg{display:flex;gap:2px}.garSeg i{width:13px;height:9px;border-radius:2px;background:#3a3740;border:1px solid #57525e}.garSeg i.on{background:linear-gradient(#ffd84d,#e8a010);border-color:#ffe27a}
+.garUp{margin:4px auto 0;width:78%;min-height:58px;border-radius:16px!important;background:linear-gradient(#7fe04a,#3fa21a)!important;border:2.5px solid #c8ff9a!important;color:#fff!important;font-size:24px!important;font-weight:900;font-style:italic;text-shadow:0 2px 2px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;gap:12px;box-shadow:0 4px 0 #2a6e10,0 6px 12px rgba(0,0,0,.5)}
+.garUp small{display:block;font-size:11px;font-style:normal;font-weight:bold;text-align:left}.garUp span{text-align:left;line-height:1.05}.garUp .ui{font-size:26px}
+.garUp.dis{background:linear-gradient(#666,#444)!important;border-color:#888!important;box-shadow:none;font-size:16px!important}
+.garOpts{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}
+.garOpts button{min-height:52px;font-size:14px!important;background:linear-gradient(#34303a,#1c1a20)!important;border:2px solid #57525e!important;border-radius:12px!important;color:#fff!important;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.garOpts button small{font-size:11px;color:#ffd84d}.garOpts button.sel{border-color:#ffc61a!important;color:#ffd84d!important}
 </style>
 <div id="phone">
   <div id="topbar"></div>
@@ -183,4 +218,4 @@ button .ico{display:block;margin:0 auto 2px;float:none}
   <div id="toast"></div>
   <div id="modal"><div class="in" id="modalIn"></div></div>
 </div>
-<script src="app.js?v=1795075782"></script>
+<script src="app.js?v=1795076247"></script>
