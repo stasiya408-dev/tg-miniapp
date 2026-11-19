@@ -1116,13 +1116,21 @@ function buyWear(k, curr) {
 
 // --- ПРОФІЛЬ
 SCREENS.profile = () => {
-  const s = stats();
-  return `<h2>👤 Профіль</h2><div class="bar"><div>${doll(220)}</div><div class="f" style="flex:1">
-  <div class="box" style="${cosFrame() ? 'border:3px solid ' + cosFrame() : ''}"><b style="${nickSt(subTier())}">${S.name}</b> ${cosTitle() ? '<span class="small">«' + cosTitle() + '»</span>' : ''} (${S.gender === 'm' ? 'чоловік' : 'жінка'})<br><span onclick="showPath()" style="cursor:pointer;color:${PATH[pathSt()].col};font-weight:800">${PATH[pathSt()].ic} ${PATH[pathSt()].t} ▸</span><br>Рівень ${S.lvl}<br><span onclick="go('tasks',{tab:'ach'})" style="cursor:pointer">🏅 <b>${achRank(achPts())[1]}</b> · ${(achPct() * 100).toFixed(1)}% досягнень · ${fmt(achPts())} очок</span><div class="prog"><i style="width:${S.xp / xpNeed(S.lvl) * 100}%"></i></div><span class="small">${S.xp} / ${xpNeed(S.lvl)} XP</span></div>
-  <div class="box" style="text-align:center"><b>⚔️ Бойова сила</b><div style="font-size:34px;font-weight:800;line-height:1.1">${fmt(avgHit())}</div><div class="small">середній удар по босу</div><hr style="margin:6px 0"><div style="text-align:left">Шкода по босах: +${s.dmg}%<br>Крит: ${s.crit}% <span class="small">(подвійний удар)</span><br>Удача: ${s.luck} <span class="small">(кращі знахідки)</span><br>Колекція: ${S.owned.length}/${Object.keys(WEAR).length} речей у гардеробі<br>Зброя: ${(WEAPONS.find(w => w.id === S.weapon) || {}).name} (x${weaponMult()})<br>Авто: ${S.car.name}</div>
+  const s = stats(), P = PATH[pathSt()], H = Math.round(Math.max(260, Math.min(($('app').clientHeight || 700) * 0.46, 460)));
+  const st = (ic, n, v) => `<div class="cell" style="padding:8px 4px;text-align:left"><div class="small">${ic} ${n}</div><b style="font-size:15px">${v}</b></div>`;
+  return `<div style="display:flex;flex-direction:column;gap:6px;min-height:100%">
+  <div style="position:relative;border-radius:14px;overflow:hidden;border:2px solid ${cosFrame() || '#c9a24a'};background:radial-gradient(ellipse at 50% 55%,#fff 0%,#e9e4da 65%,#cfc6b4 100%);display:flex;justify-content:center;padding-top:8px;flex:1 1 auto;min-height:${H}px">
+    <div style="filter:drop-shadow(0 0 ${2 + pathSt() * 2}px #ffcc44aa)">${doll(H - 16)}</div>
+    <div style="position:absolute;left:10px;top:8px;max-width:48%">
+      <b style="font-size:18px;${nickSt(subTier())}">${S.name}</b>${cosTitle() ? '<div class="small">«' + cosTitle() + '»</div>' : ''}
+      <div onclick="showPath()" style="cursor:pointer;color:${P.col};font-weight:800;font-size:13px;text-shadow:0 1px 1px #000">${P.ic} ${P.t} ▸</div>
+      <div style="font-size:13px">Рівень <b>${S.lvl}</b></div><div class="prog" style="width:110px"><i style="width:${S.xp / xpNeed(S.lvl) * 100}%"></i></div><div class="small">${fmt(S.xp)} / ${fmt(xpNeed(S.lvl))} досвіду</div>
+      <div onclick="go('tasks',{tab:'ach'})" style="cursor:pointer;font-size:12px;margin-top:4px">🏅 <b>${achRank(achPts())[1]}</b><br><span class="small">${(achPct() * 100).toFixed(1)}% · ${fmt(achPts())} очок</span></div></div>
+    <div style="position:absolute;right:10px;top:8px;text-align:right"><div class="small">⚔️ Бойова сила</div><div style="font-size:28px;font-weight:900;line-height:1">${fmt(avgHit())}</div><div class="small">середній удар</div></div></div>
+  <div class="grid g3">${st('🗡', 'Шкода', '+' + s.dmg + '%')}${st('💥', 'Крит', s.crit + '%')}${st('🍀', 'Удача', s.luck)}${st('👕', 'Колекція', S.owned.length + '/' + Object.keys(WEAR).length)}${st('🔫', 'Зброя', ((WEAPONS.find(w => w.id === S.weapon) || {}).name || '—') + ' ×' + weaponMult())}${st('🚗', 'Авто', S.car.name)}</div>
+  <div class="grid g4">${st('🔫', 'Патрони', S.ammo)}${st('💣', 'Гранати', S.grenades)}${st('🪡', 'Наперстки', S.thim || 0)}${st('🌟', 'Золоті', S.thimG || 0)}</div>
   ${profBox()}
-  <div class="box small">Патрони: ${S.ammo} · Гранати: ${S.grenades} · 🪡 Наперстки: ${S.thim || 0} · 🌟 Золоті: ${S.thimG || 0}</div></div></div>
-  <div class="bar"><input id="rn" value="${S.name}" style="flex:1"><button onclick="S.name=$('rn').value||S.name;render()">Змінити ім'я</button></div>`;
+  <div class="bar" style="margin-top:auto"><input id="rn" value="${S.name}" style="flex:1;min-height:44px;font-size:15px"><button style="min-height:44px" onclick="S.name=$('rn').value||S.name;render()">Змінити ім'я</button></div></div>`;
 };
 
 // --- ІНВЕНТАР
@@ -1130,11 +1138,19 @@ SCREENS.inventory = p => {
   const c = p.cat || 'Усе';
   const cats = ['Усе', ...new Set(S.inv.map(i => IT[i.id].cat))];
   const list = S.inv.filter(i => c === 'Усе' || IT[i.id].cat === c);
-  return `<h2>🎒 Інвентар (${S.inv.length})</h2><div class="bar">${cats.map(x => `<button class="${x === c ? 'y' : ''}" onclick="setP('cat','${x}')">${x}</button>`).join('')}</div>
-  ${list.length ? '' : '<div class="box small">Порожньо. Відкрий завезення в секонд-хенді або купи на ринку.</div>'}
-  ${list.map(i => { const d = IT[i.id]; return `<div class="row r${d.rar}"><div class="f">${ico(i.id)}<b>${d.name}</b> ${gB(itG(i))} ${rarBadge(d.rar)}<div class="small">${d.cat} · ${d.stat}</div></div>
-    ${d.cat !== 'Ресурси' && d.stat !== '—' ? `<button onclick="go('bv',{src:'i:${i.uid}'})">🧵 БВ</button>` : ''}${d.wear ? `<button onclick="toWardrobe(${i.uid})">У гардероб</button>` : ''}<button onclick="sellItem(${i.uid})">Продати ${fmt(sellPrice(i.id))}</button></div>`; }).join('')}`;
+  if (!S.inv.length) return `<div style="display:flex;flex-direction:column;gap:10px;min-height:100%"><h2>🎒 Інвентар</h2>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border-radius:14px;background:radial-gradient(#fff,#e6e0d4);border:2px dashed #c9a24a;padding:20px"><div style="font-size:90px">🎒</div><h3>Поки порожньо</h3><div class="small">Речі з'являються з завезень у секонд-хенді, з босів і з ринку.</div></div>
+    <button class="play" style="width:100%;min-height:56px;font-size:18px" onclick="go('secondhand')">🧥 До секонд-хенду</button><button style="width:100%;min-height:50px" onclick="go('market')">📈 На ринок</button></div>`;
+  return `<h2>🎒 Інвентар (${S.inv.length})</h2><div class="grid g3" style="gap:4px;margin-bottom:6px">${cats.map(x => `<button class="${x === c ? 'y' : ''}" style="min-height:42px;font-size:12px" onclick="setP('cat','${x}')">${CAT_EMO[x] || '📦'} ${x}</button>`).join('')}</div>
+  <div class="grid g3" style="gap:6px">${list.map(i => { const d = IT[i.id]; return `<div class="cell r${d.rar} invc" onclick="invPick(${i.uid})" style="padding:6px 3px;min-height:120px"><div class="bigico">${ico(i.id)}</div><div style="font-size:11px;line-height:1.15;height:26px;overflow:hidden">${d.name}</div>${gB(itG(i))}<div class="small">${fmt(sellPrice(i.id))} 💵</div></div>`; }).join('')}</div>`;
 };
+function invPick(uid) {
+  const i = S.inv.find(x => x.uid === uid); if (!i) return; const d = IT[i.id], B = 'min-height:48px;font-size:15px';
+  modal(`<div class="bigico" style="text-align:center">${ico(i.id)}</div><h3>${d.name} ${gB(itG(i))} ${rarBadge(d.rar)}</h3><div class="small">${d.cat} · ${d.stat}</div><div class="grid" style="gap:6px;margin-top:8px">
+  ${d.wear && WEAR[d.wear] ? `<button class="y" style="${B}" onclick="closeModal();toWardrobe(${uid})">👕 У гардероб</button>` : ''}
+  ${d.cat !== 'Ресурси' && d.stat !== '—' ? `<button style="${B}" onclick="closeModal();go('bv',{src:'i:${uid}'})">🧵 До баби Валі</button>` : ''}
+  <button style="${B}" onclick="closeModal();sellItem(${uid})">💵 Продати за ${fmt(sellPrice(i.id))}</button></div>`);
+}
 function sellPrice(id) { return Math.round(IT[id].base * 0.6); }
 function sellItem(uid) { const i = S.inv.find(x => x.uid === uid); S.inv = S.inv.filter(x => x.uid !== uid); give({ money: sellPrice(i.id) }, 'Продано'); render(); }
 function toWardrobe(uid) {
@@ -1158,22 +1174,36 @@ const thName = k => k === 'thimG' ? '🌟 Золотий бабин наперс
 const BV_PITY = 4, BV_PITY_MAX = 5; // +4% до шансу «краще» за кожну невдачу поспіль, до 5 невдач
 const bvOdds = o => { const [u, sm, d] = BV_ODDS[o.g], b = Math.min(o.pity, BV_PITY_MAX) * BV_PITY, add = Math.min(b, sm + d); const fromD = Math.min(add, d); return [u + add, sm - (add - fromD), d - fromD]; };
 const bvCost = (it, g) => Math.max(5, Math.round((it.base || 5000) / 300 * BV_CM[g]));
+function bvImg(src, sz) {
+  const [t, v] = (src || '').split(':'); let html = '';
+  if (t === 'i') { const i = S.inv.find(x => x.uid === +v); html = i ? ico(i.id) : ''; } else if (WEAR[v]) html = `<img src="${cropURL(WEAR[v].img)}">`;
+  return `<div class="bigico" style="--s:${sz}px">${html}</div>`;
+}
 SCREENS.bv = p => {
-  const o = bvItem(p.src);
-  let h = `<div class="bar sp"><h2 style="margin:4px 0">🧵 БАБА ВАЛЯ</h2><button class="y" onclick="bvFaq()">❓ FAQ</button></div><div class="box">Залиш їй річ на прошивку за 💎. Результат випадковий: ранг може <b>піднятись</b>, <b>лишитись</b> або <b>впасти</b>. Вищий ранг дає більше статів і дорожчий на аукціоні. Шанси завжди видно нижче.</div>
-  <div class="box small">Ранги: ${GRD.map((x, g) => `${gB(g)} ×${GM_ST[g]} стати, ціна ×${GM_PR[g]}`).join(' · ')}</div>`;
+  const o = bvItem(p.src), B = 'min-height:48px;font-size:15px;border-radius:10px';
+  const top = `<div class="bar sp"><h2 style="margin:4px 0">🧵 БАБА ВАЛЯ</h2><button class="y" style="min-height:42px" onclick="bvFaq()">❓ FAQ</button></div>`;
   if (!o) {
     const inv = S.inv.filter(i => IT[i.id].cat !== 'Ресурси' && IT[i.id].stat !== '—'), ow = S.owned.filter(k => WEAR[k]);
-    return h + `<b>Інвентар</b>${inv.map(i => `<div class="row"><div class="f">${ico(i.id)}${IT[i.id].name} ${gB(itG(i))}</div><button onclick="setP('src','i:${i.uid}')">Обрати</button></div>`).join('') || '<div class="small">Порожньо</div>'}
-    <b>Гардероб</b>${ow.map(k => `<div class="row"><div class="f">${WEAR[k].name} ${gB(wgOf(k))}</div><button onclick="setP('src','w:${k}')">Обрати</button></div>`).join('') || '<div class="small">Порожньо</div>'}`;
+    const card = (src, img, nm, g) => `<div class="cell" onclick="setP('src','${src}')" style="padding:6px 3px;min-height:112px"><div class="bigico">${img}</div><div style="font-size:11px;line-height:1.15;height:26px;overflow:hidden">${nm}</div>${gB(g)}</div>`;
+    return `<div style="display:flex;flex-direction:column;gap:6px;min-height:100%">` + top + `
+    <div style="position:relative;border-radius:14px;overflow:hidden;border:2px solid #c9a24a;background:radial-gradient(ellipse at 50% 40%,#fff3d6,#d9c3a0);min-height:26vh;display:flex;align-items:center;gap:10px;padding:12px">
+      <div style="font-size:min(26vw,110px)">👵</div><div><b style="font-size:16px">Принеси річ, синку.</b><div class="small">Прошию за 💎. Ранг може піднятись, лишитись або впасти. Шанси завжди видно.</div><div class="small" style="margin-top:4px">🪡 ${S.thim || 0} · 🌟 ${S.thimG || 0}</div></div></div>
+    <b>👕 Гардероб</b><div class="grid g4" style="gap:5px">${ow.map(k => card('w:' + k, `<img src="${cropURL(WEAR[k].img)}">`, WEAR[k].name, wgOf(k))).join('') || '<div class="small">Порожньо</div>'}</div>
+    <b>🎒 Інвентар</b><div class="grid g4" style="gap:5px">${inv.map(i => card('i:' + i.uid, ico(i.id), IT[i.id].name, itG(i))).join('') || '<div class="small">Порожньо</div>'}</div></div>`;
   }
-  const [up, same, down] = bvOdds(o), cost = bvCost(o.it, o.g), nxt = bvCost(o.it, o.g + 1);
-  if (o.g >= 5) return h + `<div class="box"><b>${o.nm}</b> ${gB(o.g)}<br>Ідеальний ранг. Баба Валя тут уже безсила.</div><button onclick="setP('src','')">Обрати іншу</button>`;
-  return h + `<div class="box" style="text-align:center"><b>${o.nm}</b> ${gB(o.g)}<br><span class="small">Далі: ${gB(o.g + 1)}</span>
-  ${o.pity ? `<div class="small" style="color:#090">🍀 Бонус невдач: +${Math.min(o.pity, BV_PITY_MAX) * BV_PITY}% до «краще»</div>` : ''}
-  <div class="grid g3" style="margin-top:6px"><div class="cell" style="color:#090">⬆ Краще<br><b>${up}%</b></div><div class="cell">➡ Так само<br><b>${same}%</b></div><div class="cell" style="color:#c00">⬇ Гірше<br><b>${down}%</b></div></div></div>
-  ${(k => k ? `<div class="box bar sp" style="margin:6px 0"><span>${thName(k)}: <b>${S[k] || 0}</b><br><span class="small">Якщо вийде «гірше», ранг не впаде, а наперсток трісне.</span></span><button class="${S.thOn && S[k] > 0 ? 'y' : ''}" onclick="S.thOn=!S.thOn;render()" ${S[k] > 0 ? '' : 'disabled'}>${S.thOn && S[k] > 0 ? 'Увімк' : 'Вимк'}</button></div>` : '')(thKey(o.g))}
-  <button class="y" style="width:100%;padding:12px;font-size:16px" onclick="bvDo('${p.src}')">🧵 Прошити — ${fmt(cost)} 💎</button><div class="small" style="text-align:center;margin-top:4px">Після успіху наступна спроба дорожча: ${fmt(nxt)} 💎 (ранг ${GRD[o.g + 1]}), зате річ коштує ×${(GM_PR[o.g + 1] / GM_PR[o.g]).toFixed(1)} на аукціоні</div><button style="width:100%;margin-top:4px" onclick="setP('src','')">Обрати іншу річ</button>`;
+  const [up, same, down] = bvOdds(o), cost = bvCost(o.it, o.g), nxt = bvCost(o.it, o.g + 1), k = thKey(o.g);
+  const show = `<div style="flex:1 1 auto;position:relative;border-radius:14px;overflow:hidden;border:2px solid #c9a24a;background:radial-gradient(ellipse at 50% 45%,#fff3d6,#cbb08a);min-height:36vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px">
+    <div style="position:absolute;left:8px;bottom:6px;font-size:min(18vw,72px)">👵</div>
+    <div class="bvbig">${bvImg(p.src)}</div><div style="font-size:17px;font-weight:800;text-align:center">${o.nm}</div>
+    <div style="font-size:22px;margin-top:4px">${gB(o.g)}${o.g < 5 ? ` <span style="opacity:.6">→</span> ${gB(o.g + 1)}` : ''}</div>
+    ${o.pity ? `<div class="small" style="color:#070;font-weight:bold">🍀 Бонус невдач: +${Math.min(o.pity, BV_PITY_MAX) * BV_PITY}% до «краще»</div>` : ''}</div>`;
+  if (o.g >= 5) return `<div style="display:flex;flex-direction:column;gap:6px;min-height:100%">` + top + show + `<div class="box" style="text-align:center">Ідеальний ранг. Баба Валя тут уже безсила.</div><button style="${B};margin-top:auto" onclick="setP('src','')">Обрати іншу річ</button></div>`;
+  return `<div style="display:flex;flex-direction:column;gap:6px;min-height:100%">` + top + show + `
+  <div class="grid g3"><div class="cell" style="color:#090;padding:8px">⬆ Краще<br><b style="font-size:20px">${up}%</b></div><div class="cell" style="padding:8px">➡ Так само<br><b style="font-size:20px">${same}%</b></div><div class="cell" style="color:#c00;padding:8px">⬇ Гірше<br><b style="font-size:20px">${down}%</b></div></div>
+  ${k ? `<button class="${S.thOn && S[k] > 0 ? 'y' : ''}" style="${B}" ${S[k] > 0 ? '' : 'disabled'} onclick="S.thOn=!S.thOn;render()">${thName(k)}: <b>${S[k] || 0}</b> · ${S.thOn && S[k] > 0 ? 'УВІМК' : 'вимк'}<br><small>рятує ранг, якщо вийде «гірше»</small></button>` : ''}
+  <div class="small" style="text-align:center">Після успіху спроба коштує ${fmt(nxt)} 💎 (ранг ${GRD[o.g + 1]}), річ дорожча ×${(GM_PR[o.g + 1] / GM_PR[o.g]).toFixed(1)}</div>
+  <button style="${B}" onclick="setP('src','')">Обрати іншу річ</button>
+  <button class="play" style="width:100%;min-height:60px;font-size:20px;margin-top:auto" onclick="bvDo('${p.src}')">🧵 Прошити — ${fmt(cost)} 💎</button></div>`;
 };
 function bvFaq() {
   modal(`<h3>❓ Баба Валя</h3>
@@ -1316,15 +1346,24 @@ SCREENS.raidBoss = p => {
   let h = `<h2>💀 НАЛІТ</h2>${tabs([['boss', 'Боси'], ['weap', '🔫 Зброя'], ['raids', 'Рейди'], ['ev', 'Події'], ['rank', 'Рейтинг']], t)}`;
   if (t === 'weap') h += weaponsList();
   if (t === 'boss') {
-    h += `<div class="box"><b>Боєприпаси</b> <span class="small">(впливають на шкоду)</span>
-      <div class="bar sp" style="margin-top:4px"><span>🔫 Патрони: <b>${S.ammo}</b> · ${AMMO_HIT}/удар</span><button class="${S.bossAm !== false ? 'y' : ''}" onclick="S.bossAm=${S.bossAm === false};render()">${S.bossAm !== false ? 'Увімк' : 'Вимк'}</button></div>
-      <div class="bar sp"><span>💣 Гранати: <b>${S.grenades}</b> · +${GREN_MULT * 100}% шкоди</span><button class="${S.bossGr ? 'y' : ''}" onclick="S.bossGr=!S.bossGr;render()">${S.bossGr ? 'Увімк' : 'Вимк'}</button></div>
-      <div class="bar sp small"><span>⚔️ Середній удар: <b>${fmt(avgHit())}</b></span><span>🗡 Шкода +${stats().dmg}% · 💥 Крит ${stats().crit}%</span></div><div class="small">Без патронів удар слабший (×${NOAMMO_MULT}). Патрони й гранати: крамниця клубу, магазин рейдів, трофеї босів.</div></div>` + BOSSES.map(b => {
-      const st = bossSt(b), locked = b.needLvl && S.lvl < b.needLvl;
-      return `<div class="row ${locked ? 'lock' : ''}"><div class="f"><b>${b.name}</b> <span class="small">Рівень ${b.lvl}</span><div class="prog"><i style="width:${st.hp / b.hp * 100}%;background:#c33"></i></div>
-      <span class="small">❤ ${fmt(st.hp)} / ${fmt(b.hp)} · Нагорода (раз на добу): ${fmt(b.rew.money)}💵 ${b.rew.crystals}💎 ${b.rew.gold ? b.rew.gold + '🟡' : ''}</span></div>
-      ${locked ? `<button disabled>🔒 Потрібен рівень ${b.needLvl}</button>` : `<div style="text-align:center"><div class="small">Спроб: ${st.tries}/${bossMax()} · ⚡${BOSS_EN} за удар</div><button class="y" onclick="hitBoss('${b.id}')">НАЛІТ »</button></div>`}</div>`;
-    }).join('') + `<button onclick="restoreTries()">Відновити всі спроби — 50 💎</button>`;
+    const bi = p.b != null ? p.b : Math.max(0, BOSSES.findIndex(b => !(b.needLvl && S.lvl < b.needLvl) && bossSt(b).hp > 0)), b = BOSSES[bi], st = bossSt(b), locked = b.needLvl && S.lvl < b.needLvl;
+    const EMO = { toro: '🐂', molot: '🔨', vipera: '🐍', karlo: '🎩', senator: '🏛️' }, B = 'min-height:48px;border-radius:10px;font-size:14px';
+    const arr = (d, side) => `<button onclick="setP('b',${(bi + d + BOSSES.length) % BOSSES.length})" style="position:absolute;${side}:6px;top:44%;width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.5);font-size:22px">${d < 0 ? '◀' : '▶'}</button>`;
+    h = `<div style="display:flex;flex-direction:column;gap:6px;min-height:100%">` + h + `
+    <div style="flex:1 1 auto;min-height:36vh;position:relative;border-radius:14px;overflow:hidden;border:2px solid ${locked ? '#777' : '#c33'};background:radial-gradient(ellipse at 50% 45%,#5a1020 0%,#1a0810 70%);${locked ? 'filter:grayscale(.8)' : ''}">
+      <div style="position:absolute;left:0;right:0;top:10px;text-align:center;color:#fff;text-shadow:0 2px 4px #000"><div style="font-size:22px;font-weight:900">${b.name}</div><div style="font-size:12px">Рівень ${b.lvl} · бос ${bi + 1} з ${BOSSES.length}</div></div>
+      <div style="position:absolute;left:0;right:0;top:24%;text-align:center;font-size:min(30vw,120px);filter:drop-shadow(0 0 18px #f33)">${locked ? '🔒' : EMO[b.id] || '💀'}</div>
+      ${arr(-1, 'left')}${arr(1, 'right')}
+      <div style="position:absolute;left:12px;right:12px;bottom:10px;color:#fff;font-size:12px;text-shadow:0 1px 2px #000">
+        <div style="display:flex;justify-content:space-between"><span>❤ ${fmt(st.hp)} / ${fmt(b.hp)}</span><span>Спроб: <b>${st.tries}/${bossMax()}</b></span></div>
+        <div style="height:12px;background:rgba(255,255,255,.2);border-radius:6px;margin:3px 0;overflow:hidden"><div style="height:100%;width:${st.hp / b.hp * 100}%;background:linear-gradient(#f55,#a11)"></div></div>
+        <div>🎁 Раз на добу: ${fmt(b.rew.money)}💵 ${b.rew.crystals}💎 ${b.rew.gold ? b.rew.gold + '🟡' : ''}</div></div></div>
+    <div class="grid g2"><button class="${S.bossAm !== false ? 'y' : ''}" style="${B}" onclick="S.bossAm=${S.bossAm === false};render()">🔫 Патрони: <b>${S.ammo}</b><br><small>${S.bossAm !== false ? 'УВІМК · ' + AMMO_HIT + '/удар' : 'вимк (удар ×' + NOAMMO_MULT + ')'}</small></button>
+      <button class="${S.bossGr ? 'y' : ''}" style="${B}" onclick="S.bossGr=!S.bossGr;render()">💣 Гранати: <b>${S.grenades}</b><br><small>${S.bossGr ? 'УВІМК · +' + GREN_MULT * 100 + '%' : 'вимк'}</small></button></div>
+    <div class="box small" style="margin:0;display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px"><span>⚔️ Удар: <b>${fmt(avgHit())}</b></span><span>🗡 +${stats().dmg}%</span><span>💥 Крит ${stats().crit}%</span><span>⚡${BOSS_EN} за удар</span></div>
+    <button style="${B}" onclick="restoreTries()">Відновити всі спроби — 50 💎</button>
+    ${locked ? `<button class="dis" style="width:100%;min-height:60px;font-size:18px;margin-top:auto" disabled>🔒 Потрібен рівень ${b.needLvl}</button>` : `<button class="play" style="width:100%;min-height:60px;font-size:22px;margin-top:auto" onclick="hitBoss('${b.id}')">НАЛІТ » ⚡${BOSS_EN}</button>`}</div>`;
+    return h;
   } else if (t === 'weap') { /* вже показано вище */ } else if (t === 'raids') h += `<div class="box">Рейди на райони міста.</div><button class="y" onclick="go('district')">Рейд на Даунтаун ▶</button>`;
   else if (t === 'ev') h += `<div class="box">Бос тижня: <b>Дон Карло</b> — подвійна шкода (заглушка).</div>`;
   else {
@@ -1788,14 +1827,18 @@ SCREENS.races = p => {
   const rt = p.rt || 'solo';
   const hd = `<h2>🏁 ГОНКИ</h2>` + tabs([['solo', 'Заїзд'], ['group', '👥 Групові 5×5']], rt, 'rt');
   if (rt === 'group') return hd + grScreen();
-  const ti = p.tr || 0, tr = TRACKS[ti], power = carPower();
-  return hd + `<div class="box" style="text-align:center">🚗💨 🚕💨 <span class="small">[траса: ${tr.n}]</span></div>
-  <div class="box bar sp"><button onclick="setP('tr',${(ti + TRACKS.length - 1) % TRACKS.length})">◀</button>
-  <div><b>Траса: ${tr.n}</b><br>Довжина: ${tr.km} км · Кіл: ${tr.laps}${tr.req ? `<br><span class="small">Рекомендована сила авто: ${tr.req}</span>` : ''}</div>
-  <button onclick="setP('tr',${(ti + 1) % TRACKS.length})">▶</button></div>
-  <div class="box">Ваше авто: ${S.car.name} · сила ${power} · стан ${Math.round(carCond())}%</div>
-  <button class="y" style="width:100%;padding:16px;font-size:20px" onclick="race(${ti})">СТАРТ ⚡5</button><div class="small" style="text-align:center">Гонок сьогодні: ${S.daily.rc || 0}/${RACE_NORM} з повною нагородою · 💎 за перемоги: ${S.daily.rcw || 0}/${RACE_CR}${(tr.rw || 1) > 1 ? ' · траса ×' + tr.rw : ''}</div>
-  <div class="grid g4" style="margin-top:6px"><button onclick="go('garage')">Гараж</button><button onclick="toast('Турніри: заглушка')">Турніри</button><button onclick="toast('Нагороди сезону гонок: заглушка')">Нагороди</button><button onclick="modal(rankTable(['Тоні','${S.name}','Козак','Бандерас','Ла Ріка'],'очок'))">Рейтинг</button></div>`;
+  const ti = p.tr || 0, tr = TRACKS[ti], power = carPower(), ok = !tr.req || power >= tr.req, B = 'min-height:48px;font-size:14px;border-radius:10px';
+  const arr = (d, side) => `<button onclick="setP('tr',${(ti + d + TRACKS.length) % TRACKS.length})" style="position:absolute;${side}:6px;top:50%;transform:translateY(-50%);width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.5);font-size:22px">${d < 0 ? '◀' : '▶'}</button>`;
+  return `<div style="display:flex;flex-direction:column;gap:6px;min-height:100%">` + hd + `
+  <div style="flex:1 1 auto;min-height:36vh;position:relative;border-radius:14px;overflow:hidden;border:2px solid #c9a24a;background:linear-gradient(#ff9a5a 0%,#c9487a 38%,#3a2a58 58%,#444 59%,#555 75%,#333 100%)">
+    <div style="position:absolute;left:0;right:0;top:66%;height:4px;background:repeating-linear-gradient(90deg,#fff 0 26px,transparent 26px 52px);opacity:.8"></div>
+    <div style="position:absolute;left:0;right:0;top:12px;text-align:center;color:#fff;text-shadow:0 2px 4px #000"><div style="font-size:22px;font-weight:900">${tr.n}</div><div style="font-size:13px">${tr.km} км · ${tr.laps} кіл${(tr.rw || 1) > 1 ? ' · нагорода ×' + tr.rw : ''}</div><div style="font-size:11px;opacity:.75">траса ${ti + 1} з ${TRACKS.length}</div></div>
+    <div style="position:absolute;left:8%;top:56%;font-size:min(20vw,86px);transform:scaleX(-1)">🏎️</div><div style="position:absolute;right:10%;top:62%;font-size:min(14vw,60px);transform:scaleX(-1);opacity:.85">🚙</div>
+    ${arr(-1, 'left')}${arr(1, 'right')}
+    <div style="position:absolute;left:10px;right:10px;bottom:8px;display:flex;justify-content:space-between;color:#fff;font-size:12px;text-shadow:0 1px 2px #000"><span>🚗 ${S.car.name} · сила <b>${power}</b></span><span>${tr.req ? `потрібно <b style="color:${ok ? '#7f7' : '#f88'}">${tr.req}</b>` : ''} · стан ${Math.round(carCond())}%</span></div></div>
+  <div class="small" style="text-align:center">Гонок сьогодні: ${S.daily.rc || 0}/${RACE_NORM} з повною нагородою · 💎 за перемоги: ${S.daily.rcw || 0}/${RACE_CR}</div>
+  <div class="grid g4"><button style="${B}" onclick="go('garage')">🔧<br>Гараж</button><button style="${B}" onclick="toast('Турніри: заглушка')">🏆<br>Турніри</button><button style="${B}" onclick="toast('Нагороди сезону гонок: заглушка')">🎁<br>Нагороди</button><button style="${B}" onclick="modal(rankTable(['Тоні','${S.name}','Козак','Бандерас','Ла Ріка'],'очок'))">📊<br>Рейтинг</button></div>
+  <button class="play" style="width:100%;min-height:60px;font-size:22px;margin-top:auto" onclick="race(${ti})">СТАРТ ⚡5</button></div>`;
 };
 function race(ti) {
   if (carCond() < 20) return toast('Авто зламане: зроби ремонт у гаражі');
@@ -2662,7 +2705,7 @@ SCREENS.settings = p => {
 const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 8192) s += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
 const unb64u = t => { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; const s = atob(t), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
 async function zip(str, mode) { const st = mode === 'c' ? new Blob([str]).stream().pipeThrough(new CompressionStream('deflate-raw')) : new Blob([str]).stream().pipeThrough(new DecompressionStream('deflate-raw')); return new Uint8Array(await new Response(st).arrayBuffer()); }
-const BUILD = 'v125';
+const BUILD = 'v126';
 const BOT = 'PotuzhneMisto_bot', PAGE = 'https://stasiya408-dev.github.io/tg-miniapp/';
 async function saveExport() {
   const o = Object.assign({}, S, { mail: [] }), t = b64u(await zip(JSON.stringify(o), 'c'));
