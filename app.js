@@ -25,6 +25,27 @@ const WEAR = {
   vest:     { name: 'Жилет пуховий',      slot: 'outer',  tab: 'wear', img: 'vest',     rar: 3, price: 30000, stat: { dmg: 8 } },
   pants:    { name: 'Штани карго',        slot: 'legs',   tab: 'wear', img: 'pants',    rar: 2, price: 16000, stat: { dmg: 6 } },
   sneakers: { name: 'Кросівки',           slot: 'feet',   tab: 'wear', img: 'sneakers_m_layer', layer: { m: ['sneakers_m_L', 'sneakers_m_R'] }, def: { s: 0.9, dy: 2 }, rar: 2, price: 14000, stat: { dmg: 2, crit: 1 } },
+  // нові кросівки (2026-11-19): кожна пара = окремі шари L/R (редагуються в Примірці), іконка = img/snXX.png
+  sn01: { name: 'Кросівки «Піщаний Скорпіон»', slot: 'feet', tab: 'wear', img: 'sn01', layer: { m: ['sn01_L', 'sn01_R'] }, def: { s: 0.9, dy: 2 }, rar: 2, price: 14000, stat: { dmg: 2, crit: 1 } },
+  sn02: { name: 'Кросівки «Морський Вовк»', slot: 'feet', tab: 'wear', img: 'sn02', layer: { m: ['sn02_L', 'sn02_R'] }, def: { s: 0.9, dy: 2 }, rar: 2, price: 14000, stat: { dmg: 2, crit: 1 } },
+  sn03: { name: 'Кросівки «Болотний Кабан»', slot: 'feet', tab: 'wear', img: 'sn03', layer: { m: ['sn03_L', 'sn03_R'] }, def: { s: 0.9, dy: 2 }, rar: 1, price: 9000, stat: { dmg: 1 } },
+  sn04: { name: 'Кросівки «Червоний Барон»', slot: 'feet', tab: 'wear', img: 'sn04', layer: { m: ['sn04_L', 'sn04_R'] }, def: { s: 0.9, dy: 2 }, rar: 3, price: 24000, stat: { dmg: 4, crit: 1 } },
+  sn05: { name: 'Кросівки «Ретро Бульвар»', slot: 'feet', tab: 'wear', img: 'sn05', layer: { m: ['sn05_L', 'sn05_R'] }, def: { s: 0.9, dy: 2 }, rar: 1, price: 9000, stat: { dmg: 1 } },
+  sn06: { name: 'Кросівки «Партизан»', slot: 'feet', tab: 'wear', img: 'sn06', layer: { m: ['sn06_L', 'sn06_R'] }, def: { s: 0.9, dy: 2 }, rar: 2, price: 14000, stat: { dmg: 2, crit: 1 } },
+  sn07: { name: 'Кросівки «Гірський Беркут»', slot: 'feet', tab: 'wear', img: 'sn07', layer: { m: ['sn07_L', 'sn07_R'] }, def: { s: 0.9, dy: 2 }, rar: 2, price: 14000, stat: { dmg: 2, crit: 1 } },
+  sn08: { name: 'Кросівки «Сірий Туман»', slot: 'feet', tab: 'wear', img: 'sn08', layer: { m: ['sn08_L', 'sn08_R'] }, def: { s: 0.9, dy: 2 }, rar: 1, price: 9000, stat: { dmg: 1 } },
+  sn09: { name: 'Кросівки «Кібер Привид»', slot: 'feet', tab: 'wear', img: 'sn09', layer: { m: ['sn09_L', 'sn09_R'] }, def: { s: 0.9, dy: 2 }, rar: 4, price: 40000, stat: { dmg: 6, crit: 2 } },
+  sn10: { name: 'Кросівки «Чорна Кобра»', slot: 'feet', tab: 'wear', img: 'sn10', layer: { m: ['sn10_L', 'sn10_R'] }, def: { s: 0.9, dy: 2 }, rar: 3, price: 24000, stat: { dmg: 4, crit: 1 } },
+  sn11: { name: 'Кросівки «Арктичний Шторм»', slot: 'feet', tab: 'wear', img: 'sn11', layer: { m: ['sn11_L', 'sn11_R'] }, def: { s: 0.9, dy: 2 }, rar: 2, price: 14000, stat: { dmg: 2, crit: 1 } },
+  sn12: { name: 'Кросівки «Червоний Пульс»', slot: 'feet', tab: 'wear', img: 'sn12', layer: { m: ['sn12_L', 'sn12_R'] }, def: { s: 0.9, dy: 2 }, rar: 3, price: 24000, stat: { dmg: 4, crit: 1 } },
+  sn13: { name: 'Кросівки «Вогняний Дракон»', slot: 'feet', tab: 'wear', img: 'sn13', layer: { m: ['sn13_L', 'sn13_R'] }, def: { s: 0.9, dy: 2 }, rar: 3, price: 24000, stat: { dmg: 4, crit: 1 } },
+  sn14: { name: 'Кросівки «Отруйна Жаба»', slot: 'feet', tab: 'wear', img: 'sn14', layer: { m: ['sn14_L', 'sn14_R'] }, def: { s: 0.9, dy: 2 }, rar: 4, price: 40000, stat: { dmg: 6, crit: 2 } },
+  sn15: { name: 'Кросівки «Жовта Оса»', slot: 'feet', tab: 'wear', img: 'sn15', layer: { m: ['sn15_L', 'sn15_R'] }, def: { s: 0.9, dy: 2 }, rar: 2, price: 14000, stat: { dmg: 2, crit: 1 } },
+  sn16: { name: 'Кросівки «Бірюзова Хвиля»', slot: 'feet', tab: 'wear', img: 'sn16', layer: { m: ['sn16_L', 'sn16_R'] }, def: { s: 0.9, dy: 2 }, rar: 3, price: 24000, stat: { dmg: 4, crit: 1 } },
+  sn17: { name: 'Кросівки «Нічний Тигр»', slot: 'feet', tab: 'wear', img: 'sn17', layer: { m: ['sn17_L', 'sn17_R'] }, def: { s: 0.9, dy: 2 }, rar: 2, price: 14000, stat: { dmg: 2, crit: 1 } },
+  sn18: { name: 'Кросівки «Фіолетовий Морок»', slot: 'feet', tab: 'wear', img: 'sn18', layer: { m: ['sn18_L', 'sn18_R'] }, def: { s: 0.9, dy: 2 }, rar: 3, price: 24000, stat: { dmg: 4, crit: 1 } },
+  sn19: { name: 'Кросівки «Скейт Вулиця»', slot: 'feet', tab: 'wear', img: 'sn19', layer: { m: ['sn19_L', 'sn19_R'] }, def: { s: 0.9, dy: 2 }, rar: 1, price: 9000, stat: { dmg: 1 } },
+  sn20: { name: 'Кросівки «Тропічний Шквал»', slot: 'feet', tab: 'wear', img: 'sn20', layer: { m: ['sn20_L', 'sn20_R'] }, def: { s: 0.9, dy: 2 }, rar: 4, price: 40000, stat: { dmg: 6, crit: 2 } },
 };
 const SLOT_NAME = { head: 'Голова', eyes: 'Очі', neck: 'Шия', top: 'Тулуб (верх)', outer: 'Верхній одяг', legs: 'Ноги', feet: 'Взуття', wristR: 'Зап\'ястя П', wristL: 'Зап\'ястя Л' };
 // позиції речей на фігурі (в пікселях картинки героя висотою 900)
@@ -64,8 +85,30 @@ const ITEMS = [
   { id: 'i_scrap', name: 'Брухт', cat: 'Ресурси', rar: 0, base: 300, stat: 'Ресурс' },
   { id: 'i_parts', name: 'Запчастини авто', cat: 'Ресурси', rar: 1, base: 1200, stat: 'Ресурс' },
   { id: 'i_lighter', name: 'Запальничка Zippo', cat: 'Інше', rar: 2, base: 1800, stat: '—' },
+  { id: 'i_sn01', name: 'Кросівки «Піщаний Скорпіон»', cat: 'Взуття', rar: 2, base: 5200, stat: 'Спритність +5', wear: 'sn01', grp: 'sn' },
+  { id: 'i_sn02', name: 'Кросівки «Морський Вовк»', cat: 'Взуття', rar: 2, base: 5200, stat: 'Спритність +5', wear: 'sn02', grp: 'sn' },
+  { id: 'i_sn03', name: 'Кросівки «Болотний Кабан»', cat: 'Взуття', rar: 1, base: 3500, stat: 'Спритність +3', wear: 'sn03', grp: 'sn' },
+  { id: 'i_sn04', name: 'Кросівки «Червоний Барон»', cat: 'Взуття', rar: 3, base: 9000, stat: 'Спритність +8', wear: 'sn04', grp: 'sn' },
+  { id: 'i_sn05', name: 'Кросівки «Ретро Бульвар»', cat: 'Взуття', rar: 1, base: 3500, stat: 'Спритність +3', wear: 'sn05', grp: 'sn' },
+  { id: 'i_sn06', name: 'Кросівки «Партизан»', cat: 'Взуття', rar: 2, base: 5200, stat: 'Спритність +5', wear: 'sn06', grp: 'sn' },
+  { id: 'i_sn07', name: 'Кросівки «Гірський Беркут»', cat: 'Взуття', rar: 2, base: 5200, stat: 'Спритність +5', wear: 'sn07', grp: 'sn' },
+  { id: 'i_sn08', name: 'Кросівки «Сірий Туман»', cat: 'Взуття', rar: 1, base: 3500, stat: 'Спритність +3', wear: 'sn08', grp: 'sn' },
+  { id: 'i_sn09', name: 'Кросівки «Кібер Привид»', cat: 'Взуття', rar: 4, base: 18000, stat: 'Спритність +12', wear: 'sn09', grp: 'sn' },
+  { id: 'i_sn10', name: 'Кросівки «Чорна Кобра»', cat: 'Взуття', rar: 3, base: 9000, stat: 'Спритність +8', wear: 'sn10', grp: 'sn' },
+  { id: 'i_sn11', name: 'Кросівки «Арктичний Шторм»', cat: 'Взуття', rar: 2, base: 5200, stat: 'Спритність +5', wear: 'sn11', grp: 'sn' },
+  { id: 'i_sn12', name: 'Кросівки «Червоний Пульс»', cat: 'Взуття', rar: 3, base: 9000, stat: 'Спритність +8', wear: 'sn12', grp: 'sn' },
+  { id: 'i_sn13', name: 'Кросівки «Вогняний Дракон»', cat: 'Взуття', rar: 3, base: 9000, stat: 'Спритність +8', wear: 'sn13', grp: 'sn' },
+  { id: 'i_sn14', name: 'Кросівки «Отруйна Жаба»', cat: 'Взуття', rar: 4, base: 18000, stat: 'Спритність +12', wear: 'sn14', grp: 'sn' },
+  { id: 'i_sn15', name: 'Кросівки «Жовта Оса»', cat: 'Взуття', rar: 2, base: 5200, stat: 'Спритність +5', wear: 'sn15', grp: 'sn' },
+  { id: 'i_sn16', name: 'Кросівки «Бірюзова Хвиля»', cat: 'Взуття', rar: 3, base: 9000, stat: 'Спритність +8', wear: 'sn16', grp: 'sn' },
+  { id: 'i_sn17', name: 'Кросівки «Нічний Тигр»', cat: 'Взуття', rar: 2, base: 5200, stat: 'Спритність +5', wear: 'sn17', grp: 'sn' },
+  { id: 'i_sn18', name: 'Кросівки «Фіолетовий Морок»', cat: 'Взуття', rar: 3, base: 9000, stat: 'Спритність +8', wear: 'sn18', grp: 'sn' },
+  { id: 'i_sn19', name: 'Кросівки «Скейт Вулиця»', cat: 'Взуття', rar: 1, base: 3500, stat: 'Спритність +3', wear: 'sn19', grp: 'sn' },
+  { id: 'i_sn20', name: 'Кросівки «Тропічний Шквал»', cat: 'Взуття', rar: 4, base: 18000, stat: 'Спритність +12', wear: 'sn20', grp: 'sn' },
 ];
 const IT = Object.fromEntries(ITEMS.map(i => [i.id, i]));
+// випадковий вибір речі: кросівки (grp) йдуть однією групою, щоб їх не випадало в 20 разів частіше
+function pickIt(pool) { const gs = {}; pool.forEach(x => { const k = x.grp || x.id; (gs[k] = gs[k] || []).push(x); }); return pick(pick(Object.values(gs))); }
 // Іконки речей: той самий спрайт, що й на герої (обрізаний по контуру); без спрайта: емодзі категорії
 const CAT_EMO = { 'Головні убори': '🧢', 'Верхній одяг': '🧥', 'Одяг': '👕', 'Штани': '👖', 'Взуття': '👟', 'Рукавиці': '🧤', 'Рюкзаки': '🎒', 'Аксесуари': '📿', 'Годинники': '⌚', 'Спорядження': '🛡️', 'Кільця': '💍', 'Ресурси': '📦' };
 const CROP = {};
@@ -712,13 +755,36 @@ function qaPick(side) {
   <button style="width:100%;margin-top:6px" onclick="closeModal()">Готово</button>`);
 }
 SCREENS.season = seasonScreen;
+// --- Позиція героя на головному (dev): x,y у % екрана, s масштаб
+const HP_DEF = { x: 0, y: 0, s: 1 };
+let HP = (() => { try { return Object.assign({}, HP_DEF, JSON.parse(localStorage.getItem('pm_hpos') || '{}')); } catch (e) { return Object.assign({}, HP_DEF); } })();
+function hpGet() { return HP; }
+function hpSave() { try { localStorage.setItem('pm_hpos', JSON.stringify(HP)); } catch (e) { } }
+function hpMove(k, d) { const st = window.hpStep || 1; if (k === 's') HP.s = Math.round(Math.min(2.5, Math.max(0.3, HP.s + d * 0.01 * st)) * 100) / 100; else HP[k] = Math.max(-100, Math.min(100, HP[k] + d * st)); hpSave(); render(); }
+function hpReset() { HP = Object.assign({}, HP_DEF); hpSave(); render(); }
+function hpCode() { return `const HP_DEF = { x: ${HP.x}, y: ${HP.y}, s: ${HP.s} };`; }
+function hpCopy() { const t = hpCode(); const ok = () => toast('Скопійовано: ' + t); try { navigator.clipboard.writeText(t).then(ok, () => modal(`<h3>Значення</h3><textarea style="width:100%;height:50px" readonly onclick="this.select()">${t}</textarea><button style="width:100%" onclick="closeModal()">Готово</button>`)); } catch (e) { modal(`<h3>Значення</h3><textarea style="width:100%;height:50px" readonly onclick="this.select()">${t}</textarea><button style="width:100%" onclick="closeModal()">Готово</button>`); } }
+function hpPanel(mini) {
+  const st = window.hpStep || 1, b = (l, k, d) => `<button class="y" style="padding:${mini ? '2px' : '12px'};font-size:${mini ? 14 : 20}px" onclick="hpMove('${k}',${d})">${l}</button>`;
+  return `<div class="box" style="${mini ? 'background:rgba(20,10,30,.88);color:#fff;padding:6px;margin:0;font-size:12px' : ''}">
+    ${mini ? '<b>🧍 Позиція героя</b>' : ''}
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin:4px 0">
+      <span></span>${b('⬆', 'y', -1)}<span></span>
+      ${b('⬅', 'x', -1)}<button onclick="window.hpStep=${st === 1 ? 5 : 1};render()" style="font-size:12px">крок ${st}</button>${b('➡', 'x', 1)}
+      <span></span>${b('⬇', 'y', 1)}<span></span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">${b('➖ Далі', 's', -1)}${b('➕ Ближче', 's', 1)}</div>
+    <div style="text-align:center;margin:4px 0">X ${HP.x}% · Y ${HP.y}% · розмір ${Math.round(HP.s * 100)}%</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px"><button onclick="hpReset()">↩ Скинути</button><button onclick="hpCopy()">📋 Копіювати</button></div>
+    ${mini ? `<button class="g" style="width:100%;margin-top:4px" onclick="window.hpEd=false;render()">✓ Готово</button>` : ''}</div>`;
+}
 SCREENS.home = () => {
   const unread = S.mail.filter(m => m.box === 'in' && (!m.read || m.gift)).length, cu = chTotal();
   after.push(() => {
     if (!S.tut) setTimeout(showTut, 500);
     const box = $('homeBox'); if (!box) return;
     const Hh = Math.max(300, $('app').clientHeight - 14), oc = cur().p.chat; box.style.height = (Hh + 12) + 'px';
-    const hh = Math.round((Hh - 130) * 0.9), Pc = PATH[pathSt()].col; $('homeDoll').innerHTML = `<div style="position:relative;display:inline-block"><div style="position:absolute;left:6%;right:6%;bottom:-6px;height:${Math.round(hh * 0.035)}px;background:radial-gradient(ellipse,rgba(10,0,20,.85),rgba(0,0,0,0) 70%);filter:blur(2px)"></div><div style="position:relative;filter:drop-shadow(0 0 ${6 + pathSt() * 3}px ${Pc}${pathSt() ? 'aa' : '55'})">${doll(hh)}</div></div>`; $('homeDoll').style.top = (oc ? 8 : Math.round(Hh - 104 - hh * 0.97)) + 'px';
+    const HPv = hpGet(), hh = Math.round((Hh - 130) * 0.9 * HPv.s), Pc = PATH[pathSt()].col; $('homeDoll').innerHTML = `<div style="position:relative;display:inline-block"><div style="position:absolute;left:6%;right:6%;bottom:-6px;height:${Math.round(hh * 0.035)}px;background:radial-gradient(ellipse,rgba(10,0,20,.85),rgba(0,0,0,0) 70%);filter:blur(2px)"></div><div style="position:relative;filter:drop-shadow(0 0 ${6 + pathSt() * 3}px ${Pc}${pathSt() ? 'aa' : '55'})">${doll(hh)}</div></div>`; $('homeDoll').style.top = (oc ? 8 : Math.round(Hh - 104 - hh * 0.97 + Hh * HPv.y / 100)) + 'px'; $('homeDoll').style.transform = `translateX(${HPv.x}%)`;
   });
   return `<div id="homeBox" style="position:relative;background:url(img/home_bg.jpg) center bottom/cover no-repeat;border-radius:0;overflow:hidden;margin:-6px -6px 0">
     <div class="side" style="position:absolute;left:8px;top:12px;z-index:3">
@@ -738,6 +804,7 @@ SCREENS.home = () => {
       ${qaList('R').map(k => `<button onclick="qaGo('${k}')">${lockOf(QA[k][1]) ? '🔒 ' : ''}${QA[k][0]}</button>`).join('')}
     </div>
     <div style="position:absolute;left:10px;right:10px;bottom:70px;z-index:3">${pathStrip()}</div>
+    ${window.hpEd ? `<div style="position:absolute;left:50%;top:12px;transform:translateX(-50%);z-index:7;width:min(190px,52%);opacity:.93">${hpPanel(true)}</div>` : ''}
     ${false ? '' : `<button class="play" style="position:absolute;left:12px;right:12px;bottom:12px;padding:14px;font-size:22px;z-index:3" onclick="go('play')">ГРАТИ ▶${dot(N.bonus())}</button>`}
   ${cur().p.chat ? `<div style="position:absolute;left:0;right:0;bottom:0;height:62%;z-index:6;display:flex;flex-direction:column;background:#f4efe6;border-top:3px solid #d8b25a;padding:6px;color:#111;font-size:14px">${chatPanel(cur().p, true)}</div>` : ''}</div>`;
 };
@@ -1234,7 +1301,7 @@ function hitBoss(id) {
   let msg = `Ви завдали ${fmt(dmg)} шкоди босу ${b.name}${anote}${gnote}.`;
   if (st.hp === 0) {
     if (!S.daily.bk) S.daily.bk = {}; S.ach.bossKills++; bump('bossKills'); bump('kill_' + b.id); st.hp = b.hp; if (!S.beat) S.beat = {}; const hadCar = hasCar(); S.beat[b.id] = 1; if (!hadCar && hasCar()) setTimeout(() => modal('<h3>🚗 Перша машина!</h3><p>Ти переміг другого боса й отримав першу машину. Відкрились <b>Транспорт</b> (гараж, тюнінг) і <b>Гонки</b>.</p><button class="y" style="width:100%" onclick="closeModal()">Чудово</button>'), 400);
-    if (!S.daily.bk[b.id]) { S.daily.bk[b.id] = 1; give({ ...b.rew, ammo: 30, grenades: 1 }, 'Бос переможений'); const it = pick(ITEMS); addItem(it.id, rollG()); msg += ` БОС ПЕРЕМОЖЕНИЙ! Трофей: ${it.name}.`; const td = TH_DROP[b.id]; if (td && Math.random() * 100 < td[1]) { give({ [td[0]]: 1 }, 'Рідкісний трофей'); bump('thimFound'); msg += td[0] === 'thimG' ? ' <b>🌟 Рідкісна знахідка: Золотий бабин наперсток!</b>' : ' <b>🪡 Рідкісна знахідка: Бабин наперсток!</b>'; } msg += ' Бос відродився.'; }
+    if (!S.daily.bk[b.id]) { S.daily.bk[b.id] = 1; give({ ...b.rew, ammo: 30, grenades: 1 }, 'Бос переможений'); const it = pickIt(ITEMS); addItem(it.id, rollG()); msg += ` БОС ПЕРЕМОЖЕНИЙ! Трофей: ${it.name}.`; const td = TH_DROP[b.id]; if (td && Math.random() * 100 < td[1]) { give({ [td[0]]: 1 }, 'Рідкісний трофей'); bump('thimFound'); msg += td[0] === 'thimG' ? ' <b>🌟 Рідкісна знахідка: Золотий бабин наперсток!</b>' : ' <b>🪡 Рідкісна знахідка: Бабин наперсток!</b>'; } msg += ' Бос відродився.'; }
     else { give({ money: Math.round(b.rew.money * 0.1) }, 'Повторне вбивство'); msg += ' Бос переможений ще раз: сьогодні повна нагорода вже отримана, лише 10% грошей. Бос відродився.'; }
   }
   S.xp += 50; lvlCheck();
@@ -1427,7 +1494,7 @@ function slotBonusUI() {
 function openSlotChest(i) {
   const b = slotBonus; if (!b || b.picked != null) return;
   b.picked = i; b.others = {}; const pool = SLOT_BONUS.map(x => x[0]);
-  for (let k = 0; k < 9; k++) if (k !== i) b.others[k] = pick(pool);
+  for (let k = 0; k < 9; k++) if (k !== i) b.others[k] = pickIt(pool);
   bump('bonusWon', b.pay); give({ chips: b.pay }, 'БОНУС x' + b.mult); pushHist({ bet: 0, win: b.pay, mult: b.mult, bonus: true });
   setTimeout(() => { slotBonus = null; if (cur().name === 'slots') render(); }, 3200);
   render();
@@ -1835,7 +1902,7 @@ function doJob(id) {
   let msg = `Зміна відпрацьована: +${fmt(inc)} 💵 · +${j.cr} 📦${key ? ' · +1 🔑' : ''}${swLvl() > ol ? ' · 🎉 рівень складу ' + swLvl() : ''}`;
   const o = { money: inc, xp: j.xp * 2 };
   if (Math.random() < 0.06) { o.money += 5000; msg += ' · 🍀 знайшов гаманець +5 000'; }
-  if (Math.random() < j.find + luckB()) { let r = Math.random() < 0.15 ? j.rar : Math.min(j.rar, 1); if (Math.random() < T.rar) r = Math.min(4, r + 1); const pool = ITEMS.filter(x => x.rar === r); const it = pick(pool.length ? pool : ITEMS); addItem(it.id, rollG()); msg += ' · знайшов «' + it.name + '»'; }
+  if (Math.random() < j.find + luckB()) { let r = Math.random() < 0.15 ? j.rar : Math.min(j.rar, 1); if (Math.random() < T.rar) r = Math.min(4, r + 1); const pool = ITEMS.filter(x => x.rar === r); const it = pickIt(pool.length ? pool : ITEMS); addItem(it.id, rollG()); msg += ' · знайшов «' + it.name + '»'; }
   S.week.bags = S.week.bags || 0; bump('jobEarn', o.money); give(o, 'Підробіток'); lastJob = msg; render();
 }
 let lastJob = '';
@@ -1911,7 +1978,7 @@ SCREENS.secondhand = p => {
 };
 const STALL_W = [69, 22, 6, 2.6, 0.4], STALL_N = 8;
 const stallPrice = id => Math.round(IT[id].base * (0.7 + 0.05 * IT[id].rar));
-function genStall() { return Array.from({ length: STALL_N }, () => { let x = Math.random() * 100, r = 0; for (let i = 0; i < 5; i++) { x -= STALL_W[i]; if (x < 0) { r = i; break; } } const pool = ITEMS.filter(i => i.rar === r); return pick(pool.length ? pool : ITEMS).id; }); }
+function genStall() { return Array.from({ length: STALL_N }, () => { let x = Math.random() * 100, r = 0; for (let i = 0; i < 5; i++) { x -= STALL_W[i]; if (x < 0) { r = i; break; } } const pool = ITEMS.filter(i => i.rar === r); return pickIt(pool.length ? pool : ITEMS).id; }); }
 function stallCheck() { if (!S.stall || !S.stallTs || Date.now() - S.stallTs >= 864e5) { S.stall = genStall(); S.stallTs = Date.now(); } }
 function stallLeft() { const m = Math.max(0, Math.ceil((S.stallTs + 864e5 - Date.now()) / 60000)); return Math.floor(m / 60) + ' год ' + (m % 60) + ' хв'; }
 function newStall() { if (!pay('crystals', 20)) return; S.stall = genStall(); S.stallTs = Date.now(); render(); }
@@ -1931,7 +1998,7 @@ function openBag(id, mode) {
   else if (!pay(b.cur, b.cur === 'money' ? Math.round(b.price * (1 - swDisc())) : b.price)) return;
   shS().bags++;
   const n = rnd(b.cnt[0], b.cnt[1]); const items = [];
-  for (let i = 0; i < n; i++) { let r = rollRar(b.rw); if (Math.random() < shTier().rar + swRar() + luckB()) r = Math.min(4, r + 1); const pool = ITEMS.filter(x => x.rar === r); items.push(pick(pool.length ? pool : ITEMS).id); }
+  for (let i = 0; i < n; i++) { let r = rollRar(b.rw); if (Math.random() < shTier().rar + swRar() + luckB()) r = Math.min(4, r + 1); const pool = ITEMS.filter(x => x.rar === r); items.push(pickIt(pool.length ? pool : ITEMS).id); }
   S.week.bags++; S.ach.bags++; bump('bags');
   bagRes = { n: b.n, items, loading: true }; render();
   setTimeout(() => { if (bagRes) bagRes.loading = false; if (cur().name === 'secondhand') render(); }, 1500);
@@ -2182,7 +2249,7 @@ function marketRules() {
 // --- ДОШКА ЛОТІВ (як у GTA Online): лот стоїть, поки його не куплять
 const SELLERS = ['Козак', 'Ла Ріка', 'Бандерас', 'Тоні', 'Лисий', 'Сеньйор', 'Мамба', 'Філін', 'Рокі', 'Дикий'];
 const LOT_MIN = 0.5, LOT_MAX = 3, LOT_FEE = 0.02, LOT_DAYS = 3;
-function newNpcLot() { const it = pick(ITEMS.filter(x => x.rar >= 1)), g = rollG(); return { uid: Math.random().toString(36).slice(2, 9), id: it.id, g, price: Math.round(price(it.id) * GM_PR[g] * (0.8 + Math.random() * 0.6)), seller: pick(SELLERS) }; }
+function newNpcLot() { const it = pickIt(ITEMS.filter(x => x.rar >= 1)), g = rollG(); return { uid: Math.random().toString(36).slice(2, 9), id: it.id, g, price: Math.round(price(it.id) * GM_PR[g] * (0.8 + Math.random() * 0.6)), seller: pick(SELLERS) }; }
 function lotChance(id, pr, g) { const r = pr / (price(id) * GM_PR[g == null ? 1 : g]); return r <= 0.95 ? 0.08 : 0.04 * Math.exp(-6 * (r - 0.95)); } // шанс продажу за 2 с
 function lotSpeed(id, pr, g) { const c = lotChance(id, pr, g), min = 1 / c * 2 / 60; return c >= 0.07 ? '⚡ швидко (до 1 хв)' : min < 5 ? '🙂 помірно (≈' + Math.round(min) + ' хв)' : min < 30 ? '🐢 довго (≈' + Math.round(min) + ' хв)' : '🧊 дуже довго'; }
 function tickLots(steps) {
@@ -2505,7 +2572,11 @@ SCREENS.fit = p => {
 };
 SCREENS.settings = p => {
   const t = p.tab || 'main';
-  let h = `<h2>⚙ Налаштування</h2>${tabs([['main', 'Основні'], ['dev', '🛠 Розробник']], t)}`;
+  let h = `<h2>⚙ Налаштування</h2>${tabs([['main', 'Основні'], ['dev', '🛠 Розробник'], ['hero', '🧍 Позиція героя']], t)}`;
+  if (t === 'hero') return h + `<div class="note">Рухай героя на головному екрані: вгору, вниз, вліво, вправо, ближче (більше) й далі (менше). Зберігається автоматично на цьому пристрої.</div>
+  <button class="y" style="width:100%;padding:12px;margin-bottom:6px" onclick="window.hpEd=true;home()">▶ Налаштувати наживо на головному екрані</button>
+  ${hpPanel(false)}
+  <div class="small">«📋 Копіювати» дає рядок <code>${hpCode()}</code>. Надішли його мені, і я зроблю ці значення типовими для всіх.</div>`;
   if (t === 'dev') return h + `<div class="note">Тестові кнопки для перевірки прототипу. У грі їх не буде.</div>
   <div class="box"><b>Підписка (тест)</b><div class="grid g2" style="margin:4px 0 8px">${[[null, 'Без'], ['start', 'Старт'], ['street', 'Вуличний'], ['boss', 'Бос']].map(([k, n]) => `<button class="${subTier() === k ? 'g' : ''}" onclick="devSub(${k ? "'" + k + "'" : 'null'})">${n}</button>`).join('')}</div><button class="${S.devAll ? 'g' : ''}" style="width:100%;padding:10px;margin-bottom:6px" onclick="S.devAll=!S.devAll;render()">🔓 Відкрити все (тест): ${S.devAll ? 'УВІМК' : 'вимк'}</button><button class="y" style="width:100%;padding:10px" onclick="go('fit')">👔 Примірка одягу (підгонка речей на герої)</button></div>
   <div class="box"><b>Валюта</b><div class="grid g2">
@@ -2531,7 +2602,7 @@ SCREENS.settings = p => {
 const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 8192) s += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
 const unb64u = t => { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; const s = atob(t), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
 async function zip(str, mode) { const st = mode === 'c' ? new Blob([str]).stream().pipeThrough(new CompressionStream('deflate-raw')) : new Blob([str]).stream().pipeThrough(new DecompressionStream('deflate-raw')); return new Uint8Array(await new Response(st).arrayBuffer()); }
-const BUILD = 'v116';
+const BUILD = 'v117';
 const BOT = 'PotuzhneMisto_bot', PAGE = 'https://stasiya408-dev.github.io/tg-miniapp/';
 async function saveExport() {
   const o = Object.assign({}, S, { mail: [] }), t = b64u(await zip(JSON.stringify(o), 'c'));
