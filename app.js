@@ -21,6 +21,7 @@ const WEAR = {
   chain:    { name: 'Ланцюжок з жетоном', slot: 'neck',   tab: 'acc',  img: 'chain',    rar: 3, price: 25000, stat: { luck: 3, dmg: 3 } },
   watch:    { name: 'Годинник тактичний', slot: 'wristR', tab: 'acc',  img: 'watch',    rar: 2, price: 15000, stat: { crit: 1 } },
   bracelet: { name: 'Браслет',            slot: 'wristL', tab: 'acc',  img: 'bracelet', rar: 1, price: 6000,  stat: { dmg: 1 } },
+  tshirt:   { name: 'Футболка біла',      slot: 'top',    tab: 'wear', img: 'tshirt',   rar: 1, price: 5000,  stat: { dmg: 1 }, def: { m: { dx: -7, dy: -18, s: 0.8 } } },
   hoodie:   { name: 'Худі пісочне',       slot: 'top',    tab: 'wear', img: 'hoodie',   rar: 2, price: 18000, stat: { dmg: 2 } },
   vest:     { name: 'Жилет пуховий',      slot: 'outer',  tab: 'wear', img: 'vest',     rar: 3, price: 30000, stat: { dmg: 8 } },
   pants:    { name: 'Штани карго',        slot: 'legs',   tab: 'wear', img: 'pants',    rar: 2, price: 16000, stat: { dmg: 6 } },
@@ -72,6 +73,7 @@ const ITEMS = [
   { id: 'i_boots', name: 'Берці посилені', cat: 'Взуття', rar: 3, base: 10800, stat: 'Захист +48' },
   { id: 'i_sneak', name: 'Кросівки', cat: 'Взуття', rar: 2, base: 5200, stat: 'Спритність +5', wear: 'sneakers' },
   { id: 'i_ring', name: 'Кільце сили', cat: 'Кільця', rar: 4, base: 28000, stat: 'Атака +10%' },
+  { id: 'i_tshirt', name: 'Футболка біла', cat: 'Одяг', rar: 1, base: 1500, stat: 'Шкода +1%', wear: 'tshirt' },
   { id: 'i_hoodie', name: 'Худі', cat: 'Одяг', rar: 1, base: 4100, stat: 'Шкода +2%', wear: 'hoodie' },
   { id: 'i_tee', name: 'Футболка «Маямі»', cat: 'Одяг', rar: 3, base: 3500, stat: 'Шкода +4%' },
   { id: 'i_glasses', name: 'Окуляри-авіатори', cat: 'Аксесуари', rar: 3, base: 7400, stat: 'Крит +2%', wear: 'glasses' },
@@ -416,6 +418,7 @@ function load() {
   if (!S.mail) S.mail = defMail();
   if (!S.st) S.st = {};
   wdelClean();
+  if (S.created && !S.gotTee && WEAR.tshirt) { S.gotTee = 1; if (!S.owned.includes('tshirt')) S.owned.push('tshirt'); }
   if (!S.ach.seen) achScan(true);
   if (S.day !== today()) { S.day = today(); S.daily = DEF().daily; Object.values(S.bosses).forEach(b => b.tries = bossMax()); }
 }
@@ -668,7 +671,7 @@ async function fitUpload() { try { if (!window.claude || !claude.use || !Object.
 setTimeout(fitUpload, 1500); setTimeout(() => { if (typeof schedUp === 'function') stateUpload(); }, 2500);
 const FSRC = () => (cur().name === 'fit' ? FIT : FITS);
 const FIT0 = { dx: 0, dy: 0, s: 1, r: 0, z: 0, o: 100 };
-const defOf = (g, key) => { const w = WEAR[key.split(':')[0]]; return w && w.layer && w.layer[g] && w.def ? w.def : {}; };
+const defOf = (g, key) => { const w = WEAR[key.split(':')[0]]; if (!w || !w.def) return {}; if (w.def[g]) return w.def[g]; return w.layer && w.layer[g] && w.def.s != null ? w.def : {}; };
 const fitOf = (g, key) => Object.assign({}, FIT0, defOf(g, key), (FSRC()[g] || {})[key] || {});
 const fitEnt = (g, key) => ((FIT[g] = FIT[g] || {})[key] = (FIT[g] || {})[key] || {});
 const IMGC = {}, BAKE = {};
@@ -2715,7 +2718,7 @@ SCREENS.settings = p => {
 const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 8192) s += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
 const unb64u = t => { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; const s = atob(t), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
 async function zip(str, mode) { const st = mode === 'c' ? new Blob([str]).stream().pipeThrough(new CompressionStream('deflate-raw')) : new Blob([str]).stream().pipeThrough(new DecompressionStream('deflate-raw')); return new Uint8Array(await new Response(st).arrayBuffer()); }
-const BUILD = 'v132';
+const BUILD = 'v133';
 const BOT = 'PotuzhneMisto_bot', PAGE = 'https://stasiya408-dev.github.io/tg-miniapp/';
 async function saveExport() {
   const o = Object.assign({}, S, { mail: [] }), t = b64u(await zip(JSON.stringify(o), 'c'));
