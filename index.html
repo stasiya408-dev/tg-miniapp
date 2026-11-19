@@ -168,7 +168,7 @@ button .ico{display:block;margin:0 auto 2px;float:none}
 /* v139: світло позаду героя, тінь вперед */
 .lampShd{position:absolute;left:0;top:0;width:100%;pointer-events:none;filter:brightness(0) blur(2.5px);transform:scaleY(-.26) skewX(32deg);opacity:.55;animation:lampShd 7s infinite}
 .lampShd .doll{margin:0 auto}
-.lampPool{position:absolute;left:-35%;right:-35%;pointer-events:none;border-radius:50%;background:radial-gradient(ellipse at 55% 40%,rgba(255,180,80,.85),rgba(255,130,50,.4) 45%,rgba(255,120,40,0) 72%);mix-blend-mode:screen;animation:lampPool 7s infinite}
+.lampPool{position:absolute;pointer-events:none;border-radius:50%;background:radial-gradient(ellipse closest-side at 50% 50%,rgba(255,185,90,.62) 0,rgba(255,150,60,.42) 50%,rgba(255,130,50,.16) 80%,rgba(255,120,40,0) 100%);mix-blend-mode:screen;animation:lampPool 7s infinite}
 @keyframes lampShd{0%,82%{opacity:.55}83%{opacity:0}85%{opacity:.55}86.5%{opacity:.04}88%{opacity:.55}100%{opacity:.55}}
 @keyframes lampPool{0%,82%{opacity:1}83%{opacity:0}85%{opacity:1}86.5%{opacity:.08}88%{opacity:1}100%{opacity:1}}
 </style>
@@ -179,4 +179,4 @@ button .ico{display:block;margin:0 auto 2px;float:none}
   <div id="toast"></div>
   <div id="modal"><div class="in" id="modalIn"></div></div>
 </div>
-<script src="app.js?v=1795075407"></script>
+<script src="app.js?v=1795075600"></script>
