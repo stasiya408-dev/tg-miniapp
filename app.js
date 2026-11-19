@@ -107,6 +107,27 @@ const ITEMS = [
   { id: 'i_sn20', name: 'Кросівки «Тропічний Шквал»', cat: 'Взуття', rar: 4, base: 18000, stat: 'Спритність +12', wear: 'sn20', grp: 'sn' },
 ];
 const IT = Object.fromEntries(ITEMS.map(i => [i.id, i]));
+// Видалені з гри речі (dev): WDEL_BAKED вшито в код, pm_wdel: видалені Тарасом у грі (ще не вшиті)
+const WDEL_BAKED = [];
+let WDEL = []; try { WDEL = JSON.parse(localStorage.getItem('pm_wdel') || '[]'); } catch (e) { }
+function wdelApply() {
+  [...WDEL_BAKED, ...WDEL].forEach(w => { delete WEAR[w]; for (let i = ITEMS.length - 1; i >= 0; i--) if (ITEMS[i].wear === w) { delete IT[ITEMS[i].id]; ITEMS.splice(i, 1); } });
+  for (let i = SETS.length - 1; i >= 0; i--) if (SETS[i].items.some(k => !WEAR[k])) SETS.splice(i, 1);
+}
+wdelApply();
+function wdelClean() {
+  if (!S) return; S.owned = (S.owned || []).filter(k => WEAR[k]); Object.keys(S.equipped || {}).forEach(sl => { if (!WEAR[S.equipped[sl]]) delete S.equipped[sl]; });
+  S.inv = (S.inv || []).filter(x => IT[x.id]); if (S.lots) S.lots = S.lots.filter(x => IT[x.id]);
+}
+async function wdelUpload() { try { if (!window.claude || !claude.use) return; const db = await claude.use('db'); if (!db) return; await db.doc('sync/wdel').set({ ids: JSON.stringify(WDEL), ts: Date.now() }); } catch (e) { } }
+function wDelAsk(k) {
+  const w = WEAR[k]; if (!w) return;
+  modal(`<h3>🗑 Видалити з гри?</h3><div style="text-align:center"><img src="${cropURL(w.img)}" style="max-width:140px;max-height:110px;object-fit:contain"></div><p><b>${w.name}</b> зникне скрізь: гардероб, інвентар, секонд-хенд, ринок, нагороди.</p><div class="small">Повернути можна в ⚙ → 🛠 Розробник → «Повернути видалені».</div>
+  <button class="y" style="width:100%;padding:10px;background:#f99" onclick="wDel('${k}')">🗑 Так, видалити</button>`);
+}
+function wDel(k) { if (!WDEL.includes(k)) WDEL.push(k); try { localStorage.setItem('pm_wdel', JSON.stringify(WDEL)); } catch (e) { } wdelUpload(); wdelApply(); wdelClean(); closeModal(); save(); toast('Видалено з гри'); render(); }
+function wdelRestore() { WDEL = []; try { localStorage.setItem('pm_wdel', '[]'); } catch (e) { } wdelUpload(); toast('Повертаю речі…'); setTimeout(() => location.reload(), 400); }
+function wdelCopy() { const t = JSON.stringify(WDEL); try { navigator.clipboard.writeText(t); } catch (e) { } modal(`<h3>Видалені речі</h3><div class="small">Скопійовано. Надішли мені, і я приберу їх з коду назавжди.</div><textarea style="width:100%;height:70px" readonly onclick="this.select()">${t}</textarea>`); }
 // випадковий вибір речі: кросівки (grp) йдуть однією групою, щоб їх не випадало в 20 разів частіше
 function pickIt(pool) { const gs = {}; pool.forEach(x => { const k = x.grp || x.id; (gs[k] = gs[k] || []).push(x); }); return pick(pick(Object.values(gs))); }
 // Іконки речей: той самий спрайт, що й на герої (обрізаний по контуру); без спрайта: емодзі категорії
@@ -393,6 +414,7 @@ function load() {
   if (S.pokerTickets) { S.chips = (S.chips || 0) + S.pokerTickets * 50; } delete S.pokerTickets; // квитки покеру злито з жетонами клубу
   if (!S.mail) S.mail = defMail();
   if (!S.st) S.st = {};
+  wdelClean();
   if (!S.ach.seen) achScan(true);
   if (S.day !== today()) { S.day = today(); S.daily = DEF().daily; Object.values(S.bosses).forEach(b => b.tries = bossMax()); }
 }
@@ -1199,7 +1221,7 @@ SCREENS.wardrobe = p => {
     const items = Object.entries(WEAR).filter(([k, w]) => sls.includes(w.slot) && (f === 'all' || (f === 'my' ? S.owned.includes(k) : !S.owned.includes(k))))
       .sort((x, y) => (S.owned.includes(y[0]) - S.owned.includes(x[0])) || x[1].rar - y[1].rar);
     h += `<div class="bar" style="gap:4px;margin-bottom:4px">${[['all', 'Усі'], ['my', 'Мої'], ['av', 'Доступні']].map(([k, n]) => `<button class="${f === k ? 'sel' : ''}" style="padding:3px 10px;font-size:11px;border-radius:12px" onclick="setP('f','${k}')">${n}</button>`).join('')}<span class="small" style="margin-left:auto">${items.length} шт.</span></div>`;
-    h += `<div class="grid g4">${items.map(([k, w]) => { const own = S.owned.includes(k), on = Object.values(S.equipped).includes(k); return `<div class="cell r${w.rar}" onclick="wPick('${k}')" style="${on ? 'background:#fff6cc;' : ''}padding:3px"><img src="${cropURL(w.img)}" style="width:100%;height:62px;object-fit:contain;${own ? '' : 'opacity:.55'}"><div style="font-size:10px;line-height:1.15;height:23px;overflow:hidden">${w.name.replace('Кросівки ', '')}</div>${own ? gB(wgOf(k)) : '🔒'}${on ? ' ✓' : ''}</div>`; }).join('') || '<div class="small">Немає речей у цій категорії</div>'}</div>`;
+    h += `<div class="grid g4">${items.map(([k, w]) => { const own = S.owned.includes(k), on = Object.values(S.equipped).includes(k); return `<div class="cell r${w.rar}" onclick="wPick('${k}')" style="${on ? 'background:#fff6cc;' : ''}padding:3px">${S.devDel ? `<span onclick="event.stopPropagation();wDelAsk('${k}')" style="position:absolute;top:-4px;right:-4px;z-index:3;background:#c22;color:#fff;border-radius:50%;width:24px;height:24px;line-height:24px;font-size:13px;box-shadow:0 1px 3px #000">🗑</span>` : ''}<img src="${cropURL(w.img)}" style="width:100%;height:62px;object-fit:contain;${own ? '' : 'opacity:.55'}"><div style="font-size:10px;line-height:1.15;height:23px;overflow:hidden">${w.name.replace('Кросівки ', '')}</div>${own ? gB(wgOf(k)) : '🔒'}${on ? ' ✓' : ''}</div>`; }).join('') || '<div class="small">Немає речей у цій категорії</div>'}</div>`;
   } else if (t === 'skin') {
     h += `<div class="box">Скін героя (стать):<div class="bar"><button class="${S.gender === 'm' ? 'sel' : ''}" onclick="S.gender='m';render()">Чоловік</button><button class="${S.gender === 'f' ? 'sel' : ''}" onclick="S.gender='f';render()">Жінка</button></div>
     <div class="note">Інші скіни: з'являться пізніше (заглушка).</div></div>`;
@@ -2598,7 +2620,9 @@ SCREENS.settings = p => {
   let h = `<h2>⚙ Налаштування</h2>${tabs([['main', 'Основні'], ['dev', '🛠 Розробник'], ['hero', '🧍 Позиція героя']], t)}`;
   if (t === 'hero') { after.push(() => { window.hpEd = true; home(); }); return h; }
   if (t === 'dev') return h + `<div class="note">Тестові кнопки для перевірки прототипу. У грі їх не буде.</div>
-  <div class="box"><b>Підписка (тест)</b><div class="grid g2" style="margin:4px 0 8px">${[[null, 'Без'], ['start', 'Старт'], ['street', 'Вуличний'], ['boss', 'Бос']].map(([k, n]) => `<button class="${subTier() === k ? 'g' : ''}" onclick="devSub(${k ? "'" + k + "'" : 'null'})">${n}</button>`).join('')}</div><button class="${S.devAll ? 'g' : ''}" style="width:100%;padding:10px;margin-bottom:6px" onclick="S.devAll=!S.devAll;render()">🔓 Відкрити все (тест): ${S.devAll ? 'УВІМК' : 'вимк'}</button><button class="y" style="width:100%;padding:10px" onclick="go('fit')">👔 Примірка одягу (підгонка речей на герої)</button></div>
+  <div class="box"><b>Підписка (тест)</b><div class="grid g2" style="margin:4px 0 8px">${[[null, 'Без'], ['start', 'Старт'], ['street', 'Вуличний'], ['boss', 'Бос']].map(([k, n]) => `<button class="${subTier() === k ? 'g' : ''}" onclick="devSub(${k ? "'" + k + "'" : 'null'})">${n}</button>`).join('')}</div><button class="${S.devAll ? 'g' : ''}" style="width:100%;padding:10px;margin-bottom:6px" onclick="S.devAll=!S.devAll;render()">🔓 Відкрити все (тест): ${S.devAll ? 'УВІМК' : 'вимк'}</button><button class="y" style="width:100%;padding:10px" onclick="go('fit')">👔 Примірка одягу (підгонка речей на герої)</button>
+  <button class="${S.devDel ? 'g' : ''}" style="width:100%;padding:10px;margin-top:6px" onclick="S.devDel=!S.devDel;render()">${S.devDel ? '☑' : '☐'} 🗑 Видалення речей з гри в гардеробі: ${S.devDel ? 'УВІМК' : 'вимк'}</button>
+  ${WDEL.length ? `<div class="small" style="margin-top:4px">Видалено: ${WDEL.length} шт.</div><div class="grid g2" style="margin-top:4px"><button onclick="wdelCopy()">📋 Список видалених</button><button onclick="wdelRestore()">↩ Повернути видалені</button></div>` : ''}</div>
   <div class="box"><b>Валюта</b><div class="grid g2">
     <button class="y" onclick="give({money:1000000},'Розробник');render()">+1 000 000 💵</button>
     <button class="y" onclick="give({crystals:5000},'Розробник');render()">+5 000 💎</button>
@@ -2622,7 +2646,7 @@ SCREENS.settings = p => {
 const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 8192) s += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
 const unb64u = t => { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; const s = atob(t), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
 async function zip(str, mode) { const st = mode === 'c' ? new Blob([str]).stream().pipeThrough(new CompressionStream('deflate-raw')) : new Blob([str]).stream().pipeThrough(new DecompressionStream('deflate-raw')); return new Uint8Array(await new Response(st).arrayBuffer()); }
-const BUILD = 'v122';
+const BUILD = 'v123';
 const BOT = 'PotuzhneMisto_bot', PAGE = 'https://stasiya408-dev.github.io/tg-miniapp/';
 async function saveExport() {
   const o = Object.assign({}, S, { mail: [] }), t = b64u(await zip(JSON.stringify(o), 'c'));
