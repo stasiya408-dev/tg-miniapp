@@ -822,27 +822,27 @@ SCREENS.home = () => {
   after.push(() => {
     if (!S.tut) setTimeout(showTut, 500);
     const box = $('homeBox'); if (!box) return;
-    const Hh = Math.max(300, $('app').clientHeight - 14), oc = cur().p.chat; box.style.height = (Hh + 12) + 'px';
+    const Hh = Math.max(300, $('app').clientHeight - 14), oc = cur().p.chat; box.style.height = (Hh + 12) + 'px'; { const pb = $('pathBox'); if (pb) { const bt = 70 + pb.offsetHeight + 8; ['sideL', 'sideR'].forEach(id => { const e = $(id); if (!e) return; e.style.bottom = bt + 'px'; const sh = Math.floor((e.clientHeight - 9 * 6) / 10); e.querySelectorAll('button').forEach(b => { b.style.height = sh + 'px'; b.style.maxHeight = 'none'; b.style.flex = 'none'; }); }); } }
     const HPv = hpGet(), hh = Math.round((Hh - 130) * 0.9 * HPv.s), Pc = PATH[pathSt()].col; $('homeDoll').innerHTML = `<div style="position:relative;display:inline-block"><div style="position:absolute;left:6%;right:6%;bottom:-6px;height:${Math.round(hh * 0.035)}px;background:radial-gradient(ellipse,rgba(10,0,20,.85),rgba(0,0,0,0) 70%);filter:blur(2px)"></div><div style="position:relative;">${doll(hh)}</div></div>`; $('homeDoll').style.top = (oc ? 8 : Math.round(Hh - 104 - hh * 0.97 + Hh * HPv.y / 100)) + 'px'; $('homeDoll').style.transform = `translateX(${HPv.x}%)`;
   });
   return `<div id="homeBox" style="position:relative;background:url(img/home_bg.jpg) center bottom/cover no-repeat;border-radius:0;overflow:hidden;margin:-6px -6px 0">
-    <div class="side" style="position:absolute;left:8px;top:12px;z-index:3">
+    <div class="side hside" id="sideL" style="position:absolute;left:8px;top:12px;bottom:140px;z-index:3">
       <button onclick="go('mail')">✉️ Пошта${unread ? `<span class="badge">${unread}</span>` : ''}</button>
       <button onclick="go('tasks')">☑ Завдання${dot(N.tasks())}</button>
       <button onclick="go('events')">🏆 Події</button>
-      <button onclick="chatGo()">${lockOf('chat') ? '🔒' : '💬'} Чат${cu ? `<span class="badge">${cu}</span>` : ''}</button>
       <button class="y" onclick="qaPick('L')" style="font-size:11px"><span style="filter:brightness(.25)">⚡</span> Швидкий доступ</button>
       ${qaList('L').map(k => `<button onclick="qaGo('${k}')">${lockOf(QA[k][1]) ? '🔒 ' : ''}${QA[k][0]}</button>`).join('')}
     </div>
     <div style="position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse 85% 75% at 50% 50%,rgba(0,0,0,0) 55%,rgba(8,0,16,.55) 100%)"></div>
     <div id="homeDoll" style="position:absolute;left:0;right:0;top:0;text-align:center;z-index:2"></div>
-    <div class="side" style="position:absolute;right:8px;top:12px;z-index:3">
-      <button onclick="go('settings')">⚙</button>
+    <div class="side hside" id="sideR" style="position:absolute;right:8px;top:12px;bottom:140px;z-index:3">
+      <button onclick="go('settings')">⚙ Налашт.</button>
       <button onclick="go('rewards')">🎁 Нагороди${dot(N.login())}</button>
+      <button onclick="chatGo()">${lockOf('chat') ? '🔒' : '💬'} Чат${cu ? `<span class="badge">${cu}</span>` : ''}</button>
       <button class="y" onclick="qaPick('R')" style="font-size:11px"><span style="filter:brightness(.25)">⚡</span> Швидкий доступ</button>
       ${qaList('R').map(k => `<button onclick="qaGo('${k}')">${lockOf(QA[k][1]) ? '🔒 ' : ''}${QA[k][0]}</button>`).join('')}
     </div>
-    <div style="position:absolute;left:10px;right:10px;bottom:70px;z-index:3">${pathStrip()}</div>
+    <div id="pathBox" style="position:absolute;left:10px;right:10px;bottom:70px;z-index:3">${pathStrip()}</div>
     ${window.hpEd ? hpOverlay() : ''}
     ${false ? '' : `<button class="play" style="position:absolute;left:12px;right:12px;bottom:12px;padding:14px;font-size:22px;z-index:3" onclick="go('play')">ГРАТИ ▶${dot(N.bonus())}</button>`}
   ${cur().p.chat ? `<div style="position:absolute;left:0;right:0;bottom:0;height:62%;z-index:6;display:flex;flex-direction:column;background:#f4efe6;border-top:3px solid #d8b25a;padding:6px;color:#111;font-size:14px">${chatPanel(cur().p, true)}</div>` : ''}</div>`;
@@ -2718,7 +2718,7 @@ SCREENS.settings = p => {
 const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 8192) s += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
 const unb64u = t => { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; const s = atob(t), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
 async function zip(str, mode) { const st = mode === 'c' ? new Blob([str]).stream().pipeThrough(new CompressionStream('deflate-raw')) : new Blob([str]).stream().pipeThrough(new DecompressionStream('deflate-raw')); return new Uint8Array(await new Response(st).arrayBuffer()); }
-const BUILD = 'v134';
+const BUILD = 'v135';
 const BOT = 'PotuzhneMisto_bot', PAGE = 'https://stasiya408-dev.github.io/tg-miniapp/';
 async function saveExport() {
   const o = Object.assign({}, S, { mail: [] }), t = b64u(await zip(JSON.stringify(o), 'c'));
