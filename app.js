@@ -613,15 +613,18 @@ function showTut() {
 }
 let after = [];
 function render() {
+  const bg = render.bg; render.bg = false;
   if (typeof spinning !== 'undefined' && spinning && cur().name === 'slots') return;
   energyTick(); pathCheck(); save();
   const c = cur(); after = [];
   const scr = SCREENS[c.name];
   const lk = lockOf(c.name);
-  $('app').innerHTML = lk ? lockedScreen(c.name, lk) : scr(c.p);
-  const noBars = c.name === 'create';
-  $('topbar').innerHTML = noBars ? '' : topbar(c.name);
-  $('navbar').innerHTML = (c.name === 'home' || NAVS.includes(c.name)) ? navbar(c.name) : '';
+  const html = lk ? lockedScreen(c.name, lk) : scr(c.p), noBars = c.name === 'create';
+  const tb = noBars ? '' : topbar(c.name), nb = (c.name === 'home' || NAVS.includes(c.name)) ? navbar(c.name) : '';
+  // нічого не змінилось: не чіпаємо DOM, щоб не «з'їдати» натискання й не мерехтіти
+  if (bg && !render.force && html === render.h && c === render.c && tb === render.tb && nb === render.nb) return;
+  render.force = false; render.h = html; render.c = c; render.tb = tb; render.nb = nb;
+  $('app').innerHTML = html; $('topbar').innerHTML = tb; $('navbar').innerHTML = nb;
   after.forEach(f => f());
 }
 const NAVS = ['profile', 'inventory', 'wardrobe', 'garage'];
@@ -2711,7 +2714,7 @@ SCREENS.settings = p => {
 const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 8192) s += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
 const unb64u = t => { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; const s = atob(t), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
 async function zip(str, mode) { const st = mode === 'c' ? new Blob([str]).stream().pipeThrough(new CompressionStream('deflate-raw')) : new Blob([str]).stream().pipeThrough(new DecompressionStream('deflate-raw')); return new Uint8Array(await new Response(st).arrayBuffer()); }
-const BUILD = 'v127';
+const BUILD = 'v128';
 const BOT = 'PotuzhneMisto_bot', PAGE = 'https://stasiya408-dev.github.io/tg-miniapp/';
 async function saveExport() {
   const o = Object.assign({}, S, { mail: [] }), t = b64u(await zip(JSON.stringify(o), 'c'));
@@ -2758,16 +2761,22 @@ if (PAY && localStorage.getItem('pm_imp') !== PAY) {
   applyPay(PAY).then(() => { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { } location.reload(); }).catch(() => { restoring = false; boot(); });
 } else boot();
 if (S && S.chips == null) S.chips = 450;
+// фонові перемальовування (таймер, зміна розміру) не робимо, поки палець на екрані або щойно був тап
+let lastTouch = 0, touchDown = false, bgT = null;
+document.addEventListener('pointerdown', () => { lastTouch = Date.now(); touchDown = true; }, true);
+document.addEventListener('pointerup', () => { lastTouch = Date.now(); touchDown = false; }, true);
+document.addEventListener('pointercancel', () => { touchDown = false; }, true);
+function bgRender(force) { clearTimeout(bgT); if (touchDown || Date.now() - lastTouch < 900) { bgT = setTimeout(() => bgRender(force), 400); return; } if (force) render.force = true; render.bg = true; render(); }
 setInterval(() => {
   if (!S || !stack.length) return;
   distDaily(); tickMarket(); tickLots(1); const newMsg = tickChat(); const grDone = grTick(); if (grDone) toast('🏁 Груповий заїзд завершено!'); save();
   const ae = document.activeElement, typing = ae && ['INPUT', 'SELECT'].includes(ae.tagName);
-  if (cur().name === 'market' && !typing && $('modal').style.display !== 'flex') render();
-  if (cur().name === 'races' && S.gr && S.gr.st === 'run' && !($('modal').style.display === 'flex')) render();
-  if (newMsg && chatVisible() && !typing && $('modal').style.display !== 'flex') render();
+  if (cur().name === 'market' && !typing && $('modal').style.display !== 'flex') bgRender();
+  if (cur().name === 'races' && S.gr && S.gr.st === 'run' && !($('modal').style.display === 'flex')) bgRender();
+  if (newMsg && chatVisible() && !typing && $('modal').style.display !== 'flex') bgRender();
 }, 2000);
 // Не перемальовуємо екран, поки гравець вводить текст (в Telegram клавіатура міняє розмір вікна й закривала поле)
 const isTyping = () => { const ae = document.activeElement; return !!(ae && ['INPUT', 'TEXTAREA', 'SELECT'].includes(ae.tagName)); };
 let rzT = null, rzPend = false;
-window.addEventListener('resize', () => { clearTimeout(rzT); rzT = setTimeout(() => { if (isTyping()) { rzPend = true; return; } render(); }, 200); });
-document.addEventListener('focusout', () => { if (rzPend) setTimeout(() => { if (!isTyping()) { rzPend = false; render(); } }, 300); });
+window.addEventListener('resize', () => { clearTimeout(rzT); rzT = setTimeout(() => { if (isTyping()) { rzPend = true; return; } bgRender(true); }, 200); });
+document.addEventListener('focusout', () => { if (rzPend) setTimeout(() => { if (!isTyping()) { rzPend = false; bgRender(true); } }, 300); });
