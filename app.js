@@ -800,7 +800,10 @@ function hpGet() { return HP; }
 const BG_DEF = { x: 0, y: 0, s: 1 };
 let BGP = (() => { try { return Object.assign({}, BG_DEF, JSON.parse(localStorage.getItem('pm_bgpos') || '{}')); } catch (e) { return Object.assign({}, BG_DEF); } })();
 const hpT = () => window.hpTgt === 'bg' ? BGP : HP;
-function bgApply() { const b = $('homeBox'); if (!b) return; const w = b.clientWidth, h = b.clientHeight, k = Math.max(w / 937, h / 1678) * BGP.s, W = 937 * k, H = 1678 * k; b.style.backgroundSize = `${W}px ${H}px`; b.style.backgroundPosition = `${Math.round((w - W) / 2 + BGP.x * w / 100)}px ${Math.round((h - H) / 2 + BGP.y * h / 100)}px`; }
+function bgApply() { const b = $('homeBox'); if (!b) return; const w = b.clientWidth, h = b.clientHeight, k = Math.max(w / 937, h / 1678) * BGP.s, W = 937 * k, H = 1678 * k; b.style.backgroundSize = `${W}px ${H}px`; const ox = Math.round((w - W) / 2 + BGP.x * w / 100), oy = Math.round((h - H) / 2 + BGP.y * h / 100); b.style.backgroundPosition = `${ox}px ${oy}px`;
+  const g = $('lampGlow'), d = $('lampDim'); if (g) Object.assign(g.style, { left: ox + LAMP.gx * k + 'px', top: oy + LAMP.gy * k + 'px', width: W + 'px', height: H + 'px' }); if (d) { const r = LAMP.r * k; Object.assign(d.style, { left: ox + LAMP.bx * k - r + 'px', top: oy + LAMP.by * k - r + 'px', width: 2 * r + 'px', height: 2 * r + 'px' }); } }
+// лампа: зсув світла відносно фону (px картинки 937×1678) і центр лампочки на фоні
+const LAMP = { gx: 19, gy: -38, bx: 567, by: 125, r: 70 };
 function hpSave() { try { localStorage.setItem('pm_hpos', JSON.stringify(HP)); localStorage.setItem('pm_bgpos', JSON.stringify(BGP)); } catch (e) { } }
 function hpMove(k, d) { const st = window.hpStep || 1, T = hpT(), bg = T === BGP; if (k === 's') T.s = Math.round(Math.min(bg ? 4 : 2.5, Math.max(bg ? 1 : 0.3, T.s + d * 0.01 * st)) * 100) / 100; else T[k] = Math.max(-100, Math.min(100, T[k] + d * st)); hpSave(); if (bg) { bgApply(); const l = $('hpLbl'); if (l) l.textContent = hpLbl(); } else render(); }
 function hpReset() { if (window.hpTgt === 'bg') BGP = Object.assign({}, BG_DEF); else HP = Object.assign({}, HP_DEF); hpSave(); render(); }
@@ -843,6 +846,7 @@ SCREENS.home = () => {
       ${hbQaHead('L')}
       ${qaList('L').map(hbQa).join('')}
     </div>
+    <div class="lampFx" id="lampGlow"></div><div class="lampFx" id="lampDim"></div>
     <div style="position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse 85% 75% at 50% 50%,rgba(0,0,0,0) 55%,rgba(8,0,16,.55) 100%)"></div>
     <div id="homeDoll" style="position:absolute;left:0;right:0;top:0;text-align:center;z-index:2"></div>
     <div class="side hside" id="sideR" style="position:absolute;right:8px;top:12px;bottom:140px;z-index:3">
@@ -2728,7 +2732,7 @@ SCREENS.settings = p => {
 const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 8192) s += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
 const unb64u = t => { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; const s = atob(t), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
 async function zip(str, mode) { const st = mode === 'c' ? new Blob([str]).stream().pipeThrough(new CompressionStream('deflate-raw')) : new Blob([str]).stream().pipeThrough(new DecompressionStream('deflate-raw')); return new Uint8Array(await new Response(st).arrayBuffer()); }
-const BUILD = 'v137';
+const BUILD = 'v138';
 const BOT = 'PotuzhneMisto_bot', PAGE = 'https://stasiya408-dev.github.io/tg-miniapp/';
 async function saveExport() {
   const o = Object.assign({}, S, { mail: [] }), t = b64u(await zip(JSON.stringify(o), 'c'));
