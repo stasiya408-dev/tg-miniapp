@@ -764,19 +764,22 @@ function hpMove(k, d) { const st = window.hpStep || 1; if (k === 's') HP.s = Mat
 function hpReset() { HP = Object.assign({}, HP_DEF); hpSave(); render(); }
 function hpCode() { return `const HP_DEF = { x: ${HP.x}, y: ${HP.y}, s: ${HP.s} };`; }
 function hpCopy() { const t = hpCode(); const ok = () => toast('Скопійовано: ' + t); try { navigator.clipboard.writeText(t).then(ok, () => modal(`<h3>Значення</h3><textarea style="width:100%;height:50px" readonly onclick="this.select()">${t}</textarea><button style="width:100%" onclick="closeModal()">Готово</button>`)); } catch (e) { modal(`<h3>Значення</h3><textarea style="width:100%;height:50px" readonly onclick="this.select()">${t}</textarea><button style="width:100%" onclick="closeModal()">Готово</button>`); } }
-function hpPanel(mini) {
-  const st = window.hpStep || 1, b = (l, k, d) => `<button class="y" style="padding:${mini ? '2px' : '12px'};font-size:${mini ? 14 : 20}px" onclick="hpMove('${k}',${d})">${l}</button>`;
-  return `<div class="box" style="${mini ? 'background:rgba(20,10,30,.88);color:#fff;padding:6px;margin:0;font-size:12px' : ''}">
-    ${mini ? '<b>🧍 Позиція героя</b>' : ''}
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin:4px 0">
-      <span></span>${b('⬆', 'y', -1)}<span></span>
-      ${b('⬅', 'x', -1)}<button onclick="window.hpStep=${st === 1 ? 5 : 1};render()" style="font-size:12px">крок ${st}</button>${b('➡', 'x', 1)}
-      <span></span>${b('⬇', 'y', 1)}<span></span>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">${b('➖ Далі', 's', -1)}${b('➕ Ближче', 's', 1)}</div>
-    <div style="text-align:center;margin:4px 0">X ${HP.x}% · Y ${HP.y}% · розмір ${Math.round(HP.s * 100)}%</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px"><button onclick="hpReset()">↩ Скинути</button><button onclick="hpCopy()">📋 Копіювати</button></div>
-    ${mini ? `<button class="g" style="width:100%;margin-top:4px" onclick="window.hpEd=false;render()">✓ Готово</button>` : ''}</div>`;
+function hpHold(k, d) { hpStop(); hpMove(k, d); window._hpT = setTimeout(() => { window._hpI = setInterval(() => hpMove(k, d), 70); }, 350); }
+function hpStop() { clearTimeout(window._hpT); clearInterval(window._hpI); }
+addEventListener('pointerup', hpStop); addEventListener('pointercancel', hpStop);
+function hpOverlay() {
+  const st = window.hpStep || 1, C = 'background:rgba(255,215,70,.38);border:1px solid rgba(255,255,255,.55);color:#fff;text-shadow:0 1px 2px #000;border-radius:50%;width:38px;height:38px;padding:0;font-size:17px;box-shadow:none;touch-action:none',
+    b = (l, k, d, x) => `<button style="${C};${x || ''}" onpointerdown="event.preventDefault();hpHold('${k}',${d})" oncontextmenu="return false">${l}</button>`,
+    sm = 'background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.4);color:#fff;padding:3px 7px;font-size:11px;border-radius:10px;box-shadow:none';
+  return `<div style="position:absolute;left:50%;top:6px;transform:translateX(-50%);z-index:7;display:flex;gap:4px;align-items:center;white-space:nowrap">
+      <span style="${sm}">X ${HP.x} · Y ${HP.y} · ${Math.round(HP.s * 100)}%</span>
+      <button style="${sm}" onclick="window.hpStep=${st === 1 ? 5 : 1};render()">крок ${st}</button></div>
+    <div style="position:absolute;left:50%;top:32px;transform:translateX(-50%);z-index:7;display:flex;gap:4px;white-space:nowrap">
+      <button style="${sm}" onclick="hpReset()">↩ Скинути</button><button style="${sm}" onclick="hpCopy()">📋 Копіювати</button><button style="${sm};background:rgba(40,160,70,.6)" onclick="window.hpEd=false;render()">✓ Готово</button></div>
+    <div style="position:absolute;left:6px;bottom:128px;z-index:7;display:grid;grid-template-columns:repeat(3,38px);gap:3px">
+      <span></span>${b('⬆', 'y', -1)}<span></span>${b('⬅', 'x', -1)}<span></span>${b('➡', 'x', 1)}<span></span>${b('⬇', 'y', 1)}<span></span></div>
+    <div style="position:absolute;right:6px;bottom:128px;z-index:7;display:grid;gap:3px">
+      ${b('＋', 's', 1)}<div style="color:#fff;font-size:10px;text-align:center;text-shadow:0 1px 2px #000">ближче<br>далі</div>${b('－', 's', -1)}</div>`;
 }
 SCREENS.home = () => {
   const unread = S.mail.filter(m => m.box === 'in' && (!m.read || m.gift)).length, cu = chTotal();
@@ -804,7 +807,7 @@ SCREENS.home = () => {
       ${qaList('R').map(k => `<button onclick="qaGo('${k}')">${lockOf(QA[k][1]) ? '🔒 ' : ''}${QA[k][0]}</button>`).join('')}
     </div>
     <div style="position:absolute;left:10px;right:10px;bottom:70px;z-index:3">${pathStrip()}</div>
-    ${window.hpEd ? `<div style="position:absolute;left:50%;top:12px;transform:translateX(-50%);z-index:7;width:min(190px,52%);opacity:.93">${hpPanel(true)}</div>` : ''}
+    ${window.hpEd ? hpOverlay() : ''}
     ${false ? '' : `<button class="play" style="position:absolute;left:12px;right:12px;bottom:12px;padding:14px;font-size:22px;z-index:3" onclick="go('play')">ГРАТИ ▶${dot(N.bonus())}</button>`}
   ${cur().p.chat ? `<div style="position:absolute;left:0;right:0;bottom:0;height:62%;z-index:6;display:flex;flex-direction:column;background:#f4efe6;border-top:3px solid #d8b25a;padding:6px;color:#111;font-size:14px">${chatPanel(cur().p, true)}</div>` : ''}</div>`;
 };
@@ -2573,10 +2576,7 @@ SCREENS.fit = p => {
 SCREENS.settings = p => {
   const t = p.tab || 'main';
   let h = `<h2>⚙ Налаштування</h2>${tabs([['main', 'Основні'], ['dev', '🛠 Розробник'], ['hero', '🧍 Позиція героя']], t)}`;
-  if (t === 'hero') return h + `<div class="note">Рухай героя на головному екрані: вгору, вниз, вліво, вправо, ближче (більше) й далі (менше). Зберігається автоматично на цьому пристрої.</div>
-  <button class="y" style="width:100%;padding:12px;margin-bottom:6px" onclick="window.hpEd=true;home()">▶ Налаштувати наживо на головному екрані</button>
-  ${hpPanel(false)}
-  <div class="small">«📋 Копіювати» дає рядок <code>${hpCode()}</code>. Надішли його мені, і я зроблю ці значення типовими для всіх.</div>`;
+  if (t === 'hero') { after.push(() => { window.hpEd = true; home(); }); return h; }
   if (t === 'dev') return h + `<div class="note">Тестові кнопки для перевірки прототипу. У грі їх не буде.</div>
   <div class="box"><b>Підписка (тест)</b><div class="grid g2" style="margin:4px 0 8px">${[[null, 'Без'], ['start', 'Старт'], ['street', 'Вуличний'], ['boss', 'Бос']].map(([k, n]) => `<button class="${subTier() === k ? 'g' : ''}" onclick="devSub(${k ? "'" + k + "'" : 'null'})">${n}</button>`).join('')}</div><button class="${S.devAll ? 'g' : ''}" style="width:100%;padding:10px;margin-bottom:6px" onclick="S.devAll=!S.devAll;render()">🔓 Відкрити все (тест): ${S.devAll ? 'УВІМК' : 'вимк'}</button><button class="y" style="width:100%;padding:10px" onclick="go('fit')">👔 Примірка одягу (підгонка речей на герої)</button></div>
   <div class="box"><b>Валюта</b><div class="grid g2">
@@ -2602,7 +2602,7 @@ SCREENS.settings = p => {
 const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 8192) s += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
 const unb64u = t => { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; const s = atob(t), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
 async function zip(str, mode) { const st = mode === 'c' ? new Blob([str]).stream().pipeThrough(new CompressionStream('deflate-raw')) : new Blob([str]).stream().pipeThrough(new DecompressionStream('deflate-raw')); return new Uint8Array(await new Response(st).arrayBuffer()); }
-const BUILD = 'v117';
+const BUILD = 'v118';
 const BOT = 'PotuzhneMisto_bot', PAGE = 'https://stasiya408-dev.github.io/tg-miniapp/';
 async function saveExport() {
   const o = Object.assign({}, S, { mail: [] }), t = b64u(await zip(JSON.stringify(o), 'c'));
