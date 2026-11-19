@@ -634,7 +634,7 @@ const NAVS = ['profile', 'inventory', 'wardrobe', 'garage'];
 // --- ВАЛЮТИ ЗВЕРХУ: 2 слоти (завжди 💵 і 💎 при вході), по натисканню можна показати іншу валюту
 const HUD_C = { money: ['💵', 'Гроші'], crystals: ['💎', 'Кристали'], gold: ['🟡', 'Золоті прикраси'], chips: ['🎟', 'Жетони клубу'] };
 let HUD = ['money', 'crystals', 'gold'];
-const hudChip = i => `<span class="cur" onclick="hudPick(${i})"><span class="ci">${HUD_C[HUD[i]][0]}</span><span class="cv">${String(fmtS(S[HUD[i]] || 0)).replace(/\s/g, '\u2009')}</span><span class="cp" onclick="event.stopPropagation();go('shop',{tab:'cur'})">+</span></span>`;
+const hudChip = i => `<span class="cur" onclick="hudPick(${i})"><span class="ci">${HUD_C[HUD[i]][0]}</span><span class="cv">${String((v => Math.abs(v) >= 1e3 && Math.abs(v) < 1e4 ? +(v / 1e3).toFixed(1) + 'K' : fmtS(v))(S[HUD[i]] || 0)).replace(/\s/g, '\u2009')}</span><span class="cp" onclick="event.stopPropagation();go('shop',{tab:'cur'})">+</span></span>`;
 const fmtS = v => { const a = Math.abs(v); return a >= 1e9 ? +(v / 1e9).toFixed(a >= 1e10 ? 0 : 1) + 'B' : a >= 1e6 ? +(v / 1e6).toFixed(a >= 1e7 ? 0 : 1) + 'M' : a >= 1e4 ? +(v / 1e3).toFixed(a >= 1e5 ? 0 : 1) + 'K' : fmt(v); };
 function hudPick(i) {
   modal(`<h3>Показати валюту</h3><div class="small">Обери, що показувати в цьому місці. При новому вході знову 💵 💎 🟡.</div>
@@ -796,10 +796,16 @@ SCREENS.season = seasonScreen;
 const HP_DEF = { x: 0, y: 0, s: 1 };
 let HP = (() => { try { return Object.assign({}, HP_DEF, JSON.parse(localStorage.getItem('pm_hpos') || '{}')); } catch (e) { return Object.assign({}, HP_DEF); } })();
 function hpGet() { return HP; }
-function hpSave() { try { localStorage.setItem('pm_hpos', JSON.stringify(HP)); } catch (e) { } }
-function hpMove(k, d) { const st = window.hpStep || 1; if (k === 's') HP.s = Math.round(Math.min(2.5, Math.max(0.3, HP.s + d * 0.01 * st)) * 100) / 100; else HP[k] = Math.max(-100, Math.min(100, HP[k] + d * st)); hpSave(); render(); }
-function hpReset() { HP = Object.assign({}, HP_DEF); hpSave(); render(); }
-function hpCode() { return `const HP_DEF = { x: ${HP.x}, y: ${HP.y}, s: ${HP.s} };`; }
+// фон головного екрана: зсув і масштаб (розробник)
+const BG_DEF = { x: 0, y: 0, s: 1 };
+let BGP = (() => { try { return Object.assign({}, BG_DEF, JSON.parse(localStorage.getItem('pm_bgpos') || '{}')); } catch (e) { return Object.assign({}, BG_DEF); } })();
+const hpT = () => window.hpTgt === 'bg' ? BGP : HP;
+function bgApply() { const b = $('homeBox'); if (!b) return; const w = b.clientWidth, h = b.clientHeight, k = Math.max(w / 937, h / 1678) * BGP.s, W = 937 * k, H = 1678 * k; b.style.backgroundSize = `${W}px ${H}px`; b.style.backgroundPosition = `${Math.round((w - W) / 2 + BGP.x * w / 100)}px ${Math.round((h - H) / 2 + BGP.y * h / 100)}px`; }
+function hpSave() { try { localStorage.setItem('pm_hpos', JSON.stringify(HP)); localStorage.setItem('pm_bgpos', JSON.stringify(BGP)); } catch (e) { } }
+function hpMove(k, d) { const st = window.hpStep || 1, T = hpT(), bg = T === BGP; if (k === 's') T.s = Math.round(Math.min(bg ? 4 : 2.5, Math.max(bg ? 1 : 0.3, T.s + d * 0.01 * st)) * 100) / 100; else T[k] = Math.max(-100, Math.min(100, T[k] + d * st)); hpSave(); if (bg) { bgApply(); const l = $('hpLbl'); if (l) l.textContent = hpLbl(); } else render(); }
+function hpReset() { if (window.hpTgt === 'bg') BGP = Object.assign({}, BG_DEF); else HP = Object.assign({}, HP_DEF); hpSave(); render(); }
+const hpLbl = () => { const T = hpT(); return `${window.hpTgt === 'bg' ? '🖼 Фон' : '🧍 Герой'}: X ${T.x} · Y ${T.y} · ${Math.round(T.s * 100)}%`; };
+function hpCode() { return `const HP_DEF = { x: ${HP.x}, y: ${HP.y}, s: ${HP.s} }; const BG_DEF = { x: ${BGP.x}, y: ${BGP.y}, s: ${BGP.s} };`; }
 function hpCopy() { const t = hpCode(); const ok = () => toast('Скопійовано: ' + t); try { navigator.clipboard.writeText(t).then(ok, () => modal(`<h3>Значення</h3><textarea style="width:100%;height:50px" readonly onclick="this.select()">${t}</textarea><button style="width:100%" onclick="closeModal()">Готово</button>`)); } catch (e) { modal(`<h3>Значення</h3><textarea style="width:100%;height:50px" readonly onclick="this.select()">${t}</textarea><button style="width:100%" onclick="closeModal()">Готово</button>`); } }
 function hpHold(k, d) { hpStop(); hpMove(k, d); window._hpT = setTimeout(() => { window._hpI = setInterval(() => hpMove(k, d), 70); }, 350); }
 function hpStop() { clearTimeout(window._hpT); clearInterval(window._hpI); }
@@ -809,7 +815,7 @@ function hpOverlay() {
     b = (l, k, d, x) => `<button style="${C};${x || ''}" onpointerdown="event.preventDefault();hpHold('${k}',${d})" oncontextmenu="return false">${l}</button>`,
     sm = 'background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.4);color:#fff;padding:3px 7px;font-size:11px;border-radius:10px;box-shadow:none';
   return `<div style="position:absolute;left:50%;top:6px;transform:translateX(-50%);z-index:7;display:flex;gap:4px;align-items:center;white-space:nowrap">
-      <span style="${sm}">X ${HP.x} · Y ${HP.y} · ${Math.round(HP.s * 100)}%</span>
+      <button style="${sm};background:rgba(${window.hpTgt === 'bg' ? '40,110,200' : '150,90,20'},.7)" onclick="window.hpTgt=window.hpTgt==='bg'?'hero':'bg';render()">⇄ ${window.hpTgt === 'bg' ? 'Фон' : 'Герой'}</button><span id="hpLbl" style="${sm}">${hpLbl()}</span>
       <button style="${sm}" onclick="window.hpStep=${st === 1 ? 5 : 1};render()">крок ${st}</button></div>
     <div style="position:absolute;left:50%;top:32px;transform:translateX(-50%);z-index:7;display:flex;gap:4px;white-space:nowrap">
       <button style="${sm}" onclick="hpReset()">↩ Скинути</button><button style="${sm}" onclick="hpCopy()">📋 Копіювати</button><button style="${sm};background:rgba(40,160,70,.6)" onclick="window.hpEd=false;render()">✓ Готово</button></div>
@@ -825,11 +831,11 @@ SCREENS.home = () => {
   const unread = S.mail.filter(m => m.box === 'in' && (!m.read || m.gift)).length, cu = chTotal();
   after.push(() => {
     if (!S.tut) setTimeout(showTut, 500);
-    const box = $('homeBox'); if (!box) return;
+    const box = $('homeBox'); if (!box) return; requestAnimationFrame(bgApply);
     const Hh = Math.max(300, $('app').clientHeight - 14), oc = cur().p.chat; box.style.height = (Hh + 12) + 'px'; { const pb = $('pathBox'); if (pb) { const bt = 70 + pb.offsetHeight + 8; ['sideL', 'sideR'].forEach(id => { const e = $(id); if (!e) return; e.style.bottom = bt + 'px'; const u = (e.clientHeight - 9 * 6) / 10.8; e.querySelectorAll('button').forEach(b => { b.style.height = Math.floor(u * (b.classList.contains('fx') ? 1.25 : b.classList.contains('y') ? 1.05 : 1)) + 'px'; b.style.maxHeight = 'none'; b.style.flex = 'none'; }); }); } }
     const HPv = hpGet(), hh = Math.round((Hh - 130) * 0.9 * HPv.s), Pc = PATH[pathSt()].col; $('homeDoll').innerHTML = `<div style="position:relative;display:inline-block"><div style="position:absolute;left:6%;right:6%;bottom:-6px;height:${Math.round(hh * 0.035)}px;background:radial-gradient(ellipse,rgba(10,0,20,.85),rgba(0,0,0,0) 70%);filter:blur(2px)"></div><div style="position:relative;">${doll(hh)}</div></div>`; $('homeDoll').style.top = (oc ? 8 : Math.round(Hh - 104 - hh * 0.97 + Hh * HPv.y / 100)) + 'px'; $('homeDoll').style.transform = `translateX(${HPv.x}%)`;
   });
-  return `<div id="homeBox" style="position:relative;background:url(img/home_bg.jpg) center bottom/cover no-repeat;border-radius:0;overflow:hidden;margin:-6px -6px 0">
+  return `<div id="homeBox" style="position:relative;background:url(img/home_bg2.jpg) center center/cover no-repeat;border-radius:0;overflow:hidden;margin:-6px -6px 0">
     <div class="side hside" id="sideL" style="position:absolute;left:8px;top:12px;bottom:140px;z-index:3">
       ${hbFix("go('mail')", '✉️', 'Пошта', unread ? `<span class="badge">${unread}</span>` : '')}
       ${hbFix("go('tasks')", '📋', 'Завдання', dot(N.tasks()))}
@@ -2693,7 +2699,7 @@ SCREENS.fit = p => {
 };
 SCREENS.settings = p => {
   const t = p.tab || 'main';
-  let h = `<h2>⚙ Налаштування</h2>${tabs([['main', 'Основні'], ['dev', '🛠 Розробник'], ['hero', '🧍 Позиція героя']], t)}`;
+  let h = `<h2>⚙ Налаштування</h2>${tabs([['main', 'Основні'], ['dev', '🛠 Розробник'], ['hero', '🧍 Герой і фон']], t)}`;
   if (t === 'hero') { after.push(() => { window.hpEd = true; home(); }); return h; }
   if (t === 'dev') return h + `<div class="note">Тестові кнопки для перевірки прототипу. У грі їх не буде.</div>
   <div class="box"><b>Підписка (тест)</b><div class="grid g2" style="margin:4px 0 8px">${[[null, 'Без'], ['start', 'Старт'], ['street', 'Вуличний'], ['boss', 'Бос']].map(([k, n]) => `<button class="${subTier() === k ? 'g' : ''}" onclick="devSub(${k ? "'" + k + "'" : 'null'})">${n}</button>`).join('')}</div><button class="${S.devAll ? 'g' : ''}" style="width:100%;padding:10px;margin-bottom:6px" onclick="S.devAll=!S.devAll;render()">🔓 Відкрити все (тест): ${S.devAll ? 'УВІМК' : 'вимк'}</button><button class="y" style="width:100%;padding:10px" onclick="go('fit')">👔 Примірка одягу (підгонка речей на герої)</button>
@@ -2722,7 +2728,7 @@ SCREENS.settings = p => {
 const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 8192) s += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
 const unb64u = t => { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; const s = atob(t), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
 async function zip(str, mode) { const st = mode === 'c' ? new Blob([str]).stream().pipeThrough(new CompressionStream('deflate-raw')) : new Blob([str]).stream().pipeThrough(new DecompressionStream('deflate-raw')); return new Uint8Array(await new Response(st).arrayBuffer()); }
-const BUILD = 'v136';
+const BUILD = 'v137';
 const BOT = 'PotuzhneMisto_bot', PAGE = 'https://stasiya408-dev.github.io/tg-miniapp/';
 async function saveExport() {
   const o = Object.assign({}, S, { mail: [] }), t = b64u(await zip(JSON.stringify(o), 'c'));
