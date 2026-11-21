@@ -119,7 +119,7 @@ function wdelApply() {
 wdelApply();
 function wdelClean() {
   if (!S) return; S.owned = (S.owned || []).filter(k => WEAR[k]); Object.keys(S.equipped || {}).forEach(sl => { if (!WEAR[S.equipped[sl]]) delete S.equipped[sl]; });
-  S.inv = (S.inv || []).filter(x => IT[x.id]); if (S.lots) S.lots = S.lots.filter(x => IT[x.id]);
+  S.inv = (S.inv || []).filter(x => IT[x.id]); ['lots', 'wh', 'myLots', 'board', 'orders', 'trades'].forEach(k => { if (Array.isArray(S[k])) S[k] = S[k].filter(x => x && IT[x.id]); }); if (S.bagPend) S.bagPend = S.bagPend.filter(x => IT[x.id]);
 }
 async function wdelUpload() { try { if (!window.claude || !claude.use) return; const db = await claude.use('db'); if (!db) return; await db.doc('sync/wdel').set({ ids: JSON.stringify(WDEL), ts: Date.now() }); } catch (e) { } }
 function wDelAsk(k) {
@@ -553,7 +553,7 @@ const hasCar = () => !!(S.legacy || (S.beat && S.beat.molot));
 // ключ: [рівень, чи потрібна машина, назва]
 const UNL = {
   chat: [3, 0, '💬 Чат'], secondhand: [3, 0, '🧥 Секонд-хенд'], jobs: [3, 0, '💼 Робота'], events: [5, 0, '🏆 Події'],
-  slots: [5, 0, '🎡 Барабани удачі'], club: [5, 0, '🎡 Клуб розваг'], season: [7, 0, '🏆 Сезон'], market: [8, 0, '📈 Ринок і Аукціон'],
+  slots: [5, 0, '🎡 Барабани удачі'], club: [5, 0, '🎡 Клуб розваг'], season: [7, 0, '🏆 Сезон'], market: [8, 0, '🏪 Аукціон (лоти гравців)'], birzha: [12, 0, '📊 Біржа'],
   group: [10, 0, '👥 Групування'], bv: [10, 0, '🧵 Баба Валя'], district: [12, 0, '🏙 Райони'], poker: [15, 0, '🃏 Картковий турнір'],
   flip: [20, 0, '🚗 Перекуп авто'], garage: [0, 1, '🔧 Транспорт'], races: [0, 1, '🏁 Гонки']
 };
@@ -724,7 +724,7 @@ function fitRevert() { FIT = JSON.parse(JSON.stringify(FITS)); fitSave(); render
 function doll(height, gender, equipped) {
   const g = gender || S.gender, A = ANCH[g], eq = equipped || S.equipped;
   const W = A.W, k = height / 900;
-  let html = `<div class="doll" style="width:${W * k}px;height:${height}px"><img src="img/hero_${g}.png?v=129" style="left:0;top:0;width:100%;height:100%">`;
+  let html = `<img src="img/hero_${g}.png?v=129" style="left:0;top:0;width:100%;height:100%">`;
   ZORD.forEach((slot, zi) => {
     const id = eq[slot]; if (!id) return;
     const it = WEAR[id];
@@ -738,7 +738,9 @@ function doll(height, gender, equipped) {
     else if (slot === 'feet') { put(A.feetL, 'shoeL', id + ':L'); put(A.feetR, 'shoeR', id + ':R'); }
     else put(A[slot], it.img, id);
   });
-  return html + '</div>';
+  // v152: дві копії — нерухома (ноги, голова) і «дихаюча» смуга корпусу з одягом
+  const dl = `<div class="doll" style="width:${W * k}px;height:${height}px"><div class="dl dls">${html}</div><div class="dl dlb">${html.replace(/ data-k="[^"]*"/g, '')}</div></div>`;
+  return dl;
 }
 
 // ---------- ЕКРАНИ ----------
@@ -763,7 +765,7 @@ SCREENS.create = p => {
 };
 function createHero(g) {
   const n = $('nm').value.trim(); if (n.length < 2) return toast('Введи ім\'я (мін. 2 літери)');
-  S.name = n; S.gender = g; S.created = true; home();
+  S.name = n; S.gender = g; S.created = true; home(); setTimeout(refBoot, 800);
 }
 
 // --- ШВИДКИЙ ДОСТУП: гравець сам обирає кнопки в правому стовпчику головного екрана
@@ -845,8 +847,6 @@ SCREENS.home = () => {
       ${hbFix("go('mail')", '✉️', 'Пошта', unread ? `<span class="badge">${unread}</span>` : '')}
       ${hbFix("go('tasks')", '📋', 'Завдання', dot(N.tasks()))}
       ${hbFix("go('events')", '📅', 'Події', '')}
-      ${hbQaHead('L')}
-      ${qaList('L').map(hbQa).join('')}
     </div>
     <div class="lampFx" id="lampGlow"></div><div class="lampFx" id="lampDim"></div>
     <div style="position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse 85% 75% at 50% 50%,rgba(0,0,0,0) 55%,rgba(8,0,16,.55) 100%)"></div>
@@ -855,22 +855,60 @@ SCREENS.home = () => {
       ${hbFix("go('settings')", '⚙️', 'Налашт.', '')}
       ${hbFix("go('rewards')", '🎁', 'Нагороди', dot(N.login()))}
       ${hbFix('chatGo()', lockOf('chat') ? '🔒' : '💬', 'Чат', cu ? `<span class="badge">${cu}</span>` : '')}
-      ${hbQaHead('R')}
-      ${qaList('R').map(hbQa).join('')}
     </div>
     <div id="pathBox" style="position:absolute;left:10px;right:10px;bottom:70px;z-index:3">${pathStrip()}</div>
     ${window.hpEd ? hpOverlay() : ''}
-    ${false ? '' : `<button class="play" style="position:absolute;left:12px;right:12px;bottom:12px;padding:14px;font-size:22px;z-index:3" onclick="go('play')"><span class="pl">▶</span>ГРАТИ${dot(N.bonus())}</button>`}
+    ${false ? '' : `<button class="play" style="position:absolute;left:12px;right:12px;bottom:12px;padding:14px;font-size:22px;z-index:3" onclick="go('city')"><span class="pl">🏙</span>МІСТО${dot(N.bonus())}</button>`}
   ${cur().p.chat ? `<div style="position:absolute;left:0;right:0;bottom:0;height:62%;z-index:6;display:flex;flex-direction:column;background:#f4efe6;border-top:3px solid #d8b25a;padding:6px;color:#111;font-size:14px">${chatPanel(cur().p, true)}</div>` : ''}</div>`;
 };
 
+// --- МІСТО (v156): головна кнопка → мапа районів → місця в районі
+const CITY = [
+  { id: 'down', n: 'Даунтаун', ic: '💀', col: '#ff4f6a', d: 'Боси, рейди й боротьба за райони', at: [29, 3, 42, 25], pl: [
+    ['💀', 'Наліт', 'raidBoss', 0, 'Боси й рейди'], ['🏙', 'Атака на райони', 'district', 0, '12 етапів Даунтауна'], ['👥', 'Групування', 'group', 0, 'Твоя група і внески'], ['🏆', 'Сезон', 'season', 0, 'Нагороди за активність']] },
+  { id: 'ind', n: 'Промзона', ic: '🏭', col: '#5fd3ff', d: 'Робота, підробіток і перекуп', at: [3, 33, 42, 27], pl: [
+    ['💼', 'Робота', 'jobs', 0, 'Зміни й підробіток'], ['🧥', 'Секонд-хенд', 'secondhand', 0, 'Завезення й полиці'], ['🚗', 'Перекуп авто', 'jobs', { tab: 'car' }, 'Купи, полагодь, продай', 'flip'], ['🧵', 'Баба Валя', 'bv', 0, 'Прошивка речей']] },
+  { id: 'center', n: 'Центр', ic: '🛍', col: '#ffcc44', d: 'Ринок, аукціон і магазин', at: [55, 33, 42, 27], pl: [
+    ['🏪', 'Аукціон', 'market', { tab: 'buy', sub: 'lots' }, 'Лоти гравців і склад'], ['📊', 'Біржа', 'market', { tab: 'auc' }, 'Ціни, графіки, заявки', 'birzha'], ['🛒', 'Магазин', 'shop', 0, 'Кристали, золото, VIP']] },
+  { id: 'port', n: 'Порт і траса', ic: '🏁', col: '#6ee36e', d: 'Гонки й гараж', at: [3, 65, 42, 26], pl: [
+    ['🏁', 'Гонки', 'races', 0, 'Траси й нагороди'], ['🏎', 'Груповий заїзд', 'races', { rt: 'group' }, 'Командні заїзди 5×5'], ['🔧', 'Гараж', 'garage', 0, 'Тюнінг і ремонт']] },
+  { id: 'beach', n: 'Набережна', ic: '🎡', col: '#ff4fd8', d: 'Клуб розваг біля моря', at: [55, 65, 42, 26], pl: [
+    ['🎡', 'Клуб розваг', 'club', 0, 'Бонуси й жетони'], ['🎰', 'Барабани удачі', 'slots', 0, 'Гра на жетони'], ['🃏', 'Картковий турнір', 'poker', 0, 'Столи на жетони']] },
+];
+const cityLk = x => lockOf(x[5] || x[2]);
+const cityLkS = x => { const k = x[5] || x[2], u = UNL[k]; if (!lockOf(k) || !u) return ''; return u[1] && !hasCar() ? 'після 2-го боса' : 'рів. ' + u[0]; };
+const cityOpen = D => D.pl.filter(x => !cityLk(x)).length;
+function cityGo(di, pi) { const x = CITY[di].pl[pi], l = cityLk(x); if (l) return toast('🔒 ' + l); go(x[2], x[3] ? { ...x[3] } : {}); }
+SCREENS.city = p => {
+  // v163: Місто за макетами Тараса (img/city/<район>.jpg, 941×1573), прозорі гарячі зони поверх картинки
+  const di = Math.max(0, CITY.findIndex(D => D.id === (p.d || S.cityD || 'down'))), D = CITY[di];
+  after.push(() => { const a = $('app'), bx = $('cityBox'); if (!bx) return; const kw = a.clientWidth / 941, k = Math.min(kw, a.clientHeight / 1573), w = Math.floor(941 * k), h = Math.floor(Math.min(1573 * k * 1.15, a.clientHeight)); bx.style.width = w + 'px'; bx.style.height = h + 'px'; bx.style.aspectRatio = 'auto'; });
+  const R = (x1, y1, x2, y2) => `left:${(x1 / 9.41).toFixed(2)}%;top:${((y1 - 98) / 15.73).toFixed(2)}%;width:${((x2 - x1) / 9.41).toFixed(2)}%;height:${((y2 - y1) / 15.73).toFixed(2)}%`;
+  const TILE = { down: [258, 233, 655, 470], ind: [36, 510, 448, 737], center: [484, 510, 906, 737], port: [32, 762, 448, 994], beach: [484, 762, 912, 994] };
+  const PL = [[20, 1172, 461, 1310], [478, 1172, 922, 1310], [20, 1326, 461, 1474], [478, 1326, 922, 1474]];
+  const lockBox = (st, txt, rad) => `<div style="position:absolute;${st};border-radius:${rad}px;background:rgba(8,5,14,.72);display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;color:#fff;text-align:center;font-weight:bold;font-size:clamp(11px,1.8vh,15px);text-shadow:0 1px 2px #000"><span style="font-size:clamp(20px,3.6vh,32px)">🔒</span>${txt}</div>`;
+  const tiles = CITY.map((T, i) => { const [x1, y1, x2, y2] = TILE[T.id], o = cityOpen(T), n = T.pl.length;
+    let h = `<div onclick="S.cityD='${T.id}';setP('d','${T.id}')" style="position:absolute;${R(x1, y1, x2, y2)};cursor:pointer;border-radius:14%/22%"></div>`;
+    if (!o) h += lockBox(R(x1, y1, x2, y2), T.n, 18);
+    else if (o < n) { const cx = (x1 + x2) / 2, yt = { down: 438, ind: 700, center: 700, port: 962, beach: 962 }[T.id]; h += `<div style="position:absolute;${R(cx - 120, yt - 20, cx + 120, yt + 22)};border-radius:8px;background:rgba(10,6,18,.92);color:${T.col};white-space:nowrap;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:clamp(11px,1.7vh,15px);pointer-events:none">${o}/${n} відкрито</div>`; }
+    return h; }).join('');
+  const places = D.pl.map((x, i) => { const r = PL[i]; if (!r) return ''; const l = cityLkS(x);
+    return `<div onclick="cityGo(${di},${i})" style="position:absolute;${R(...r)};cursor:pointer;border-radius:16px"></div>` + (l ? lockBox(R(...r), 'Відкриється: ' + l, 16) : '') + (x[2] === 'club' && N.bonus() && !l ? `<div style="position:absolute;${R(r[2] - 40, r[1] - 6, r[2] - 6, r[1] + 28)}">${DOT}</div>` : ''); }).join('');
+  const pre = CITY.filter(T => T.id !== D.id).map(T => `<link rel="preload" as="image" href="img/city/${T.id}.jpg">`).join('');
+  return `${pre}<div style="position:absolute;inset:0;background:#120c18 url(img/city/${D.id}.jpg) center/cover;filter:blur(14px) brightness(.55)"></div>
+  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;overflow:hidden"><div id="cityBox" style="position:relative;width:100%;aspect-ratio:941/1573;background:url(img/city/${D.id}.jpg) center/100% 100% no-repeat">
+    ${tiles}${places}
+    <div onclick="go('play')" style="position:absolute;${R(25, 1494, 457, 1604)};cursor:pointer;border-radius:16px"></div>
+    <div onclick="showUnlocks()" style="position:absolute;${R(480, 1494, 916, 1604)};cursor:pointer;border-radius:16px"></div>
+  </div></div>`;
+};
 
 const QA_D = { boss: 'Боси, рейди, рейтинг шкоди', dist: 'Атака на райони, 12 етапів', club: 'Барабани удачі, картковий турнір, клубний день', slots: 'Барабани удачі за жетони', poker: 'Столи 10 / 50 / 500 / 1000 жетонів', races: 'Траси, старт, нагороди', grace: 'Командні заїзди 5×5', jobs: 'Секонд-хенд, перекуп авто', sh: 'Завезення, полиці, зміни', market: 'Купити / продати, графіки цін', auction: 'Лоти гравців і біржа', shop: 'Кристали, золото, підписки', bv: 'Прошивка речей: ранг D…A++', season: 'Нагороди за активність, 30 рівнів', group: 'Твоя група, внески, гілки', inv: 'Твої речі', ward: 'Одяг і набори', garage: 'Авто, тюнінг, ремонт', weap: 'Зброя для боса', prof: 'Герой, досягнення' };
 const PLAY_EXTRA = [['✉ Пошта', 'mail', 'Листи й подарунки'], ['☑ Завдання', 'tasks', 'Щоденні, тижневі, досягнення'], ['🏆 Події', 'events', 'Події та турніри'], ['🎁 Нагороди', 'rewards', 'Щоденний вхід, подарунки'], ['⚙ Налаштування', 'settings', 'Звук, мова, розробник']];
 SCREENS.play = () => {
   const row = (label, scr, d, onclick, dotH) => { const lk = lockOf(scr); return `<div class="row" style="position:relative" onclick="${onclick}">${dotH || ''}<div class="f"><b>${lk ? '🔒 ' : ''}${label}</b><div class="small">${lk || d}</div></div><button class="${lk ? 'dis' : 'y'}">${lk ? '🔒' : '▶'}</button></div>`; };
   const bk = `<button class="y" style="width:100%;padding:12px;margin:4px 0" onclick="home()">◀ Назад у меню</button>`;
-  return bk + `<h2>ГРАТИ: усі розділи</h2><button style="width:100%;margin:4px 0" onclick="showUnlocks()">📋 Що коли відкривається</button><div class="small">Тут усі вкладки гри. Найчастіші можна винести на головний екран у «⚡ Швидкий доступ» (по 6 з кожного боку).</div>
+  return bk + `<h2>ГРАТИ: усі розділи</h2><button style="width:100%;margin:4px 0" onclick="showUnlocks()">📋 Що коли відкривається</button><div class="small">Тут усі вкладки гри. Зручніше обирати місце на мапі: кнопка «🏙 Місто» на головному екрані.</div>
   ${Object.keys(QA).map(k => row(QA[k][0], QA[k][1], QA_D[k] || '', `qaGo('${k}')`, k === 'club' ? dot(N.bonus()) : '')).join('')}
   ${PLAY_EXTRA.map(([l, scr, d]) => row(l, scr, d, `go('${scr}')`)).join('')}` + bk;
 };
@@ -1158,6 +1196,7 @@ SCREENS.profile = () => {
     <div style="position:absolute;right:10px;top:8px;text-align:right"><div class="small">⚔️ Бойова сила</div><div style="font-size:28px;font-weight:900;line-height:1">${fmt(avgHit())}</div><div class="small">середній удар</div></div></div>
   <div class="grid g3">${st('🗡', 'Шкода', '+' + s.dmg + '%')}${st('💥', 'Крит', s.crit + '%')}${st('🍀', 'Удача', s.luck)}${st('👕', 'Колекція', S.owned.length + '/' + Object.keys(WEAR).length)}${st('🔫', 'Зброя', ((WEAPONS.find(w => w.id === S.weapon) || {}).name || '—') + ' ×' + weaponMult())}${st('🚗', 'Авто', S.car.name)}</div>
   <div class="grid g4">${st('🔫', 'Патрони', S.ammo)}${st('💣', 'Гранати', S.grenades)}${st('🪡', 'Наперстки', S.thim || 0)}${st('🌟', 'Золоті', S.thimG || 0)}</div>
+  ${refBox()}
   ${profBox()}
   <div class="bar" style="margin-top:auto"><input id="rn" value="${S.name}" style="flex:1;min-height:44px;font-size:15px"><button style="min-height:44px" onclick="S.name=$('rn').value||S.name;render()">Змінити ім'я</button></div></div>`;
 };
@@ -1178,7 +1217,8 @@ function invPick(uid) {
   modal(`<div class="bigico" style="text-align:center">${ico(i.id)}</div><h3>${d.name} ${gB(itG(i))} ${rarBadge(d.rar)}</h3><div class="small">${d.cat} · ${d.stat}</div><div class="grid" style="gap:6px;margin-top:8px">
   ${d.wear && WEAR[d.wear] ? `<button class="y" style="${B}" onclick="closeModal();toWardrobe(${uid})">👕 У гардероб</button>` : ''}
   ${d.cat !== 'Ресурси' && d.stat !== '—' ? `<button style="${B}" onclick="closeModal();go('bv',{src:'i:${uid}'})">🧵 До баби Валі</button>` : ''}
-  <button style="${B}" onclick="closeModal();sellItem(${uid})">💵 Продати за ${fmt(sellPrice(i.id))}</button></div>`);
+  <button class="${isFind(i.id, itG(i)) ? 'y' : ''}" style="${B}" onclick="closeModal();toWh(${uid});go('market',{tab:'sell',sub:'lot',lotItem:'${i.id}|${itG(i)}'})">🏷 На біржу ≈ ${fmt(lotVal(i.id, itG(i)))}</button>
+  <button style="${B}" onclick="closeModal();sellItem(${uid})">💵 Продати швидко за ${fmt(sellPrice(i.id))}</button></div>`);
 }
 function sellPrice(id) { return Math.round(IT[id].base * 0.6); }
 function sellItem(uid) { const i = S.inv.find(x => x.uid === uid); S.inv = S.inv.filter(x => x.uid !== uid); give({ money: sellPrice(i.id) }, 'Продано'); render(); }
@@ -1276,12 +1316,13 @@ SCREENS.wardrobe = p => {
       <div style="display:flex;flex-direction:column;gap:17px">${WSIDE[0].map(sl => wSlotCell(sl, cat)).join('')}</div>
       <div style="flex:1;display:flex;justify-content:center;min-width:0;overflow:hidden">${doll(H)}</div>
       <div style="display:flex;flex-direction:column;gap:17px">${WSIDE[1].map(sl => wSlotCell(sl, cat)).join('')}</div></div>`;
-    h += `<div class="grid g4" style="padding:6px 0 4px;gap:4px">${WCAT.map(([k, e, n]) => `<button class="${k === cat ? 'y' : ''}" style="padding:4px 2px;border-radius:10px;font-size:11px;line-height:1.1" onclick="setP('cat','${k}')"><span style="font-size:18px;display:block">${e}</span>${n}</button>`).join('')}</div>`;
     const sls = (WCAT.find(c => c[0] === cat) || WCAT[0])[3];
     const items = Object.entries(WEAR).filter(([k, w]) => sls.includes(w.slot) && (f === 'all' || (f === 'my' ? S.owned.includes(k) : !S.owned.includes(k))))
       .sort((x, y) => (S.owned.includes(y[0]) - S.owned.includes(x[0])) || x[1].rar - y[1].rar);
-    h += `<div class="bar" style="gap:4px;margin-bottom:4px">${[['all', 'Усі'], ['my', 'Мої'], ['av', 'Доступні']].map(([k, n]) => `<button class="${f === k ? 'sel' : ''}" style="padding:3px 10px;font-size:11px;border-radius:12px" onclick="setP('f','${k}')">${n}</button>`).join('')}<span class="small" style="margin-left:auto">${items.length} шт.</span></div>`;
-    h += `<div class="grid g4">${items.map(([k, w]) => { const own = S.owned.includes(k), on = Object.values(S.equipped).includes(k); return `<div class="cell r${w.rar}" onclick="wPick('${k}')" style="${on ? 'background:#fff6cc;' : ''}padding:3px">${S.devDel ? `<span onclick="event.stopPropagation();wDelAsk('${k}')" style="position:absolute;top:-4px;right:-4px;z-index:3;background:#c22;color:#fff;border-radius:50%;width:24px;height:24px;line-height:24px;font-size:13px;box-shadow:0 1px 3px #000">🗑</span>` : ''}<img src="${cropURL(w.img)}" style="width:100%;height:62px;object-fit:contain;${own ? '' : 'opacity:.55'}"><div style="font-size:10px;line-height:1.15;height:23px;overflow:hidden">${w.name.replace('Кросівки ', '')}</div>${own ? gB(wgOf(k)) : '🔒'}${on ? ' ✓' : ''}</div>`; }).join('') || '<div class="small">Немає речей у цій категорії</div>'}</div>`;
+    // v150: кнопки категорій прибрано (вибір через слоти біля героя), панель речей розтягнута
+    h += `<div style="margin-top:6px;background:linear-gradient(#efe8db,#e2d8c6);border:2px solid #c9a24a;border-radius:14px;padding:8px 6px;min-height:${Math.round(Math.max(180, ($('app').clientHeight || 700) - H - 150))}px;box-sizing:border-box">`;
+    h += `<div class="bar" style="gap:4px;margin-bottom:6px">${[['all', 'Усі'], ['my', 'Мої'], ['av', 'Доступні']].map(([k, n]) => `<button class="${f === k ? 'sel' : ''}" style="padding:3px 10px;font-size:11px;border-radius:12px" onclick="setP('f','${k}')">${n}</button>`).join('')}<span class="small" style="margin-left:auto">${items.length} шт.</span></div>`;
+    h += `<div class="grid g4" style="grid-template-columns:repeat(4,minmax(0,1fr))">${items.map(([k, w]) => { const own = S.owned.includes(k), on = Object.values(S.equipped).includes(k); return `<div class="cell r${w.rar}" onclick="wPick('${k}')" style="${on ? 'background:#fff6cc;' : ''}padding:3px">${S.devDel ? `<span onclick="event.stopPropagation();wDelAsk('${k}')" style="position:absolute;top:-4px;right:-4px;z-index:3;background:#c22;color:#fff;border-radius:50%;width:24px;height:24px;line-height:24px;font-size:13px;box-shadow:0 1px 3px #000">🗑</span>` : ''}<img src="${cropURL(w.img)}" style="width:100%;height:62px;object-fit:contain;${own ? '' : 'opacity:.55'}"><div style="font-size:10px;line-height:1.15;height:23px;overflow:hidden">${w.name.replace('Кросівки ', '')}</div>${own ? gB(wgOf(k)) : '🔒'}${on ? ' ✓' : ''}</div>`; }).join('') || '<div class="small">Немає речей у цій категорії</div>'}</div></div>`;
   } else if (t === 'skin') {
     h += `<div class="box">Скін героя (стать):<div class="bar"><button class="${S.gender === 'm' ? 'sel' : ''}" onclick="S.gender='m';render()">Чоловік</button><button class="${S.gender === 'f' ? 'sel' : ''}" onclick="S.gender='f';render()">Жінка</button></div>
     <div class="note">Інші скіни: з'являться пізніше (заглушка).</div></div>`;
@@ -1536,7 +1577,7 @@ const CLUB_COS = [
 const clubOwn = () => S.cos || (S.cos = { own: [], title: '', frame: '' });
 function cosBuy(k) { const c = CLUB_COS.find(x => x[0] === k), o = clubOwn(); if (o.own.includes(k)) return; if (!pay('chips', c[2])) return; o.own.push(k); bump('cosN'); toast('Куплено: ' + c[1]); render(); }
 function cosUse(k) { const c = CLUB_COS.find(x => x[0] === k), o = clubOwn(), key = k[0] === 't' ? 'title' : 'frame'; o[key] = o[key] === k ? '' : k; render(); }
-const cosTitle = () => { const k = clubOwn().title, c = CLUB_COS.find(x => x[0] === k); return c ? c[1].replace(/^🏷 Титул /, '') : ''; };
+const cosTitle = () => { const k = clubOwn().title; if (k === 'tz') return 'Розвідник ЗБТ'; const c = CLUB_COS.find(x => x[0] === k); return c ? c[1].replace(/^🏷 Титул /, '') : ''; };
 const cosFrame = () => { const k = clubOwn().frame, c = CLUB_COS.find(x => x[0] === k); return c ? c[3] : ''; };
 const CLUB_SHOP = [
   ['en10', '⚡ +10 енергії', 150, () => give({ energy: 10 })], ['en25', '⚡ +25 енергії', 350, () => give({ energy: 25 })],
@@ -1550,9 +1591,11 @@ const CLUB_SHOP = [
 ];
 function clubBuy(k) { const c = CLUB_SHOP.find(x => x[0] === k), d = S.daily.cs || (S.daily.cs = {}); if (d[k]) return toast('Сьогодні вже куплено'); if (!pay('chips', c[2])) return; d[k] = true; bump('clubShopN'); c[3](); toast('Куплено: ' + c[1]); render(); }
 const CHIPS_SPINS = 20, CHIPS_POKER = 25, CHIPS_DAILY = CHIPS_SPINS * 10 + CHIPS_POKER * 10; // 450
-const CHIP_RATE = 10, CHIP_EX = [10, 50, 100, 250]; // 1 🟡 = 10 🎟, обмін лише в один бік
-function chipsExchBox() { return `<div class="box"><b>🟡 → 🎟 Обмін на жетони</b><div class="small">Курс: 1 🟡 = ${CHIP_RATE} 🎟. Лише в один бік: жетони назад не обмінюються й не виводяться. У тебе <b>${fmt(S.gold || 0)}</b> 🟡.</div><div class="grid g4" style="margin-top:4px">${CHIP_EX.map(g => `<button class="y" onclick="chipsExch(${g})">${g} 🟡<br>→ ${fmt(g * CHIP_RATE)} 🎟</button>`).join('')}</div></div>`; }
-function chipsExch(g) { if (!pay('gold', g)) return; give({ chips: g * CHIP_RATE }, 'Обмін 🟡 → 🎟'); render(); }
+// v162: жетони купуються лише за 💎, не більше 2 000 🎟 на день
+const CHIP_RATE = 5, CHIP_EX = [20, 50, 100, 400], CHIP_DAY = 2000; // 1 💎 = 5 🎟, обмін лише в один бік
+const chipsLeft = () => Math.max(0, CHIP_DAY - (S.daily.chipsBuy || 0));
+function chipsExchBox() { const left = chipsLeft(); return `<div class="box"><b>💎 → 🎟 Купити жетони</b><div class="small">Курс: 1 💎 = ${CHIP_RATE} 🎟. Не більше <b>${fmt(CHIP_DAY)} 🎟 на день</b>, сьогодні ще можна <b>${fmt(left)}</b> 🎟. Лише в один бік: жетони назад не обмінюються й не виводяться. У тебе <b>${fmt(S.crystals || 0)}</b> 💎.</div><div class="prog" style="margin:5px 0"><i style="width:${Math.round((CHIP_DAY - left) / CHIP_DAY * 100)}%"></i></div><div class="grid g4" style="margin-top:4px">${CHIP_EX.map(c => { const n = c * CHIP_RATE, ok = n <= left; return `<button class="${ok ? 'y' : 'dis'}" style="min-height:52px" onclick="chipsExch(${c})">${c} 💎<br>→ ${fmt(n)} 🎟</button>`; }).join('')}</div></div>`; }
+function chipsExch(c) { const n = c * CHIP_RATE; if (n > chipsLeft()) return toast('Ліміт: не більше ' + fmt(CHIP_DAY) + ' 🎟 на день. Сьогодні ще ' + fmt(chipsLeft()) + ' 🎟'); if (!pay('crystals', c)) return; S.daily.chipsBuy = (S.daily.chipsBuy || 0) + n; give({ chips: n }, 'Купівля 🎟 за 💎'); render(); }
 function claimChips() { if (S.daily.chipsClaim) return; S.daily.chipsClaim = true; bump('chipsClaimN'); give({ chips: CHIPS_DAILY }, 'Щоденні жетони'); render(); }
 SCREENS.club = p => {
   const t = p.tab || 'bon';
@@ -1585,6 +1628,10 @@ const SYM = ['7️⃣', '💲', '🔫', '💵', '🎲', '👑', '💎', '🍀', 
 const SLOT_GOAL = 50, SCAT = '🪙'; // скриня-скатер: 3+ на барабанах = бонусна гра (вага символу підібрана під ~1 раз на 50 обертів)
 const SLOT_BASE = [[1, 220000], [2, 104000], [3, 50000], [5, 24000], [10, 8000], [20, 2500], [50, 600], [100, 100], [200, 25], [500, 5]];
 const SLOT_BONUS = [[2, 560000], [3, 230000], [5, 120000], [10, 55000], [25, 22000], [50, 8000], [100, 3500], [250, 1000], [500, 400], [1000, 100]];
+// v164: символи барабанів — малюнки Тараса (img/sym/*.png), 7 — стилізований текст
+const SYM_IMG = { '💲': 'chip', '🔫': 'gun', '💵': 'cash', '🎲': 'dice', '👑': 'crown', '💎': 'gem', '🍀': 'clover', '🂡': 'card', '🔒': 'lock', '🥇': 'medal', '🚬': 'cigar', '🪙': 'gift' };
+const symH = s => SYM_IMG[s] ? `<img class="symI" src="img/sym/${SYM_IMG[s]}.webp" alt="" draggable="false">` : `<b class="sym7">7</b>`;
+(function preSym() { try { Object.values(SYM_IMG).forEach(n => { const i = new Image(); i.src = 'img/sym/' + n + '.webp'; }); } catch (e) { } })();
 const WINMAP = { 1: ['🍀', 3], 2: ['🚬', 3], 3: ['🎲', 3], 5: ['🔫', 3], 10: ['💵', 4], 20: ['💲', 4], 50: ['👑', 5], 100: ['💎', 5], 200: ['🥇', 5], 500: ['7️⃣', 5] };
 function rollTable(t) { let x = Math.random() * 1e6; for (const [m, w] of t) { x -= w; if (x < 0) return m; } return 0; }
 const tableEV = t => t.reduce((s, [m, w]) => s + m * w / 1e6, 0);
@@ -1635,18 +1682,22 @@ function openSlotChest(i) {
 SCREENS.slots = () => {
   if (slotBonus) return slotBonusUI();
   if (!reels) reels = buildReels(0).g;
-  return `<div class="bar sp"><h2 style="margin:4px 0">🎡 БАРАБАНИ УДАЧІ</h2><button class="y" onclick="slotFaq()">❓ FAQ</button></div>${ctabs('slots')}<div class="reel">${reels.map((s, i) => `<div class="${winCells.includes(i) ? 'win' : ''}${s === SCAT ? ' scat' : ''}">${s}</div>`).join('')}</div><div class="small" style="text-align:center;margin:2px 0">7 ліній · заряд на лінію ${(S.slots.bet / 7).toFixed(1)} 🎟 (загальний ${S.slots.bet}) · Віддача 97% · ${SCAT} ×3 = бонус</div>
-  <div class="${lastWin ? 'winban ' + (lastWin.mult >= 20 ? 'me' : '') : 'small'}" style="${lastWin ? '' : 'text-align:center;padding:10px'}">${lastWin ? (lastWin.mult >= 20 ? '🔥 ВЕЛИКА НАГОРОДА ' : 'НАГОРОДА ') + 'x' + lastWin.mult + ' (лінія ' + lastWin.line + '): +' + fmt(lastWin.pay) + ' 🎟' : 'Крутни барабани'}</div>
-  <div class="bar" style="justify-content:center;margin:8px 0"><button onclick="S.slots.bet=Math.max(10,S.slots.bet-10);render()">−</button><b>${S.slots.bet} 🎟</b><button onclick="S.slots.bet=Math.min(200,S.slots.bet+10);render()">+</button>
-  <button class="y" style="padding:10px 24px;font-size:18px" onclick="spin()">ГРАТИ</button>
-  <label><input type="checkbox" id="auto" ${autoOn ? 'checked' : ''} onchange="autoSpin(this.checked)"> АВТО</label></div>
-  <div class="box small">🎁 Бонусна гра випадає випадково під час обертів: приз від x2 до x1000 від заряду.</div>
-  <div class="box small">🔞 16+. Клуб розваг — це гра. Жетони не обмінюються назад на валюту й не виводяться. Реальних виграшів немає. Денний ліміт заряду ${fmt(SLOT_DAY_CAP)} 🎟 (сьогодні ${fmt(S.daily.sb || 0)}).</div>
-  <div class="box"><div class="bar sp"><b>Історія обертів</b><span class="small">${slotStats()}</span></div>${slotHistory()}</div>`;
+  const bet = S.slots.bet, left = Math.max(0, SLOT_DAY_CAP - (S.daily.sb || 0));
+  return `<div class="slotsScr">
+  <div class="slHead"><div class="slTitle">БАРАБАНИ УДАЧІ</div><button class="slFaq" onclick="slotFaq()">❓ FAQ</button></div>${ctabs('slots')}
+  <div class="slFrame"><div class="reel">${reels.map((s, i) => `<div class="${winCells.includes(i) ? 'win' : ''}${s === SCAT ? ' scat' : ''}">${symH(s)}</div>`).join('')}</div></div>
+  <div class="slInfo">7 ліній · заряд на лінію ${(bet / 7).toFixed(1)} 🎟 (загальний ${bet}) · Віддача 97% · <span class="symS">${symH(SCAT)}</span>×3 = бонус</div>
+  ${lastWin ? `<div class="winban ${lastWin.mult >= 20 ? 'me' : ''}">${lastWin.mult >= 20 ? '🔥 ВЕЛИКА НАГОРОДА ' : 'НАГОРОДА '}x${lastWin.mult}: +${fmt(lastWin.pay)} 🎟</div>` : ''}
+  <div class="slCtl"><div class="slBet"><button onclick="S.slots.bet=Math.max(10,S.slots.bet-10);render()">−</button><b>${bet} 🎟</b><button onclick="S.slots.bet=Math.min(200,S.slots.bet+10);render()">+</button></div>
+  <button class="slPlay" onclick="spin()">ГРАТИ</button><label class="slAuto"><input type="checkbox" id="auto" ${autoOn ? 'checked' : ''} onchange="autoSpin(this.checked)"> АВТО</label></div>
+  <div class="slNote"><span class="slIco">🎁</span><span>Бонусна гра випадає випадково під час обертів: приз від x2 до x1000 від заряду.</span></div>
+  <div class="slNote"><span class="slIco sl16">16+</span><span>Клуб розваг — це гра. Жетони не обмінюються назад на валюту й не виводяться. Реальних виграшів немає. Денний ліміт заряду ${fmt(SLOT_DAY_CAP)} 🎟 (лишилось ${fmt(left)}).</span></div>
+  <div class="slHist"><div class="bar sp slHH"><b>🏆 Історія обертів</b><span>${slotStats()}</span></div>${slotHistory()}</div>
+  </div>`;
 };
 function slotFaq() {
   modal(`<h3>FAQ: Барабани удачі</h3><b>Таблиця виплат</b> (множник на заряд)
-  <table style="width:100%;border-collapse:collapse;font-size:12px;margin:4px 0"><tr style="background:#ffe9a8"><td style="white-space:nowrap">${`<span class="scatT">${SCAT}</span>`.repeat(3)}</td><td colspan="2"><b>Бонусна гра</b><div class="small">3 будь-де на екрані</div></td></tr>${SLOT_BASE.map(([m, w]) => `<tr style="border-bottom:1px solid #ddd"><td>${WINMAP[m][0].repeat(WINMAP[m][1])}</td><td><b>x${m}</b></td><td class="small">шанс 1 до ${fmt(Math.round(1e6 / w))}</td></tr>`).join('')}</table>
+  <table style="width:100%;border-collapse:collapse;font-size:12px;margin:4px 0"><tr style="background:#ffe9a8"><td style="white-space:nowrap">${`<span class="symS">${symH(SCAT)}</span>`.repeat(3)}</td><td colspan="2"><b>Бонусна гра</b><div class="small">3 будь-де на екрані</div></td></tr>${SLOT_BASE.map(([m, w]) => `<tr style="border-bottom:1px solid #ddd"><td style="white-space:nowrap">${`<span class="symS">${symH(WINMAP[m][0])}</span>`.repeat(WINMAP[m][1])}</td><td><b>x${m}</b></td><td class="small">шанс 1 до ${fmt(Math.round(1e6 / w))}</td></tr>`).join('')}</table>
   <p class="small">7 ліній виплат: 3 горизонтальні, 2 діагоналі (V і Λ) та 2 зигзаги. Нагороду дає збіг символів зліва направо по лінії. Загальний заряд ділиться на 7.</p>
   <p class="small">Віддача барабанів: <b>97%</b>.</p><div class="small" style="color:#888">Збірка ${BUILD}</div>`);
 }
@@ -1675,8 +1726,8 @@ function animReels(final, done) {
     const el = Date.now() - t0; let all = true;
     for (let c = 0; c < 5; c++) {
       if (el >= stopAt[c]) {
-        if (!stopped[c]) { stopped[c] = 1; for (let r = 0; r < 3; r++) { const d = cells[r * 5 + c]; d.textContent = final[r * 5 + c]; d.classList.toggle('scat', final[r * 5 + c] === SCAT); d.classList.remove('spin'); d.classList.add('stop'); } }
-      } else { all = false; for (let r = 0; r < 3; r++) { const d = cells[r * 5 + c]; d.textContent = pick(SYM); d.classList.add('spin'); } }
+        if (!stopped[c]) { stopped[c] = 1; for (let r = 0; r < 3; r++) { const d = cells[r * 5 + c]; d.innerHTML = symH(final[r * 5 + c]); d.classList.toggle('scat', final[r * 5 + c] === SCAT); d.classList.remove('spin'); d.classList.add('stop'); } }
+      } else { all = false; for (let r = 0; r < 3; r++) { const d = cells[r * 5 + c]; d.innerHTML = symH(pick(SYM)); d.classList.add('spin'); } }
     }
     if (all) { spinning = false; setTimeout(done, 250); return; }
     const next = stopAt.find((x, k) => !stopped[k]), left = next - el;
@@ -1689,7 +1740,7 @@ function spin() {
   const bet = S.slots.bet;
   if (!S.daily.sb) S.daily.sb = 0;
   if (S.daily.sb + bet > SLOT_DAY_CAP) { autoSpin(false); return toast('Денний ліміт заряду барабанів ' + fmt(SLOT_DAY_CAP) + ' 🎟 вичерпано'); }
-  if (!pay('chips', bet)) { autoSpin(false); return toast('Жетони закінчились. Нові: щоденні жетони або обмін 🟡 у клубі'); }
+  if (!pay('chips', bet)) { autoSpin(false); return toast('Жетони закінчились. Нові: щоденні жетони або купівля за 💎 у клубі'); }
   S.daily.sb += bet;
   const mult = rollTable(SLOT_BASE), bonusHit = Math.random() < 1 / SLOT_GOAL, nsc = bonusHit ? (() => { const x = Math.random(); return x < 0.85 ? 3 : x < 0.97 ? 4 : 5; })() : (Math.random() < 0.12 ? rnd(1, 2) : 0), R = buildReels(mult, nsc);
   lastWin = null; winCells = [];
@@ -1700,7 +1751,7 @@ function spin() {
     if (!mult) bump('slotLost', bet); if (mult) { bump('slotWins'); bump('slotBig', mult, 'max'); bump('slotWon', bet * mult); lastWin = { mult, pay: bet * mult, line: R.line + 1 }; give({ chips: bet * mult }, 'Нагорода x' + mult); }
     if (bonusHit) {
       const m = rollTable(SLOT_BONUS) || 2; bump('slotBonus'); autoSpin(false); bonusPend = true;
-      winCells = winCells.concat(R.sc); toast('🎁 Бонусна гра! ' + R.sc.length + '× ' + SCAT);
+      winCells = winCells.concat(R.sc); toast('🎁 Бонусна гра! ' + R.sc.length + ' подарунки');
       setTimeout(() => { bonusPend = false; slotBonus = { picked: null, mult: m, avg: bet, pay: bet * m, intro: true }; if (cur().name === 'slots') render(); setTimeout(endIntro, 2200); }, 1800);
     }
     render();
@@ -1737,7 +1788,7 @@ let PKT = null, PKR = 0;
 function pkSit(i) { const t = PK_TABLES[i]; if (S.chips < t[0]) return toast('Для цього столу треба мінімум ' + fmt(t[0]) + ' 🎟'); PKT = i; STAKE = t[0]; render(); }
 function pokerNew() {
   if ((S.daily.pk || 0) >= POKER_DAY) return toast('Ліміт турніру на сьогодні: ' + POKER_DAY + ' партій. Завтра нові');
-  if (S.chips < STAKE) return toast('Мінімум ' + STAKE + ' 🎟. Нові: щоденні або обмін 🟡 у клубі');
+  if (S.chips < STAKE) return toast('Мінімум ' + STAKE + ' 🎟. Нові: щоденні або купівля за 💎 у клубі');
   const d = deck();
   PK = { d, me: [d.pop(), d.pop()], bots: ['Тоні', 'Сеньйор', 'Лисий', 'Ла Ріка'].map((n, i) => ({ n, c: [d.pop(), d.pop()], fold: false, stack: STAKE * 10, th: [0.42, 0.38, 0.3, 0.45][i], bl: [0.05, 0.03, 0.12, 0.04][i] })), board: [d.pop(), d.pop(), d.pop(), d.pop(), d.pop()], st: 0, bank: 0, over: false, msg: '', owe: 0, raises: 0 };
   S.daily.pk = (S.daily.pk || 0) + 1; S.chips -= STAKE; bump('pokerSpent', STAKE); bump('chipsSpent', STAKE); PK.bank = STAKE * 5; S.daily.casino++; bump('pokerPlayed'); clubPt(); render();
@@ -2086,18 +2137,14 @@ const BAGS = [{ id: 'basic', n: 'Звичайне завезення', cur: 'mon
   { id: 'rare', n: 'Рідкісне завезення', cur: 'crystals', price: 50, cnt: [6, 10], rw: [10, 30, 35, 20, 5], crates: 20, keys: 1 }];
 let bagRes = null;
 SCREENS.secondhand = p => {
-  const t = p.tab || 'work';
+  if (!bagRes && S.bagPend && S.bagPend.length) bagRes = { n: 'Незавершене завезення', items: S.bagPend };
+  const t = p.tab || (bagRes ? 'my' : 'work');
   let h = `<h2>🧥 СЕКОНД-ХЕНД</h2><div class="small" style="text-align:center">Підробіток для початківця</div>${tabs([['work', '💼 Робота'], ['my', '👜 Завезення'], ['search', '🔍 Полиці'], ['auc', '🏪 Аукціон']], t)}`;
   if (t === 'work') return h + workTab();
   if (t === 'my') {
     if (bagRes && bagRes.loading) return h + `<div class="box" style="text-align:center;padding:40px 5px"><b>Завезення відкрито!</b><div style="font-size:50px">👜</div>⏳ Визначаємо знайдені речі...</div>`;
-    if (bagRes) {
-      const sum = bagRes.items.reduce((a, i) => a + sellPrice(i), 0);
-      return h + `<div class="box" style="text-align:center"><b>Результат завезення</b><br>${bagRes.n} → Відкрито! Отримано речей: <b>${bagRes.items.length}</b></div>
-      <div class="grid g4">${bagRes.items.map(i => `<div class="cell r${IT[i].rar}">${ico(i)}${IT[i].name}<br>x1<br><span class="small">${RAR[IT[i].rar]}</span></div>`).join('')}</div>
-      <div class="grid g2" style="margin-top:6px"><button onclick="bagKeep()">Залишити в інвентарі</button><button class="y" onclick="bagSell(${sum})">Продати все<br>${fmt(sum)} 💵</button></div>`;
-    }
-    h += swHead() + shHead() + `<div class="box" style="text-align:center"><b>Мої завезення</b><div class="small">Відкривай баули, отримуй випадкові речі та вирішуй: залишити собі чи продати на аукціоні!</div></div>
+    if (bagRes) return h + bagResUI();
+    h += swHead() + shHead() + `<div class="box" style="text-align:center"><b>Мої завезення</b><div class="small">Відкривай баули, отримуй випадкові речі: мотлох продавай одразу, а цікаві знахідки неси на біржу й торгуйся за свою ціну!</div></div>
     <div class="grid g3">${BAGS.map(b => `<div class="cell">👜<br><b>${b.n}</b><br>${b.cnt[0]}-${b.cnt[1]} речей<button class="small" style="width:100%;margin:2px 0;padding:2px" onclick="bagOdds('${b.id}')">📊 Шанси</button><button class="y" style="width:100%" onclick="openBag('${b.id}')">${fmt(b.cur === 'money' ? Math.round(b.price * (1 - swDisc())) : b.price)} ${b.cur === 'money' ? '💵' : '💎'}</button><button style="width:100%;margin-top:2px" class="${sw().crates >= b.crates && sw().keys >= b.keys ? 'g' : ''}" onclick="openBag('${b.id}','crates')">${b.crates} 📦${b.keys ? ' + ' + b.keys + ' 🔑' : ''}</button></div>`).join('')}</div>
     <div class="box"><div class="small">Лишилось завезень сьогодні: <b>${shLeft('bags')}</b></div><div class="bar">${shBuyBtn('bags')}</div></div>
     <div class="box"><b>Знахідки в інвентарі:</b> ${S.inv.length} шт. <button onclick="stack=[{name:'home',p:{}}];go('inventory')">Відкрити інвентар</button></div>`;
@@ -2108,8 +2155,11 @@ SCREENS.secondhand = p => {
     <div class="box small">⏱ Полиці оновлюються раз на 24 години, наступне оновлення через <b>${stallLeft()}</b>.<br>Шанс речі: ${STALL_W.map((w, i) => RAR[i] + ' ' + w + '%').join(' · ')}</div>
     ${S.stall.map((id, i) => ({ id, i })).filter(x => IT[x.id].name.toLowerCase().includes(q)).map(({ id, i }) => `<div class="row r${IT[id].rar}"><div class="f">${ico(id)}${IT[id].name} ${rarBadge(IT[id].rar)}</div><button class="y" onclick="buyStall(${i})">${fmt(stallPrice(id))} 💵</button></div>`).join('') || '<div class="box small">Нічого</div>'}`;
   } else {
-    h += `<div class="box">Аукціон працює як біржа: живі свічкові графіки, стакан заявок, свої лоти на продаж і заявки на купівлю.<br>Ваших активних заявок: <b>${(S.orders || []).length}</b></div>
-    <button class="y" style="width:100%;padding:12px" onclick="go('market',{tab:'sell',sub:'lot'})">📈 Відкрити аукціон (лоти)</button>`;
+    const f = shFinds();
+    h += `<div class="box"><b>🧥 → 🏪 Секонд-хенд і біржа</b><div class="small">Мотлох продається одразу за копійки. Рідкісні речі й речі високого рангу виставляй лотом на біржі: там вони коштують у рази більше.</div></div>
+    <div class="box"><b>Твої знахідки для біржі: ${f.length}</b>${f.slice(0, 6).map(i => `<div class="row r${IT[i.id].rar}"><div class="f">${ico(i.id)}<b>${IT[i.id].name}</b> ${gB(itG(i))}<div class="small">На біржі ≈ <b>${fmt(lotVal(i.id, itG(i)))} 💵</b> · швидко ${fmt(sellPrice(i.id))}</div></div><button class="y" style="min-height:48px" onclick="S.inv=S.inv.filter(x=>x.uid!==${i.uid});wh().push({uid:${i.uid},id:'${i.id}',g:${itG(i)},sh:1});toBirzha('${i.id}|${itG(i)}')">🏷 На біржу</button></div>`).join('') || '<div class="small">Поки немає. Відкривай завезення!</div>'}</div>
+    <div class="box small">📦 На складі біржі: <b>${wh().length}</b> · твоїх лотів: <b>${(S.myLots || []).length}</b> · заявок: <b>${(S.orders || []).length}</b></div>
+    <button class="y" style="width:100%;min-height:56px;font-size:17px" onclick="go('market',{tab:'sell',sub:'lot'})">🏪 Відкрити біржу</button>`;
   }
   return h;
 };
@@ -2135,13 +2185,57 @@ function openBag(id, mode) {
   else if (!pay(b.cur, b.cur === 'money' ? Math.round(b.price * (1 - swDisc())) : b.price)) return;
   shS().bags++;
   const n = rnd(b.cnt[0], b.cnt[1]); const items = [];
-  for (let i = 0; i < n; i++) { let r = rollRar(b.rw); if (Math.random() < shTier().rar + swRar() + luckB()) r = Math.min(4, r + 1); const pool = ITEMS.filter(x => x.rar === r); items.push(pickIt(pool.length ? pool : ITEMS).id); }
+  for (let i = 0; i < n; i++) { let r = rollRar(b.rw); if (Math.random() < shTier().rar + swRar() + luckB()) r = Math.min(4, r + 1); const pool = ITEMS.filter(x => x.rar === r); items.push({ id: pickIt(pool.length ? pool : ITEMS).id, g: rollG(), st: 0 }); }
   S.week.bags++; S.ach.bags++; bump('bags');
-  bagRes = { n: b.n, items, loading: true }; render();
+  bagRes = { n: b.n, items, loading: true }; S.bagPend = items; render();
   setTimeout(() => { if (bagRes) bagRes.loading = false; if (cur().name === 'secondhand') render(); }, 1500);
 }
-function bagKeep() { bagRes.items.forEach(id => addItem(id, rollG())); toast('Речі в інвентарі (одяг → кнопка «У гардероб»)'); bagRes = null; render(); }
-function bagSell(sum) { give({ money: sum }, 'Продано все'); bagRes = null; render(); }
+// v159: окремий склад біржі. Покупки, знахідки для продажу й непродані лоти лежать тут
+function wh() { if (!S.wh) S.wh = []; return S.wh; }
+function whAdd(id, g, sh) { const u = { uid: ++S.uidN, id }; if (g != null) u.g = g; if (sh) u.sh = 1; wh().push(u); return u; }
+function whTake(f) { const i = wh().find(f); if (i) S.wh = S.wh.filter(x => x !== i); return i; }
+function toWh(uid) { const i = S.inv.find(x => x.uid === uid); if (!i) return; S.inv = S.inv.filter(x => x !== i); wh().push(i); toast('На складі біржі: ' + IT[i.id].name); render(); }
+function fromWh(uid) { const i = whTake(x => x.uid === uid); if (!i) return; S.inv.push(i); toast('Забрано в інвентар: ' + IT[i.id].name); render(); }
+function whTab(p) {
+  const W = wh(), B = 'min-height:46px';
+  let h = `<div class="box" style="text-align:center"><div style="font-size:44px">📦</div><b style="font-size:17px">Склад біржі: ${W.length} шт.</b><div class="small">Окремо від інвентаря. Сюди падають покупки на біржі, знахідки секонд-хенду для продажу й непродані лоти. Виставляй звідси або забирай собі.</div></div>`;
+  h += W.length ? W.slice().sort((a, b) => lotVal(b.id, itG(b)) - lotVal(a.id, itG(a))).map(i => `<div class="row r${IT[i.id].rar}"><div class="f">${ico(i.id)}<b>${i.sh ? '🧥 ' : ''}${IT[i.id].name}</b> ${gB(itG(i))}<div class="small">На біржі ≈ <b>${fmt(lotVal(i.id, itG(i)))} 💵</b></div></div>
+    <div style="display:flex;flex-direction:column;gap:3px"><button class="y" style="${B}" onclick="go('market',{tab:'sell',sub:'lot',lotItem:'${i.id}|${itG(i)}'})">🏷 Виставити</button><button style="min-height:40px" onclick="fromWh(${i.uid})">🎒 Забрати</button></div></div>`).join('') : '<div class="box small" style="text-align:center">Склад порожній.</div>';
+  const inv = S.inv.filter(i => IT[i.id].cat !== 'Ресурси');
+  h += `<details class="box" ${W.length ? '' : 'open'}><summary><b>➡ Перенести з інвентаря (${inv.length})</b></summary>${inv.map(i => `<div class="row r${IT[i.id].rar}"><div class="f">${ico(i.id)}${IT[i.id].name} ${gB(itG(i))}<div class="small">≈ ${fmt(lotVal(i.id, itG(i)))} 💵</div></div><button style="${B}" onclick="toWh(${i.uid})">📦 На склад</button></div>`).join('') || '<div class="small">Інвентар порожній.</div>'}</details>`;
+  return h;
+}
+// v157: секонд-хенд ↔ біржа. Мотлох — швидкий продаж, цікаве — лот на біржі
+const lotVal = (id, g) => Math.round(price(id) * GM_PR[g == null ? 1 : g]);
+const isFind = (id, g) => { g = g == null ? 1 : g; return (IT[id].rar >= 2 && g >= 1) || g >= 3; };
+function shFinds() { return S.inv.filter(i => i.sh && isFind(i.id, itG(i))); }
+function bagDone() { if (bagRes && bagRes.items.every(x => x.st)) { bagRes = null; S.bagPend = null; } }
+function bagAdd(x) { const u = addItem(x.id, x.g); u.sh = 1; x.st = 'k'; return u; }
+function bagOne(k, act) {
+  const x = bagRes && bagRes.items[k]; if (!x || x.st) return;
+  if (act === 's') { x.st = 's'; give({ money: sellPrice(x.id) }, 'Продано ' + IT[x.id].name); }
+  else if (act === 'b') { whAdd(x.id, x.g, 1); bump('itemsFound'); x.st = 'b'; bagDone(); return toBirzha(x.id + '|' + x.g); }
+  else { bagAdd(x); toast('В інвентарі: ' + IT[x.id].name); }
+  bagDone(); render();
+}
+function bagJunk() { if (!bagRes) return; let sum = 0, n = 0; bagRes.items.forEach(x => { if (!x.st && !isFind(x.id, x.g)) { x.st = 's'; sum += sellPrice(x.id); n++; } }); if (n) give({ money: sum }, 'Продано мотлох: ' + n + ' шт.'); bagDone(); render(); }
+function bagKeep() { if (!bagRes) return; bagRes.items.forEach(x => { if (!x.st) bagAdd(x); }); toast('Речі в інвентарі. Цікаві знахідки можна винести на біржу 🏪'); bagRes = null; S.bagPend = null; render(); }
+function bagSell() { if (!bagRes) return; let sum = 0; bagRes.items.forEach(x => { if (!x.st) { x.st = 's'; sum += sellPrice(x.id); } }); give({ money: sum }, 'Продано все'); bagRes = null; S.bagPend = null; render(); }
+function toBirzha(key) { stack = [{ name: 'home', p: {} }, { name: 'secondhand', p: { tab: 'my' } }]; go('market', { tab: 'sell', sub: 'lot', lotItem: key, fromSh: 1 }); }
+function bagResUI() {
+  const L = bagRes.items.map((x, k) => ({ x, k })).filter(o => !o.x.st), finds = L.filter(o => isFind(o.x.id, o.x.g)), junk = L.filter(o => !isFind(o.x.id, o.x.g));
+  const jSum = junk.reduce((a, o) => a + sellPrice(o.x.id), 0), done = bagRes.items.length - L.length;
+  const B = 'min-height:48px;font-size:14px';
+  return `<div class="box" style="text-align:center"><b>Результат завезення</b><br>${bagRes.n}: отримано речей <b>${bagRes.items.length}</b>${done ? ` · розібрано ${done}` : ''}</div>
+  ${finds.length ? `<div class="box" style="border:2px solid #e80;background:#fff6dc"><b>✨ Цікаві знахідки (${finds.length})</b><div class="small">Не продавай за копійки: на біржі за них торгуються гравці.</div>
+  ${finds.map(({ x, k }) => `<div class="row r${IT[x.id].rar}"><div class="f">${ico(x.id)}<b>${IT[x.id].name}</b> ${gB(x.g)} ${rarBadge(IT[x.id].rar)}<div class="small">На біржі ≈ <b>${fmt(lotVal(x.id, x.g))} 💵</b> · швидко лише ${fmt(sellPrice(x.id))}</div></div>
+  <div style="display:flex;flex-direction:column;gap:3px"><button class="y" style="${B}" onclick="bagOne(${k},'b')">🏷 На біржу</button><button style="min-height:40px" onclick="bagOne(${k},'k')">🎒 Собі</button></div></div>`).join('')}</div>` : ''}
+  ${junk.length ? `<div class="box"><b>🗑 Мотлох (${junk.length})</b><div class="small">Дешеві речі: простіше продати одразу.</div>
+  <div class="grid g4">${junk.map(({ x, k }) => `<div class="cell r${IT[x.id].rar}">${ico(x.id)}${IT[x.id].name}<br>${gB(x.g)}<button class="y" style="width:100%;min-height:44px;margin-top:3px;font-size:12px" onclick="bagOne(${k},'s')">💵 ${fmt(sellPrice(x.id))}</button><button style="width:100%;min-height:36px;margin-top:2px;font-size:11px" onclick="bagOne(${k},'k')">🎒 Собі</button></div>`).join('')}</div>
+  <button class="y" style="width:100%;min-height:52px;margin-top:6px;font-size:16px" onclick="bagJunk()">💵 Продати весь мотлох · ${fmt(jSum)}</button></div>` : ''}
+  <div class="grid g2" style="margin-top:6px"><button style="${B}" onclick="bagKeep()">🎒 Решту в інвентар</button><button style="${B}" onclick="if(confirmSellAll())bagSell()">Продати все<br>${fmt(L.reduce((a, o) => a + sellPrice(o.x.id), 0))} 💵</button></div>`;
+}
+function confirmSellAll() { const f = bagRes.items.filter(x => !x.st && isFind(x.id, x.g)); if (!f.length || bagRes.warned) return true; bagRes.warned = 1; toast('Увага: серед речей ' + f.length + ' цікавих. Натисни ще раз, щоб продати все за копійки'); return false; }
 function buyStall(i) { const id = S.stall[i]; if (!pay('money', stallPrice(id))) return; addItem(id, rollG()); S.stall.splice(i, 1); toast('Куплено: ' + IT[id].name); render(); }
 function putLot(uid) { bump('lotsPosted'); const i = S.inv.find(x => x.uid === uid); S.inv = S.inv.filter(x => x.uid !== uid); S.lots.push({ id: i.id, price: IT[i.id].base, end: Date.now() + 30000 }); render(); }
 function checkLots() { const now = Date.now(); S.lots.filter(l => l.end <= now).forEach(l => sendMail('Ринок', 'Предмет продано', `Ваш лот «${IT[l.id].name}» успішно продано.`, { money: l.price })); S.lots = S.lots.filter(l => l.end > now); }
@@ -2246,7 +2340,7 @@ function fillOrders() {
       sendMail('Аукціон', 'Лот продано', `«${IT[o.id].name}» продано за ${fmt(p)}, комісія ${mkFeePct()}%: на руки ${fmt(net(p))}.`, { money: net(p) }); tradeLog('sell', o.id, 1, net(p));
       toast('Ваш лот продано: ' + IT[o.id].name + ' (гроші в пошті)'); m.trades.unshift({ p, q: 1, side: 's', t: 'ваш' });
     } else if (o.side === 'buy' && p <= o.price) {
-      addItem(o.id); tradeLog('buy', o.id, 1, p); S.money += o.price - p; S.daily.market++; toast('Заявку виконано: куплено ' + IT[o.id].name + ' за ' + fmt(p)); m.trades.unshift({ p, q: 1, side: 'b', t: 'ваш' });
+      whAdd(o.id); tradeLog('buy', o.id, 1, p); S.money += o.price - p; S.daily.market++; toast('Заявку виконано: куплено ' + IT[o.id].name + ' за ' + fmt(p)); m.trades.unshift({ p, q: 1, side: 'b', t: 'ваш' });
     } else keep.push(o);
   });
   S.orders = keep;
@@ -2326,7 +2420,7 @@ function tradePanel() {
   return `<div class="box" style="margin-top:10px"><b>Підсумок за сьогодні</b>
   <div class="grid g3" style="margin:4px 0"><div class="cell">Витрачено<br><b style="color:#c00">−${fmt(spent)}</b></div><div class="cell">Зароблено<br><b style="color:#090">+${fmt(earned)}</b></div><div class="cell" style="background:${net >= 0 ? '#d8f5d8' : '#f6dede'}">Чистий результат<br><b style="color:${net >= 0 ? '#090' : '#c00'}">${net >= 0 ? '+' : ''}${fmt(net)} 💵</b></div></div>
   <div class="small">Угод за день: ${day.length}</div></div>
-  <div class="box"><b>Історія покупок і продажів</b>${all.length ? all.slice(0, 30).map(x => `<div class="bar sp" style="font-size:12px;padding:3px 4px;margin:2px 0;border-radius:3px;background:${x.side === 'buy' ? '#f6dede' : '#d8f5d8'}"><span>${x.side === 'buy' ? '🛒 Куплено' : '🏷 Продано'} ${IT[x.id].name}${x.qty > 1 ? ' ×' + x.qty : ''}</span><span class="small">${x.day === today() ? x.t : x.day.slice(5)}</span><b style="color:${x.side === 'buy' ? '#c00' : '#090'}">${x.side === 'buy' ? '−' : '+'}${fmt(x.total)}</b></div>`).join('') : '<div class="small">Поки немає угод.</div>'}</div>`;
+  <div class="box"><b>Історія покупок і продажів</b>${all.length ? all.slice(0, 30).map(x => `<div class="bar sp" style="font-size:12px;padding:3px 4px;margin:2px 0;border-radius:3px;background:${x.side === 'buy' ? '#f6dede' : '#d8f5d8'}"><span>${x.side === 'buy' ? '🛒 Куплено' : '🏷 Продано'} ${IT[x.id] ? IT[x.id].name : 'річ'}${x.qty > 1 ? ' ×' + x.qty : ''}</span><span class="small">${x.day === today() ? x.t : x.day.slice(5)}</span><b style="color:${x.side === 'buy' ? '#c00' : '#090'}">${x.side === 'buy' ? '−' : '+'}${fmt(x.total)}</b></div>`).join('') : '<div class="small">Поки немає угод.</div>'}</div>`;
 }
 const MK_BAND = 0.10, BASE_FEE = 20, BASE_LIM = 5, BASE_ORD = 3, MIN_FEE = 5, RING_BONUS = 3;
 // Підписки (як Value Pack у Black Desert): менша комісія, більше лімітів і слотів ордерів, щоденна виплата
@@ -2386,7 +2480,7 @@ function marketRules() {
 // --- ДОШКА ЛОТІВ (як у GTA Online): лот стоїть, поки його не куплять
 const SELLERS = ['Козак', 'Ла Ріка', 'Бандерас', 'Тоні', 'Лисий', 'Сеньйор', 'Мамба', 'Філін', 'Рокі', 'Дикий'];
 const LOT_MIN = 0.5, LOT_MAX = 3, LOT_FEE = 0.02, LOT_DAYS = 3;
-function newNpcLot() { const it = pickIt(ITEMS.filter(x => x.rar >= 1)), g = rollG(); return { uid: Math.random().toString(36).slice(2, 9), id: it.id, g, price: Math.round(price(it.id) * GM_PR[g] * (0.8 + Math.random() * 0.6)), seller: pick(SELLERS) }; }
+function newNpcLot() { const it = pickIt(ITEMS.filter(x => x.rar >= 1)), g = rollG(); return { uid: Math.random().toString(36).slice(2, 9), id: it.id, g, price: Math.round(price(it.id) * GM_PR[g] * (0.8 + Math.random() * 0.6)), seller: pick(SELLERS), sh: Math.random() < 0.45 ? 1 : 0 }; }
 function lotChance(id, pr, g) { const r = pr / (price(id) * GM_PR[g == null ? 1 : g]); return r <= 0.95 ? 0.08 : 0.04 * Math.exp(-6 * (r - 0.95)); } // шанс продажу за 2 с
 function lotSpeed(id, pr, g) { const c = lotChance(id, pr, g), min = 1 / c * 2 / 60; return c >= 0.07 ? '⚡ швидко (до 1 хв)' : min < 5 ? '🙂 помірно (≈' + Math.round(min) + ' хв)' : min < 30 ? '🐢 довго (≈' + Math.round(min) + ' хв)' : '🧊 дуже довго'; }
 function tickLots(steps) {
@@ -2398,7 +2492,7 @@ function tickLots(steps) {
     if (Math.random() < 0.05 && S.board.length < 14) S.board.push(newNpcLot());
     S.myLots = S.myLots.filter(l => {
       if (!l.until) l.until = Date.now() + LOT_DAYS * 864e5;
-      if (l.until <= Date.now()) { addItem(l.id, l.g); toast('Лот «' + IT[l.id].name + '» не продався за ' + LOT_DAYS + ' доби. Річ повернулась в інвентар'); return false; }
+      if (l.until <= Date.now()) { whAdd(l.id, l.g, l.sh); toast('Лот «' + IT[l.id].name + '» не продався за ' + LOT_DAYS + ' доби. Річ на складі біржі'); return false; }
       if (Math.random() < lotChance(l.id, l.price, l.g)) {
         const got = net(l.price); sendMail('Дошка лотів', 'Лот продано', `«${IT[l.id].name}» куплено гравцем ${pick(SELLERS)} за ${fmt(l.price)}. Комісія ${mkFeePct()}%, на руки ${fmt(got)}.`, { money: got });
         tradeLog('sell', l.id, 1, got); bump('lotsSold'); toast('Ваш лот купили: ' + IT[l.id].name + ' (+' + fmt(got) + ', гроші в пошті)'); return false;
@@ -2410,17 +2504,21 @@ function tickLots(steps) {
 function catchUpLots() { if (!S.lotTs) { S.lotTs = Date.now(); return; } const n = Math.min(900, Math.floor((Date.now() - S.lotTs) / 2000)); if (n > 0) tickLots(n); }
 function lotsBoard(p, part) {
   if (!S.board) tickLots(0);
-  const inv = {}; S.inv.forEach(i => { const k = i.id + '|' + itG(i); inv[k] = (inv[k] || 0) + 1; });
-  const ids = Object.keys(inv), sel = ids.includes(p.lotItem) ? p.lotItem : ids[0];
+  const inv = {}; wh().forEach(i => { const k = i.id + '|' + itG(i); inv[k] = (inv[k] || 0) + 1; });
+  const ids = Object.keys(inv).sort((a, b) => lotVal(b.split('|')[0], +b.split('|')[1]) - lotVal(a.split('|')[0], +a.split('|')[1])), sel = ids.includes(p.lotItem) ? p.lotItem : ids[0];
+  const shK = new Set(wh().filter(i => i.sh).map(i => i.id + '|' + itG(i)));
   const my = S.myLots || [], free = mkOrd() - my.length;
   let h = '';
   if (part === 'sell') {
+    const fk = [...shK];
+    if (p.fromSh) h += `<div class="box" style="background:#fff6dc;border:2px solid #e80"><b>🧥 Із секонд-хенду</b><div class="small">Річ уже вибрана. Постав ціну й виставляй. <button onclick="back()">◀ Назад до завезення</button></div></div>`;
+    if (fk.length) h += `<div class="box"><b>🧥 Знахідки секонд-хенду на складі (${fk.length})</b><div style="display:flex;gap:4px;overflow-x:auto;padding:4px 0">${fk.map(k => `<button class="${k === sel ? 'y' : ''}" style="min-width:92px;min-height:64px;font-size:11px" onclick="cur().p.lotItem='${k}';cur().p.lotPrice=0;render()">${ico(k.split('|')[0])}${IT[k.split('|')[0]].name} ${gB(+k.split('|')[1])}<br>≈${fmt(lotVal(k.split('|')[0], +k.split('|')[1]))}</button>`).join('')}</div></div>`;
     h += `<div class="box"><b>Виставити лот</b> <span class="small">(вільних місць: ${free} з ${mkOrd()})</span>`;
-    if (!sel) h += `<div class="small" style="margin-top:4px">У тебе немає речей для продажу.</div></div>`;
+    if (!sel) h += `<div class="small" style="margin-top:4px">Склад біржі порожній. Перенеси речі з інвентаря.</div><button class="y" style="width:100%;min-height:50px;margin-top:6px" onclick="setP('tab','wh')">📦 Відкрити склад</button></div>`;
     else {
       const sid = sel.split('|')[0], sgr = +sel.split('|')[1], fp = Math.round(price(sid) * GM_PR[sgr]), lp = p.lotPrice || Math.round(fp * 1.05), r = lp / fp * 100;
       const verdict = r < 95 ? '⚡ Продасться дуже швидко' : r <= 110 ? '🙂 Продасться за кілька хвилин' : r <= 150 ? '🐢 Чекатимеш довго' : '🧊 Дуже дорого, можливо ніхто не купить';
-      h += `<select id="lotSel" style="width:100%;margin:6px 0 3px" onchange="cur().p.lotItem=this.value;cur().p.lotPrice=0;this.blur();render()">${ids.map(i => `<option value="${i}" ${i === sel ? 'selected' : ''}>${IT[i.split('|')[0]].name} [${GRD[+i.split('|')[1]]}] (у тебе ${inv[i]} шт.)</option>`).join('')}</select>
+      h += `<select id="lotSel" style="width:100%;margin:6px 0 3px" onchange="cur().p.lotItem=this.value;cur().p.lotPrice=0;this.blur();render()">${ids.map(i => `<option value="${i}" ${i === sel ? 'selected' : ''}>${shK.has(i) ? '🧥 ' : ''}${IT[i.split('|')[0]].name} [${GRD[+i.split('|')[1]]}] (на складі ${inv[i]} шт.)</option>`).join('')}</select>
       <div class="small">Типова ціна цієї речі: <b>${fmt(fp)} 💵</b></div>
       <div class="small">За рангами: ${GRD.map((x, g) => `<span style="${g === sgr ? 'font-weight:bold;text-decoration:underline' : ''}">${x} ${fmt(Math.round(price(sid) * GM_PR[g]))}</span>`).join(' · ')}</div>
       <div class="bar" style="margin:4px 0;justify-content:center"><button onclick="cur().p.lotPrice=${Math.max(1, Math.round(lp * 0.9))};render()">−10%</button><input id="lotPrice" type="number" value="${lp}" style="width:110px;text-align:center;font-size:16px" onchange="cur().p.lotPrice=+this.value;render()"><button onclick="cur().p.lotPrice=${Math.round(lp * 1.1)};render()">+10%</button></div>
@@ -2428,18 +2526,18 @@ function lotsBoard(p, part) {
       <div class="box" style="margin:4px 0">${verdict}<br>Збір за виставлення ${LOT_FEE * 100}%: <b>${fmt(Math.round(lp * LOT_FEE))} 💵</b> · комісія з продажу ${mkFeePct()}%.<br><b>Тобі прийде: ${fmt(net(lp))} 💵</b><br><span class="small">Лот діє ${LOT_DAYS} доби, потім річ повертається.</span></div>
       <button class="y" style="width:100%;padding:12px;font-size:15px" onclick="listLot('${sel}')">🏷 ВИСТАВИТИ НА ПРОДАЖ</button></div>`;
     }
-    h += `<div class="box"><b>Мої лоти</b>${my.length ? my.map((l, k) => { const left = Math.max(0, Math.ceil(((l.until || Date.now()) - Date.now()) / 36e5)); return `<div class="row"><div class="f"><b>${IT[l.id].name}</b> ${gB(l.g == null ? 1 : l.g)}<div class="small">Ціна ${fmt(l.price)} 💵 · ${lotSpeed(l.id, l.price, l.g)} · ще ${left >= 24 ? Math.floor(left / 24) + ' д ' + (left % 24) + ' год' : left + ' год'}</div></div><button onclick="cancelLot(${k})">Зняти</button></div>`; }).join('') : '<div class="small">Поки порожньо.</div>'}</div>`;
+    h += `<div class="box"><b>Мої лоти</b>${my.length ? my.map((l, k) => { const left = Math.max(0, Math.ceil(((l.until || Date.now()) - Date.now()) / 36e5)); return `<div class="row"><div class="f"><b>${l.sh ? '🧥 ' : ''}${IT[l.id].name}</b> ${gB(l.g == null ? 1 : l.g)}<div class="small">Ціна ${fmt(l.price)} 💵 · ${lotSpeed(l.id, l.price, l.g)} · ще ${left >= 24 ? Math.floor(left / 24) + ' д ' + (left % 24) + ' год' : left + ' год'}</div></div><button onclick="cancelLot(${k})">Зняти</button></div>`; }).join('') : '<div class="small">Поки порожньо.</div>'}</div>`;
     return h + `<details class="box"><summary class="small">Моя комісія та ліміти</summary>${tradeStatus()}</details>`;
   }
   const lc = p.lc || 'Усі товари', lr = p.lr ?? -1, ls = p.ls || 'pct';
   const lr_ = l => l.price / (price(l.id) * GM_PR[itG(l)]);
-  let list = S.board.filter(l => (lc === 'Усі товари' || IT[l.id].cat === lc) && (lr < 0 || itG(l) === lr));
+  let list = S.board.filter(l => (lc === 'Усі товари' || IT[l.id].cat === lc) && (lr < 0 || itG(l) === lr) && (!p.lsh || l.sh));
   list.sort((a, b) => ls === 'pr' ? a.price - b.price : ls === 'rk' ? itG(b) - itG(a) : lr_(a) - lr_(b));
   h += `<div class="bar"><select onchange="cur().p.lc=this.value;this.blur();render()">${['Усі товари', ...CAT].map(x => `<option ${x === lc ? 'selected' : ''}>${x}</option>`).join('')}</select>
   <select onchange="cur().p.lr=+this.value;this.blur();render()"><option value="-1">Ранг: усі</option>${GRD.map((g, i) => `<option value="${i}" ${lr === i ? 'selected' : ''}>${g}</option>`).join('')}</select>
-  <select onchange="cur().p.ls=this.value;this.blur();render()"><option value="pct" ${ls === 'pct' ? 'selected' : ''}>Вигідні</option><option value="pr" ${ls === 'pr' ? 'selected' : ''}>Ціна ↑</option><option value="rk" ${ls === 'rk' ? 'selected' : ''}>Ранг ↓</option></select></div>
+  <select onchange="cur().p.ls=this.value;this.blur();render()"><option value="pct" ${ls === 'pct' ? 'selected' : ''}>Вигідні</option><option value="pr" ${ls === 'pr' ? 'selected' : ''}>Ціна ↑</option><option value="rk" ${ls === 'rk' ? 'selected' : ''}>Ранг ↓</option></select><button class="${p.lsh ? 'y' : ''}" style="min-height:44px" onclick="cur().p.lsh=${p.lsh ? 0 : 1};render()">🧥 Секонд</button></div>
   <div class="small">Зелений % означає дешевше, ніж зазвичай для цього рангу.</div>
-  ${list.map(l => { const r = lr_(l) * 100; return `<div class="row r${IT[l.id].rar}"><div class="f">${ico(l.id)}<b>${IT[l.id].name}</b> ${gB(itG(l))} ${rarBadge(IT[l.id].rar)}<div class="small">від ${l.seller} · <span style="color:${r < 100 ? '#090' : '#c00'}">${r < 100 ? 'дешевше на ' + (100 - r).toFixed(0) : 'дорожче на ' + (r - 100).toFixed(0)}%</span></div></div><button class="y" onclick="buyLot('${l.uid}')">Купити<br>${fmt(l.price)} 💵</button></div>`; }).join('') || '<div class="box small">Лотів за цими фільтрами немає</div>'}`;
+  ${list.map(l => { const r = lr_(l) * 100; return `<div class="row r${IT[l.id].rar}"><div class="f">${ico(l.id)}<b>${IT[l.id].name}</b> ${gB(itG(l))} ${rarBadge(IT[l.id].rar)}<div class="small">${l.sh ? '🧥 з секонд-хенду · ' : ''}від ${l.seller} · <span style="color:${r < 100 ? '#090' : '#c00'}">${r < 100 ? 'дешевше на ' + (100 - r).toFixed(0) : 'дорожче на ' + (r - 100).toFixed(0)}%</span></div></div><button class="y" onclick="buyLot('${l.uid}')">Купити<br>${fmt(l.price)} 💵</button></div>`; }).join('') || '<div class="box small">Лотів за цими фільтрами немає</div>'}`;
   return h;
 }
 function listLot(key) {
@@ -2449,26 +2547,30 @@ function listLot(key) {
   if (pr < fp * LOT_MIN || pr > fp * LOT_MAX) return toast('Ціна поза межами: ' + fmt(fp * LOT_MIN) + ' – ' + fmt(fp * LOT_MAX));
   if ((S.myLots || []).length >= mkOrd()) return toast('Усі слоти лотів зайняті (' + mkOrd() + '). Підписка додає слоти.');
   if (mLeft('sell', id) < 1) return toast('Ліміт продажів на сьогодні вичерпано для цього товару');
-  const i = S.inv.find(x => x.id === id && itG(x) === gr); if (!i) return toast('Немає такої речі');
+  const i = wh().find(x => x.id === id && itG(x) === gr); if (!i) return toast('Немає такої речі на складі');
   if (!pay('money', Math.round(pr * LOT_FEE))) return;
-  S.inv = S.inv.filter(x => x !== i); mUse('sell', id, 1); S.myLots.push({ id, price: pr, g: gr, until: Date.now() + LOT_DAYS * 864e5 }); cur().p.lotPrice = 0; toast('Лот виставлено за ' + fmt(pr) + ' на ' + LOT_DAYS + ' доби'); render();
+  S.wh = wh().filter(x => x !== i); mUse('sell', id, 1); S.myLots.push({ id, price: pr, g: gr, until: Date.now() + LOT_DAYS * 864e5, sh: i.sh ? 1 : 0 }); if (i.sh) bump('shLots'); cur().p.lotPrice = 0; toast('Лот виставлено за ' + fmt(pr) + ' на ' + LOT_DAYS + ' доби'); render();
 }
-function cancelLot(k) { const l = S.myLots[k]; addItem(l.id, l.g); S.myLots.splice(k, 1); toast('Лот знято, річ повернулась в інвентар'); render(); }
+function cancelLot(k) { const l = S.myLots[k]; whAdd(l.id, l.g, l.sh); S.myLots.splice(k, 1); toast('Лот знято, річ на складі біржі'); render(); }
 function buyLot(uid) {
   const l = S.board.find(x => x.uid === uid); if (!l) return toast('Лот уже купили');
   if (mLeft('buy', l.id) < 1) return toast('Ліміт покупок на сьогодні вичерпано для цього товару');
-  if (!pay('money', l.price)) return; mUse('buy', l.id, 1); addItem(l.id, l.g); tradeLog('buy', l.id, 1, l.price); S.daily.market++;
-  S.board = S.board.filter(x => x !== l); toast('Куплено: ' + IT[l.id].name + ' у ' + l.seller); render();
+  if (!pay('money', l.price)) return; mUse('buy', l.id, 1); whAdd(l.id, l.g); tradeLog('buy', l.id, 1, l.price); S.daily.market++;
+  S.board = S.board.filter(x => x !== l); toast('Куплено: ' + IT[l.id].name + ' у ' + l.seller + '. Річ на складі біржі 📦'); render();
 }
 SCREENS.market = p => marketMain(p) + tradePanel();
 function marketMain(p) {
   const t = p.tab || 'buy', c = p.cat || 'Усі товари', pg = p.pg || 0, rar = p.rar ?? -1, sort = p.sort || 'price';
-  let h = `<div class="bar sp"><h2 style="margin:4px 0">🏪 Аукціон</h2><button class="y" onclick="marketRules()">❓ FAQ</button></div>${tabs([['buy', '🛒 Купити'], ['sell', '🏷 Продати'], ['auc', '📊 Біржа (графіки)']], t)}`;
-  if (t === 'auc') return h + auction(p);
-  if (p.item) return h + marketItem(p);
+  let h = `<div class="bar sp"><h2 style="margin:4px 0">🏪 Аукціон</h2><button class="y" onclick="marketRules()">❓ FAQ</button></div>${tabs([['buy', '🛒 Купити'], ['sell', '🏷 Продати'], ['wh', '📦 Склад ' + wh().length], ['auc', (lockOf('birzha') ? '🔒' : '📊') + ' Графіки']], t)}`;
+  // v160: на старті лише лоти гравців; біржа (ранг C, швидкий продаж, графіки й заявки) з рівня UNL.birzha
+  const bL = lockOf('birzha'), bLk = '<div class="box" style="text-align:center;padding:22px 8px"><div style="font-size:46px">🔒</div><b style="font-size:17px">📊 Біржа</b><div class="small" style="margin:6px 0">' + bL + '</div><div class="small">Поки торгуй через 🏪 лоти гравців: купуй і виставляй речі зі складу за свою ціну. Біржа дасть миттєві покупки й продажі за ринковою ціною, графіки цін і заявки.</div><button class="y" style="width:100%;min-height:50px;margin-top:8px" onclick="setP(\'sub\',\'lots\')">🏪 До лотів гравців</button></div>';
+  if (t === 'auc') return h + (bL ? bLk : auction(p));
+  if (t === 'wh') return h + whTab(p);
+  if (p.item) return h + (bL ? bLk : marketItem(p));
   const bsub = ['lots', 'ex'].includes(p.sub) ? p.sub : 'lots', ssub = ['lot', 'fast'].includes(p.sub) ? p.sub : 'lot';
-  if (t === 'buy') h += tabs([['lots', '🏪 Лоти гравців'], ['ex', '📦 Біржа (ранг C)']], bsub, 'sub');
-  else h += tabs([['lot', '🏷 Виставити лот'], ['fast', '⚡ Швидко (ранг C)']], ssub, 'sub');
+  if (t === 'buy') h += tabs([['lots', '🏪 Лоти гравців'], ['ex', (bL ? '🔒' : '📦') + ' Біржа (ранг C)']], bsub, 'sub');
+  else h += tabs([['lot', '🏷 Виставити лот'], ['fast', (bL ? '🔒' : '⚡') + ' Швидко (ранг C)']], ssub, 'sub');
+  if (bL && ((t === 'buy' && bsub === 'ex') || (t === 'sell' && ssub === 'fast'))) return h + bLk;
   if (t === 'buy' && bsub === 'lots') return h + lotsBoard(p, 'buy');
   if (t === 'sell' && ssub === 'lot') return h + lotsBoard(p, 'sell');
   if (t === 'buy') {
@@ -2483,8 +2585,8 @@ function marketMain(p) {
       <div style="text-align:center"><b>${fmt(price(i.id))} 💵</b><br><span class="small">${chgH(i.id)}</span><br><button class="y">Купити</button></div></div>`; }).join('') || '<div class="box small">Немає товарів</div>'}
     <div class="bar" style="justify-content:center"><button onclick="setP('pg',${Math.max(0, pg - 1)})">◀</button> ${pg + 1} / ${pages} <button onclick="setP('pg',${Math.min(pages - 1, pg + 1)})">▶</button></div>`;
   } else {
-    h += `<div class="small">Швидкий продаж звичайних речей [C] за найкращою заявкою. Речі інших рангів продаються лотом.</div>` +
-      (S.inv.filter(i => itG(i) === 1).map(i => `<div class="row r${IT[i.id].rar}"><div class="f">${ico(i.id)}${IT[i.id].name}<div class="small">Ринок: ${fmt(price(i.id))} ${chgH(i.id)}</div></div>
+    h += `<div class="small">Швидкий продаж звичайних речей [C] зі складу біржі за найкращою заявкою. Речі інших рангів продаються лотом.</div>` +
+      (wh().filter(i => itG(i) === 1).map(i => `<div class="row r${IT[i.id].rar}"><div class="f">${ico(i.id)}${IT[i.id].name}<div class="small">Ринок: ${fmt(price(i.id))} ${chgH(i.id)}</div></div>
         <button class="y" onclick="marketSell(${i.uid})">Продати ${fmt(net(bid(i.id)))}</button><button onclick="go('market',{tab:'sell',sub:'lot',lotItem:'${i.id}|1'})">Лот ›</button></div>`).join('') || '<div class="box small">Нічого продавати</div>');
   }
   return h;
@@ -2500,13 +2602,13 @@ function marketItem(p) {
   <button class="y" style="width:100%;padding:10px;margin-top:5px" onclick="marketBuy('${i.id}',${q})">🛒 Купити за ${fmt(pr * q)} 💵</button>
   <button style="width:100%;margin-top:4px" onclick="go('market',{tab:'auc',aid:'${i.id}'})">📊 Торгувати на аукціоні (своя ціна)</button></div>`;
 }
-function marketBuy(id, q) { const pr = price(id); if (q > mLeft('buy', id)) return toast('Ліміт покупок на сьогодні: залишилось ' + mLeft('buy', id) + ' шт. цього товару'); if (!pay('money', pr * q)) return; mUse('buy', id, q); tradeLog('buy', id, q, pr * q); for (let k = 0; k < q; k++) addItem(id); S.daily.market++; toast('Куплено: ' + IT[id].name + ' x' + q); render(); }
-function marketSell(uid) { const i = S.inv.find(x => x.uid === uid); if (itG(i) !== 1) return toast('Біржа приймає лише звичайні речі [C]. Інші ранги: аукціон-дошка лотів'); if (mLeft('sell', i.id) < 1) return toast('Ліміт продажів на сьогодні вичерпано для цього товару'); mUse('sell', i.id, 1); const got = net(bid(i.id)); tradeLog('sell', i.id, 1, got); S.inv = S.inv.filter(x => x.uid !== uid); give({ money: got }, 'Продано ' + IT[i.id].name + ' (комісія ' + mkFeePct() + '%)'); render(); }
+function marketBuy(id, q) { const pr = price(id); if (q > mLeft('buy', id)) return toast('Ліміт покупок на сьогодні: залишилось ' + mLeft('buy', id) + ' шт. цього товару'); if (!pay('money', pr * q)) return; mUse('buy', id, q); tradeLog('buy', id, q, pr * q); for (let k = 0; k < q; k++) whAdd(id); S.daily.market++; toast('Куплено: ' + IT[id].name + ' x' + q + '. На складі біржі 📦'); render(); }
+function marketSell(uid) { const i = wh().find(x => x.uid === uid); if (!i) return toast('Немає такої речі на складі'); if (itG(i) !== 1) return toast('Біржа приймає лише звичайні речі [C]. Інші ранги: аукціон-дошка лотів'); if (mLeft('sell', i.id) < 1) return toast('Ліміт продажів на сьогодні вичерпано для цього товару'); mUse('sell', i.id, 1); const got = net(bid(i.id)); tradeLog('sell', i.id, 1, got); S.wh = wh().filter(x => x.uid !== uid); give({ money: got }, 'Продано ' + IT[i.id].name + ' (комісія ' + mkFeePct() + '%)'); render(); }
 
 // АУКЦІОН: стакан, свічки, свої заявки
 function auction(p) {
   const id = p.aid && IT[p.aid] ? p.aid : IT.i_cap ? 'i_cap' : ITEMS.find(x => x.rar > 0).id, it = IT[id], per = p.per || 'live', side = p.side || 'buy', m = mk(id), pr = price(id), st = perStats(id, 'd');
-  const myOrd = (S.orders || []).filter(o => o.id === id), owned = S.inv.filter(x => x.id === id).length;
+  const myOrd = (S.orders || []).filter(o => o.id === id), owned = wh().filter(x => x.id === id).length;
   const lp = p.lp || (side === 'buy' ? Math.round(pr * 0.97) : Math.round(pr * 1.03));
   const asks = [5, 4, 3, 2, 1].map(k => ({ p: Math.round(pr * (1 + 0.006 * k)), q: 1 + ((k * 7 + m.ticks) % 6) }));
   const bids = [1, 2, 3, 4, 5].map(k => ({ p: Math.round(pr * (1 - 0.006 * k)), q: 1 + ((k * 5 + m.ticks) % 6) }));
@@ -2546,13 +2648,13 @@ function placeOrder(id, side) {
     if (!pay('money', pr)) return; mUse('buy', id, 1); S.orders.push({ id, side, price: pr }); toast('Заявку на купівлю виставлено: чекає ціни ' + fmt(pr));
   } else {
     if (pr <= mp) return toast('Ціна лота має бути ВИЩЕ ринкової (' + fmt(mp) + '). Хочеш продати зараз — «Продати по ринку».');
-    const i = S.inv.find(x => x.id === id); if (!i) return toast('Немає такої речі в інвентарі');
-    S.inv = S.inv.filter(x => x !== i); mUse('sell', id, 1); S.orders.push({ id, side, price: pr }); toast('Лот виставлено: чекає ціни ' + fmt(pr));
+    const i = wh().find(x => x.id === id); if (!i) return toast('Немає такої речі на складі біржі');
+    S.wh = wh().filter(x => x !== i); mUse('sell', id, 1); S.orders.push({ id, side, price: pr }); toast('Лот виставлено: чекає ціни ' + fmt(pr));
   }
   cur().p.lp = 0; render();
 }
-function sellNow(id) { const i = S.inv.find(x => x.id === id); if (!i) return toast('Немає такої речі в інвентарі'); marketSell(i.uid); }
-function cancelOrder(k) { const o = S.orders[k]; if (o.side === 'buy') S.money += o.price; else addItem(o.id); S.orders.splice(k, 1); toast('Заявку скасовано'); render(); }
+function sellNow(id) { const i = wh().find(x => x.id === id); if (!i) return toast('Немає такої речі на складі біржі'); marketSell(i.uid); }
+function cancelOrder(k) { const o = S.orders[k]; if (o.side === 'buy') S.money += o.price; else whAdd(o.id); S.orders.splice(k, 1); toast('Заявку скасовано'); render(); }
 
 // --- НАЛАШТУВАННЯ
 
@@ -2731,19 +2833,39 @@ SCREENS.settings = p => {
     <button onclick="S.day='';save();load();render()">Новий день</button>
     <button onclick="DISTS.forEach(D=>dRate(D.id,20000));render()">+ рейтинг районів</button>
     <button onclick="S.xp+=xpNeed(S.lvl);lvlCheck();render()">+1 рівень</button></div></div>`;
-  return h + `<div class="box">Звук: <button onclick="toast('Заглушка')">Увімк</button> Музика: <button onclick="toast('Заглушка')">Увімк</button></div>
+  return h + `<div class="box">Звук: <button onclick="toast('Заглушка')">Увімк</button> Музика: <button onclick="bgmToggle();render()">${window.bgmOn&&bgmOn()?'Вимк':'Увімк'}</button></div>
   <div class="box">Мова: Українська</div>
-  <div class="box"><b>Перенос збереження</b><div class="small">Одне посилання: скопіюй тут, відкрий у Telegram, і прогрес з’явиться там.</div><div class="grid g2"><button class="y" onclick="saveExport()">🔗 Посилання</button><button onclick="saveImport()">📥 Вставити</button></div></div>
+  <div class="box"><b>Перенос збереження</b><div class="small">Телефон ↔ комп’ютер: тут отримуєш короткий код, на іншому пристрої вводиш його в «Вставити».</div><div class="grid g2"><button class="y" onclick="saveExport()">🔗 Код переносу</button><button onclick="saveImport()">📥 Вставити</button></div></div>
   <button style="background:#f99;width:100%" onclick="if(confirmReset()){}">Скинути прогрес (почати з нуля)</button>
   <div class="note">Прототип зберігає прогрес у браузері (localStorage).<br><b>Збірка ${BUILD}</b></div>`;
 };
 const b64u = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 8192) s += String.fromCharCode.apply(null, u8.subarray(i, i + 8192)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
 const unb64u = t => { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; const s = atob(t), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; };
 async function zip(str, mode) { const st = mode === 'c' ? new Blob([str]).stream().pipeThrough(new CompressionStream('deflate-raw')) : new Blob([str]).stream().pipeThrough(new DecompressionStream('deflate-raw')); return new Uint8Array(await new Response(st).arrayBuffer()); }
-const BUILD = 'v149';
+const BUILD = 'v165';
 const BOT = 'PotuzhneMisto_bot', PAGE = 'https://stasiya408-dev.github.io/tg-miniapp/';
+// v158: короткий код переносу (6 знаків) через сховище артефакта
+const CODE_AB = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+async function codeDb() { try { return window.claude && claude.use ? await claude.use('db') : null; } catch (e) { return null; } }
 async function saveExport() {
   const o = Object.assign({}, S, { mail: [] }), t = b64u(await zip(JSON.stringify(o), 'c'));
+  const db = await codeDb();
+  if (db) {
+    try {
+      const code = Array.from(crypto.getRandomValues(new Uint8Array(6)), b => CODE_AB[b % CODE_AB.length]).join('');
+      await db.doc('codes/' + code).set({ z: t, ts: Date.now() });
+      window._lnk = code; window._lnkTg = t;
+      modal(`<h3>Код переносу</h3><div class="small">На іншому пристрої відкрий гру → ⚙ Налаштування → 📥 Вставити → введи код.</div>
+      <div style="font:900 40px monospace;letter-spacing:6px;text-align:center;margin:12px 0">${code}</div><textarea id="lnkT" style="position:absolute;left:-9999px">${code}</textarea>
+      <button class="y" style="width:100%;min-height:50px" id="lnkB" onclick="lnkCopy()">📋 Копіювати код</button>
+      <button style="width:100%;margin-top:6px;min-height:44px" onclick="saveExportTg()">✈ Для Telegram (довге посилання)</button><button style="width:100%;margin-top:6px;min-height:44px" onclick="closeModal()">Готово</button>`);
+      return;
+    } catch (e) { }
+  }
+  saveExportTg(t);
+}
+async function saveExportTg(t) {
+  if (!t) t = window._lnkTg || b64u(await zip(JSON.stringify(Object.assign({}, S, { mail: [] })), 'c'));
   const link = t.length <= 480 ? `https://t.me/${BOT}?startapp=PM${t}` : `${PAGE}#pm=${t}`;
   window._lnk = link;
   modal(`<h3>Посилання з прогресом</h3><div class="small">${t.length <= 480 ? 'Скопійовано. Встав у чат Telegram і відкрий: прогрес з’явиться в Mini App.' : 'Скопійовано. Надішли собі в Telegram (наприклад, «Збережене»), потім у Mini App: Налаштування → «Вставити» → встав це посилання.'}</div>
@@ -2758,16 +2880,90 @@ function lnkCopy() {
   if (b && ok) b.textContent = '✓ Скопійовано';
 }
 function saveImport() {
-  modal(`<h3>Вставити посилання</h3><div class="small">Встав посилання з прогресом. Поточний прогрес буде замінено.</div><textarea id="saveIn" style="width:100%;height:80px"></textarea><button class="y" style="width:100%;margin-top:6px" onclick="saveApply()">Застосувати</button><button style="width:100%;margin-top:6px" onclick="closeModal()">Скасувати</button>`);
+  modal(`<h3>Перенести прогрес</h3><div class="small">Введи код із 6 знаків (або встав довге посилання). Поточний прогрес буде замінено.</div><textarea id="saveIn" style="width:100%;height:60px;font:700 22px monospace;text-align:center;text-transform:uppercase" placeholder="K7P2QX"></textarea><button class="y" style="width:100%;margin-top:6px" onclick="saveApply()">Застосувати</button><button style="width:100%;margin-top:6px" onclick="closeModal()">Скасувати</button>`);
 }
 function payOf(txt) { const m = String(txt).match(/(?:startapp=PM|pm=)([A-Za-z0-9_-]{20,})/); return m ? m[1] : null; }
 async function applyPay(t) { const o = JSON.parse(new TextDecoder().decode(await zip2(unb64u(t)))); if (!o || !o.created) throw 0; o.savedAt = Date.now(); localStorage.setItem('pm_state', JSON.stringify(o)); localStorage.setItem('pm_imp', t); }
 async function saveApply() {
+  const v = $('saveIn').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (v.length === 6 && !payOf($('saveIn').value)) {
+    const db = await codeDb(); if (!db) return toast('Код працює лише в грі в Claude. Для Telegram використай довге посилання');
+    try { const d = await db.doc('codes/' + v).get(); if (!d.exists) return toast('Код не знайдено. Перевір літери'); await applyPay(d.data().z); location.reload(); } catch (e) { toast('Не вдалося завантажити код'); }
+    return;
+  }
   try { const t = payOf($('saveIn').value); if (!t) throw 0; await applyPay(t); location.reload(); } catch (e) { toast('Не вдалося: посилання неповне або пошкоджене'); }
 }
 async function zip2(u8) { return new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer()); }
 function confirmReset() { modal(`<p>Скинути весь прогрес?</p><button style="background:#f99" onclick="localStorage.removeItem('pm_state');load();closeModal();stack=[{name:'create',p:{}}];render()">Так, скинути</button>`); }
 
+
+// ---------- v165: ID гравця і запрошення друзів ----------
+const ART_URL = 'https://claude.ai/artifact/FTxCZfd9ehxmee387t6pd9', REF_GEM = 200;
+function myPid() { if (!S.pid) { S.pid = Array.from(crypto.getRandomValues(new Uint8Array(8)), b => CODE_AB[b % CODE_AB.length]).join(''); save(); } return S.pid; }
+const refLink = () => TGW && TGW.initData ? `https://t.me/${BOT}?startapp=R${myPid()}` : `${ART_URL}#ref=${myPid()}`;
+const normPid = v => String(v || '').toUpperCase().replace(/[^A-Z0-9]/g, '').replace(/^R(?=[A-Z0-9]{8}$)/, '');
+// ID з посилання: Telegram startapp=R<ID>, або #ref=<ID> / ?ref=<ID>
+const REF_IN = (() => { try { const sp = TGW && TGW.initDataUnsafe && TGW.initDataUnsafe.start_param; if (sp && /^R[A-Z0-9]{8}$/.test(sp)) return sp.slice(1); const m = (location.hash + '&' + location.search).match(/ref=([A-Za-z0-9]{8})/); return m ? m[1].toUpperCase() : null; } catch (e) { return null; } })();
+if (REF_IN) try { localStorage.setItem('pm_ref_in', REF_IN); } catch (e) { }
+async function myUid() { try { const u = window.claude && claude.use ? await claude.use('user') : null; return u ? await u.id() : null; } catch (e) { return null; } }
+function copyTxt(t, ok) {
+  const done = () => toast(ok || 'Скопійовано');
+  const fb = () => { const ta = document.createElement('textarea'); ta.value = t; ta.style.cssText = 'position:fixed;left:-9999px'; document.body.appendChild(ta); ta.select(); let r = false; try { r = document.execCommand('copy'); } catch (e) { } ta.remove(); if (r) done(); else modal(`<h3>Скопіюй вручну</h3><textarea style="width:100%;height:70px" readonly onclick="this.select()">${t}</textarea><button style="width:100%;min-height:48px;margin-top:6px" onclick="closeModal()">Готово</button>`); };
+  try { navigator.clipboard.writeText(t).then(done, fb); } catch (e) { fb(); }
+}
+function refBox() {
+  const id = myPid(), n = (S.refGot || []).length, o = clubOwn(), hasT = o.own.includes('tz');
+  return `<div class="box"><div class="bar sp"><span>🆔 Твій ID: <b style="font:900 17px monospace;letter-spacing:2px">${id}</b></span><button style="min-height:44px" onclick="copyTxt('${id}','ID скопійовано')">📋 Копіювати</button></div>
+  <button class="y" style="width:100%;min-height:50px;margin-top:6px" onclick="copyTxt(refLink(),'Реф-посилання скопійовано')">🔗 Копіювати реф-посилання на гру</button>
+  <div class="small" style="margin-top:4px">За кожного друга, який зайде за твоїм посиланням: <b>+${REF_GEM} 💎</b> і титул <b>«Розвідник ЗБТ»</b>. Запрошено друзів: <b>${n}</b>.</div>
+  ${hasT ? `<button class="${o.title === 'tz' ? 'g' : ''}" style="width:100%;min-height:44px;margin-top:6px" onclick="cosUse('tz')">🏷 «Розвідник ЗБТ»: ${o.title === 'tz' ? '✓ Одягнено' : 'Одягти'}</button>` : ''}
+  ${S.refBy ? `<div class="small" style="margin-top:4px">Тебе запросив: <b>${S.refBy}</b></div>` : `<button style="width:100%;min-height:44px;margin-top:6px" onclick="refAsk()">🤝 Мене запросив друг (ввести ID)</button>`}
+  <button style="width:100%;min-height:44px;margin-top:6px" onclick="refPoll(true)">🔄 Перевірити запрошених</button></div>`;
+}
+function refAsk(pre) {
+  modal(`<h3>Хто тебе запросив?</h3><div class="small">Введи ID друга (8 знаків, є в його профілі). Можна лише один раз.</div><input id="refIn" value="${pre || ''}" style="width:100%;min-height:50px;font:900 22px monospace;text-align:center;text-transform:uppercase;margin-top:6px" placeholder="AB12CD34"><button class="y" style="width:100%;min-height:50px;margin-top:6px" onclick="refClaim($('refIn').value)">Підтвердити</button><button style="width:100%;min-height:44px;margin-top:6px" onclick="closeModal()">Скасувати</button>`);
+}
+async function refRegister() {
+  const db = await codeDb(); if (!db) return;
+  try { const id = myPid(), uid = await myUid(); if (S.pidReg === id + (uid || '')) return; await db.doc('ids/' + id).set({ uid: uid || '', ts: Date.now() }); S.pidReg = id + (uid || ''); save(); } catch (e) { }
+}
+async function refClaim(v, quiet) {
+  const code = normPid(v), me = myPid(), say = t => { if (!quiet) toast(t); };
+  if (S.refBy) return say('Запрошення вже зараховано');
+  if (code.length !== 8) return say('ID має 8 знаків');
+  if (code === me) return say('Це твій власний ID');
+  const db = await codeDb(); if (!db) return say('Запрошення зараховуються лише в грі в Claude. У Telegram поки не працює (немає сервера)');
+  try {
+    const uid = await myUid();
+    const idd = await db.doc('ids/' + code).get();
+    if (!idd.exists) return say('Гравця з таким ID не знайдено');
+    if (uid && idd.data().uid === uid) return say('Не можна запросити самого себе');
+    if ((await db.doc('refs/' + me).get()).exists) { S.refBy = code; save(); return say('Запрошення вже зараховано'); }
+    if (uid && (await db.collection('refs').where('uid', '==', uid).limit(1).get()).docs.length) return say('З цього акаунта запрошення вже приймали');
+    const back = await db.doc('refs/' + code).get();
+    if (back.exists && back.data().by === me) return say('Цей гравець запрошений тобою, взаємно не можна');
+    await db.doc('refs/' + me).set({ by: code, uid: uid || '', ts: Date.now() });
+    S.refBy = code; try { localStorage.removeItem('pm_ref_in'); } catch (e) { }
+    save(); closeModal(); toast('✓ Запрошення зараховано другу ' + code); render();
+  } catch (e) { say('Не вдалося. Можливо, немає права запису в гру (треба доступ «Учасник»)'); }
+}
+async function refPoll(manual) {
+  const db = await codeDb(); if (!db) { if (manual) toast('Перевірка працює лише в грі в Claude'); return; }
+  try {
+    const uid = await myUid(), snap = await db.collection('refs').where('by', '==', myPid()).get();
+    S.refGot = S.refGot || []; let n = 0;
+    snap.docs.forEach(d => { if (S.refGot.includes(d.id)) return; if (uid && d.data().uid === uid) return; S.refGot.push(d.id); n++; });
+    if (n) {
+      const o = clubOwn(); if (!o.own.includes('tz')) o.own.push('tz'); if (!o.title) o.title = 'tz';
+      give({ crystals: REF_GEM * n }, 'Запрошено друзів: ' + n); toast('🏷 Титул «Розвідник ЗБТ»'); save(); render();
+    } else if (manual) toast('Нових запрошених немає');
+  } catch (e) { if (manual) toast('Не вдалося перевірити'); }
+}
+function refBoot() {
+  if (!S || !S.created) return;
+  myPid(); refRegister().then(() => { let inc = null; try { inc = localStorage.getItem('pm_ref_in'); } catch (e) { } if (inc && !S.refBy && inc !== S.pid) refClaim(inc, true); refPoll(); });
+}
+setTimeout(refBoot, 2500); setInterval(() => { if (S && S.created) refPoll(); }, 120000);
 // ---------- СТАРТ ----------
 // @@SEED@@ (підставляється при деплої в Telegram: стан гри з артефакта; null = немає)
 const SEED = null;
@@ -2806,3 +3002,14 @@ const isTyping = () => { const ae = document.activeElement; return !!(ae && ['IN
 let rzT = null, rzPend = false;
 window.addEventListener('resize', () => { clearTimeout(rzT); rzT = setTimeout(() => { if (isTyping()) { rzPend = true; return; } bgRender(true); }, 200); });
 document.addEventListener('focusout', () => { if (rzPend) setTimeout(() => { if (!isTyping()) { rzPend = false; bgRender(true); } }, 300); });
+
+/* фонова музика (v154) */
+(function(){
+  var a=new Audio('snd/bgm.mp3');a.loop=true;a.volume=0.45;a.preload='auto';
+  var want=true;try{want=localStorage.getItem('pm_bgm')!=='0'}catch(e){}
+  function go(){if(want&&a.paused){var p=a.play();if(p&&p.catch)p.catch(function(){})}}
+  window.bgmOn=function(){return want};
+  window.bgmToggle=function(){want=!want;try{localStorage.setItem('pm_bgm',want?'1':'0')}catch(e){}if(want)go();else a.pause()};
+  ['pointerdown','touchstart','keydown'].forEach(function(ev){document.addEventListener(ev,go,{passive:true})});
+  document.addEventListener('visibilitychange',function(){if(document.hidden)a.pause();else go()});
+})();

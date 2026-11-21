@@ -230,6 +230,53 @@ button .ico{display:block;margin:0 auto 2px;float:none}
 @keyframes lfPool{0%{opacity:1}12%{opacity:0}38%{opacity:1}55%{opacity:.08}80%,100%{opacity:1}}
 @keyframes lfHero{0%{filter:brightness(1)}12%{filter:brightness(.68)}38%{filter:brightness(1)}55%{filter:brightness(.7)}80%,100%{filter:brightness(1)}}
 #garShd{position:absolute;pointer-events:none;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.75),rgba(0,0,0,0) 70%)}
+
+/* v152: дихання лише корпусу (ноги й голова нерухомі) */
+.doll .dl{position:absolute;left:0;top:0;width:100%;height:100%}
+.doll .dls{clip-path:polygon(0 0,100% 0,100% 15.5%,0 15.5%,0 46%,100% 46%,100% 100%,0 100%)}
+.doll .dlb{clip-path:inset(15% 0 54% 0);transform-origin:50% 46%;animation:breathe 4.2s ease-in-out infinite;will-change:transform}
+@keyframes breathe{0%,100%{transform:scale(1,1)}50%{transform:scale(1.045,1.025)}}
+#fitBox .dlb{display:none}
+@media (prefers-reduced-motion: reduce){.doll .dlb{animation:none}}
+
+/* v155: дихання вдвічі слабше і цілим шаром, без розривів */
+.doll .dlb{display:none!important}
+.doll .dls{clip-path:none!important;transform-origin:50% 100%;animation:breathe2 6.5s ease-in-out infinite;will-change:transform}
+@keyframes breathe2{0%,100%{transform:scale(1,1)}50%{transform:scale(1.005,1.008)}}
+#fitBox .dls{animation:none}
+@media (prefers-reduced-motion: reduce){.doll .dls{animation:none}}
+
+/* v164: Барабани удачі за макетом */
+.slotsScr{margin:-6px;padding:8px 8px 14px;min-height:calc(100% + 12px);background:radial-gradient(ellipse at 50% 0%,#5a1f5e 0%,#2a0f33 35%,#14081c 70%),#14081c;color:#f3e9ff;display:flex;flex-direction:column;gap:8px}
+.slHead{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:4px 2px}
+.slTitle{font:900 italic 25px/1.05 system-ui,Arial;letter-spacing:.5px;background:linear-gradient(#fff,#ffd6f6 45%,#ff6ad5);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 0 #7a1a6a) drop-shadow(0 0 8px rgba(255,80,200,.6))}
+.slFaq{background:linear-gradient(#ffdc55,#f0a91a)!important;border:2px solid #fff2b0!important;border-radius:12px!important;font-weight:900;color:#3a1d00!important;min-height:44px}
+.slotsScr .tabs button{border-radius:12px!important;font-weight:bold}
+.slotsScr>.box{background:rgba(30,12,40,.85);border:1.5px solid #ff4fd8;color:#f3e9ff}
+.slotsScr .small{color:#d9c8ea}
+.slFrame{padding:7px;border-radius:20px;border:3px solid #ff9a3c;box-shadow:0 0 14px 3px rgba(255,80,200,.75),inset 0 0 14px rgba(255,120,60,.5);background:#1a0a20}
+.slotsScr .reel{gap:5px;background:transparent;padding:0}
+.slotsScr .reel div{height:auto;aspect-ratio:1/.92;line-height:normal;border-radius:12px;background:radial-gradient(circle at 50% 40%,#3a1a2a,#160a14 75%);border:1.5px solid #b8742a;box-shadow:inset 0 0 8px rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;padding:6%;position:relative;overflow:hidden}
+.slotsScr .reel div.win{background:radial-gradient(circle,#7a4a00,#2a1400 80%)!important;border-color:#ffd84d;box-shadow:0 0 12px 3px #ffd84d,inset 0 0 10px #ffd84d}
+.slotsScr .reel div.scat{background:radial-gradient(circle,#5a1a6a,#1a0a20 80%)!important;box-shadow:inset 0 0 0 2px #ffd84d!important;line-height:normal!important}
+.slotsScr .reel div.scat::after{bottom:3px;color:#ffd84d;font-size:9px}
+.slotsScr .reel div.spin{filter:blur(1.4px)}
+.symI{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.6))}
+.sym7{font:900 italic 2.1em/1 Georgia,serif;background:linear-gradient(#fff3b0,#ffb81c 45%,#d0201a 55%,#7a0a0a);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 4px #ff4f6a)}
+.symS{display:inline-flex;width:22px;height:22px;vertical-align:middle;align-items:center;justify-content:center}
+.symS .sym7{font-size:20px}
+.slInfo{text-align:center;font-size:12px;color:#e7d6f5}
+.slCtl{display:flex;align-items:center;justify-content:center;gap:8px}
+.slBet{display:flex;align-items:center;gap:4px;background:#0c0610;border:1.5px solid #6a5a72;border-radius:12px;padding:3px}
+.slBet button{background:linear-gradient(#3a3440,#1c1820)!important;color:#fff!important;border:1.5px solid #6a5a72!important;border-radius:9px!important;min-width:44px;min-height:46px!important;font-size:22px;font-weight:bold}
+.slBet b{min-width:60px;text-align:center;font-size:17px}
+.slPlay{flex:1;max-width:170px;min-height:56px!important;border-radius:16px!important;background:linear-gradient(#ffe36a,#f2a812)!important;border:2.5px solid #fff2b0!important;color:#1a1200!important;font:900 24px/1 system-ui,Arial;box-shadow:0 4px 0 #a8650c,0 6px 12px rgba(0,0,0,.6)}
+.slAuto{display:flex;align-items:center;gap:4px;font-weight:bold;font-size:15px}.slAuto input{width:22px;height:22px;accent-color:#ffc61a}
+.slNote{display:flex;align-items:center;gap:8px;background:rgba(30,12,40,.85);border:1.5px solid #ff4fd8;border-radius:12px;padding:7px 9px;font-size:12px;line-height:1.3}
+.slIco{flex:0 0 auto;font-size:22px}.sl16{width:34px;height:34px;border-radius:50%;background:#e0202a;color:#fff;font:900 13px/34px system-ui;text-align:center;border:2px solid #fff}
+.slHist{background:rgba(26,10,32,.92);border:2px solid #ff9a3c;border-radius:16px;padding:8px;box-shadow:0 0 10px rgba(255,120,60,.4)}
+.slHH b{font-size:17px}.slHH span{font-size:13px;color:#ffd84d}
+.slHist .bar.sp~.bar.sp,.slHist .bar.sp~.bar.sp span{color:#1a1020}
 </style>
 <div id="phone">
   <div id="topbar"></div>
@@ -238,4 +285,4 @@ button .ico{display:block;margin:0 auto 2px;float:none}
   <div id="toast"></div>
   <div id="modal"><div class="in" id="modalIn"></div></div>
 </div>
-<script src="app.js?v=1795079065"></script>
+<script src="app.js?v=1795248301"></script>
